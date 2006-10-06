@@ -1,0 +1,15 @@
+syntax: glob
+
+syntax: regexp
+
+syntax: glob
+Icon?
+\.DS_Store
+*.pyc
+*.pyo
+*~
+.*.swp
+.*.swo
+\.svn/
+
+syntax: regexp

@@ -10,11 +10,13 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.helixui.actors import HelixObject
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixUIScene(Observable):
+class HelixUIScene(HelixObject):
     """A HelixUI scene is the root rendering object, which is simply a
     composite of all the actors below it.  It acts as a mediator, keeping links
     to event roots relevant to the scene.  
