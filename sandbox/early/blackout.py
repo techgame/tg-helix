@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~ Copyright (C) 2002-2006  TechGame Networks, LLC.              ##
 ##~                                                               ##
@@ -10,40 +11,46 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from helix import Cell
+from TG.helixui.bridges.wx.basic import BasicRenderSkinModel
+from TG.helixui.stage.scene import HelixUIScene
+
+from TG.openGL.raw import gl, glu, glext
+from TG.openGL.raw.gl import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Space(HelixActor):
-    """Transform and volume (bounding box).  
-    
-    Location, orientation, and volume.
-    """
-    
-    xform = None
-    volume = None
+class TestScene(HelixUIScene):
+    def setup(self, renderContext):
+        pass
+    def shutdown(self, renderContext):
+        pass
+    def resize(self, renderContext, size):
+        print 'resize', size
+        glViewport(0, 0, size[0], size[1])
+
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+    def refresh(self, renderContext):
+        print 'refresh'
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Cell(HelixActor):
-    """A basic object rooted in a space"""
-
-    space = None
+class TestRenderSkinModel(BasicRenderSkinModel):
+    SceneFactory = TestScene
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class LayoutCell(Cell):
-    """LayoutCell divides space it occupies into subspaces for cells under it.  
-    
-    Follows the composite pattern.
-    """
-
-    strategy = None
-
+#~ Main 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class LayerCell(LayoutCell):
-    """LayerCell is a LayoutCell that generally divides subspaces by depth"""
+if __name__=='__main__':
+    model = TestRenderSkinModel()
+    model.skinModel()
 

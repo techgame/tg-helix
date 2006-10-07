@@ -16,24 +16,38 @@ from TG.observing import Observable, ObservableProperty
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixObject(Observable):
-    """Root model object for all helix"""
-    pass
+def _setupAllVisitTypes(klass):
+    allVisitTypes = []
+    for base in klass.__mro__:
+        if base is Observable:
+            break
+        vt = base.visitType
+        if not vt or vt in allVisitTypes:
+            vt = base.__name__
+        allVisitTypes.append(vt)
+    klass.allVisitTypes = allVisitTypes
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Space(HelixObject):
-    """Transform and volume (bounding box).  
-    
-    Location, orientation, and volume.
-    """
-    xform = None
-    volume = None
+class HelixActor(Observable):
+    """Base class for all helix actors"""
+
+    allVisitTypes = None
+    visitType = None
+
+    def __new__(klass, *args, **kw):
+        if klass.allVisitTypes is None:
+            _setupAllVisitTypes(klass)
+
+        return Observable.__new__(klass, *args, **kw)
+
+    def visit(self, action):
+        return action.visitActor(self)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Cell(HelixObject):
-    """A basic object rooted in a space"""
-    space = None
+class HelixCompositeActor(HelixActor):
+    """Composite base class for all helix actors"""
 
-
+    def visit(self, action):
+        return action.visitCompositeActor(self)
