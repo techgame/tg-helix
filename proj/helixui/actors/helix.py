@@ -12,6 +12,8 @@
 
 from TG.observing import Observable, ObservableProperty
 
+from TG.helixui.geometry import GeometryFactory
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,6 +37,8 @@ class HelixActor(Observable):
     allVisitTypes = None
     visitType = None
 
+    geom = GeometryFactory()
+
     def __new__(klass, *args, **kw):
         if klass.allVisitTypes is None:
             _setupAllVisitTypes(klass)
@@ -51,3 +55,27 @@ class HelixCompositeActor(HelixActor):
 
     def visit(self, action):
         return action.visitCompositeActor(self)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class HelixVisitor(Observable):
+    def visitActorByVisitTypes(self, actor, allVisitTypes=None):
+        if allVisitTypes is None:
+            allVisitTypes = actor.allVisitTypes
+
+        acceptActor = self.acceptActorByVisitType
+        for visitType in actor.allVisitTypes:
+            if acceptActor(actor, visitType):
+                break
+
+    def acceptActorByVisitType(self, actor, visitType):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def visitActor(self, actor):
+        self.visitActorByVisitTypes(actor)
+
+    def visitCompositeActor(self, actor):
+        self.visitActorByVisitTypes(actor)
+

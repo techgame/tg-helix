@@ -16,14 +16,28 @@ from helix import Cell
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Space(HelixActor):
+class SpaceBox(HelixActor):
     """Transform and volume (bounding box).  
     
     Location, orientation, and volume.
     """
     
-    xform = None
-    volume = None
+    pts = None
+    size = None
+
+    def updateFromSize(self, (x1, y1)):
+        self.update((0., 0.), (x1, y1))
+
+    def update(self, (x0, y0), (x1, y1)):
+        if x0 > x1: x0, x1 = x1, x0
+        if y0 > y1: y0, y1 = y1, y0
+
+        pts = self.geom.vec([[x0, y0], [x1, y1]])
+        size = pts[1]-pts[0]
+
+        self.pts = pts
+        self.size = size
+        self.aspect = size[0]/size[1]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -46,4 +60,21 @@ class LayoutCell(Cell):
 
 class LayerCell(LayoutCell):
     """LayerCell is a LayoutCell that generally divides subspaces by depth"""
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Layout Strategies
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class LayoutStrategy(object):
+    pass
+
+class LayoutAlign(LayoutStrategy):
+    pass
+
+class LayoutGrow(LayoutStrategy):
+    pass
+
+class LayoutVertical(LayoutStrategy):
+    pass
 
