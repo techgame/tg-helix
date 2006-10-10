@@ -19,9 +19,14 @@ class AxisBox(GeometryBase):
         return klass.fromCorners(v0, v1)
 
     @classmethod
+    def fromDims(klass, w, h, d=2):
+        v = klass.geom.vec([w/2., h/2., d/2.])
+        return klass.fromCorners(-v, v)
+
+    @classmethod
     def fromCorners(klass, v0, v1):
-        self = klass()
         v = vstack([v0, v1])
+        self = klass()
         self.v = v
         self.size = v[1] - v[0]
         return self
@@ -33,7 +38,7 @@ class AxisBox(GeometryBase):
     @property
     def depth(self): return self.size[2]
 
-    def vRect(self, fillZ=False):
+    def vRect(self, fillZ=True):
         # duplicate v0 four times to make a rectangle
         r = self.v.repeat(2, 0)
         r[1,0] = r[2,0]
@@ -51,6 +56,4 @@ class AxisBox(GeometryBase):
         # and fill across the top
         rTop[:,2] = rTop[2,2]
         return vstack([rBottom, rTop])
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

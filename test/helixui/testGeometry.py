@@ -20,6 +20,7 @@ class TestGeometry(unittest.TestCase):
     def testVec(self):
         v = geometry.vec([2., 3., 4.])
         self.assertEqual(v.tolist(), [[2., 3., 4.]])
+
     def testAxisBoxCorners(self):
         v0 = geometry.vec([-1, -1, -1])
         v1 = geometry.vec([2, 3, 4])
@@ -28,8 +29,8 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(abox.vRect().tolist(), [
                 [-1.0, -1.0, -1.0],
                 [2.0, -1.0, -1.0],
-                [2.0, 3.0, 4.0],
-                [-1.0, 3.0, 4.0], ])
+                [2.0, 3.0, -1.0],
+                [-1.0, 3.0, -1.0], ])
         self.assertEqual(abox.vBox().tolist(), [
                 [-1.0, -1.0, -1.0],
                 [2.0, -1.0, -1.0],
@@ -41,6 +42,43 @@ class TestGeometry(unittest.TestCase):
                 [2.0, 3.0, 4.0],
                 [-1.0, 3.0, 4.0], ])
 
+    def testAxisBoxFromSize(self):
+        abox = geometry.axisBoxFromSize(20,30)
+        self.assertEqual(abox.size.tolist(), [20,30,1])
+        self.assertEqual(abox.vRect().tolist(), [
+                [0.0, 0.0, 0.0],
+                [20.0, 0.0, 0.0],
+                [20.0, 30.0, 0.0],
+                [0.0, 30.0, 0.0], ])
+        self.assertEqual(abox.vBox().tolist(), [
+                [0.0, 0.0, 0.0],
+                [20.0, 0.0, 0.0],
+                [20.0, 30.0, 0.0],
+                [0.0, 30.0, 0.0],
+
+                [0.0, 0.0, 1.0],
+                [20.0, 0.0, 1.0],
+                [20.0, 30.0, 1.0],
+                [0.0, 30.0, 1.0], ])
+
+    def testAxisBoxFromDims(self):
+        abox = geometry.axisBoxFromDims(20,30)
+        self.assertEqual(abox.size.tolist(), [20,30,2])
+        self.assertEqual(abox.vRect().tolist(), [
+                [-10.0, -15.0, -1.0],
+                [10.0, -15.0, -1.0],
+                [10.0, 15.0, -1.0],
+                [-10.0, 15.0, -1.0], ])
+        self.assertEqual(abox.vBox().tolist(), [
+                [-10.0, -15.0, -1.0],
+                [10.0, -15.0, -1.0],
+                [10.0, 15.0, -1.0],
+                [-10.0, 15.0, -1.0],
+               
+                [-10.0, -15.0, 1.0],
+                [10.0, -15.0, 1.0],
+                [10.0, 15.0, 1.0],
+                [-10.0, 15.0, 1.0], ])
     
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Unittest Main 

@@ -33,6 +33,8 @@ class GeometryFactory(object):
     def vec(self, v, size=3):
         return array([v], dtype=self.dtype, ndmin=size-1)
 
+    def axisBoxFromDims(self, w, h, d=2):
+        return AxisBox.fromDims(w, h, d)
     def axisBoxFromSize(self, w, h, d=1):
         return AxisBox.fromSize(w, h, d)
     def axisBoxFromCorners(self, v0, v1):
