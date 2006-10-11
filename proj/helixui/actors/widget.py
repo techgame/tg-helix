@@ -10,13 +10,21 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.helixui.actors.layout import Cell
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Widget(Cell):
-    """A Widget is a cell that actually displays something.
-    
-    Widgets may be composite objects, providing spaces to be occupied.
-    """
+class Panel(Widget):
+    pass
+
+class Image(Widget):
+    pass
+
+class Button(Widget):
+    pass
+
+class VideoPlayer(Widget):
+    pass
 

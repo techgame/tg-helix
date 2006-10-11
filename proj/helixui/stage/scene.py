@@ -10,13 +10,37 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helixui.actors.helix import HelixCompositeActor
+from TG.observing import Observable, ObservableDict
+
+from TG.helixui.actors.helix import HelixActor
+from TG.helixui.actors.basic import ViewportBounds
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixScene(HelixCompositeActor):
+class SceneCommand(Observable):
+    action = None
+
+    def perform(self, scene, **kw):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+
+class SceneVisitor(SceneCommand):
+    action = None
+
+    def __init__(self, visitor, action=None):
+        self.visitor = visitor
+        if action is None:
+            self.action = getattr(visitor, 'action', None)
+
+    # visitor is an instance of an actors.visitor.HelixVisitor
+    visitor = None 
+    def perform(self, scene, **kw):
+        return scene.accept(self.visitor)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class HelixScene(HelixActor):
     """A Helix scene is the root rendering object, which is simply a composite
     of all the actors below it.  It acts as a mediator, keeping links to event
     roots relevant to the scene.  
@@ -25,36 +49,94 @@ class HelixScene(HelixCompositeActor):
     picking through rendering colours.
     """
 
-    visitors = None # a mapping of name to helix object visitors
+    visitKind = "Scene"
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ IHelixScene ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def visit(self, action):
-        action.visitScene(self)
+    def setup(self, renderContext): pass
+    def shutdown(self, renderContext): pass
+    def resize(self, renderContext, size): pass
+    def refresh(self, renderContext): pass
 
-    def render(self, **kw):
-        self._visitActionByKey('render')
-    def pick(self, **kw):
-        self._visitActionByKey('pick')
-
-    def _visitActionByKey(self, key, **kw):
-        action = self.visitors[key]
-        actions.setup(**kw)
-        self.visit(self.actions)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def setup(self, renderContext):
-        pass
-    def shutdown(self, renderContext):
-        pass
-    def resize(self, renderContext, size):
-        pass
-    def refresh(self, renderContext):
-        pass
+    def accept(self, visitor):
+        return visitor.visitScene(self)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixUIScene(HelixScene):
-    space = None # an instance of the space available for rednering
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Scene Commands 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    managers = ObservableDict.property()
+    def getManagerFor(self, resourceKind):
+        return self.managers[resourceKind]
+    def addManager(self, manager, resourceKind=None):
+        if resourceKind is None:
+            resourceKind = command.resourceKind
+        self.managers[resourceKind] = manager
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    commands = ObservableDict.property()
+
+    def getCommandFor(self, action):
+        return self.commands[action]
+    def addCommand(self, command, action=None):
+        if action is None:
+            action = command.action
+        self.commands[action] = command
+    def performCommand(self, action, scene, **kw):
+        cmd = self.getCommandFor(action)
+        return cmd.perform(scene, **kw)
+
+    def render(self, **kw):
+        return self.performCommand('render', self, **kw)
+    def selectPick(self, **kw):
+        return self.performCommand('selectPick', self, **kw)
+    def selectColor(self, **kw):
+        return self.performCommand('selectColor', self, **kw)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    viewport = None
+    ViewportFactory = ViewportBounds
+
+    def init(self):
+        self.loadManagers()
+        self.loadCommands()
+
+    def loadManagers(self):
+        pass
+
+    def loadCommands(self):
+        pass
+
+    def setup(self, renderContext):
+        self.ctx = renderContext
+        self.loadScene()
+
+    def loadScene(self):
+        self.items = self.ItemsFactory()
+        self.viewport = self.items.add(self.ViewportFactory())
+
+    def shutdown(self, renderContext):
+        self.ctx = renderContext
+        self.unloadScene(self)
+        self.ctx = None
+
+    def unloadScene(self):
+        self.items.clear()
+        del self.viewport
+
+    def resize(self, renderContext, size):
+        self.ctx = renderContext
+        self.viewport.setViewportSize(size)
+    def refresh(self, renderContext):
+        self.ctx = renderContext
+        result = self.refreshRender()
+        return result
+
+    def refreshRender(self):
+        return self.render()
 

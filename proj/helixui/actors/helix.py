@@ -10,72 +10,62 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import Observable, ObservableProperty
+from TG.observing import Observable, ObservableProperty, ObservableList
 
-from TG.helixui.geometry import GeometryFactory
+from TG.helixui.geometry import geometry
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def _setupAllVisitTypes(klass):
-    allVisitTypes = []
+    allVisitKeys = [klass.__name__]
     for base in klass.__mro__:
         if base is Observable:
+            # don't trace past Observable
             break
-        vt = base.visitType
-        if not vt or vt in allVisitTypes:
+
+        vt = base.visitKind
+        if not vt:
             vt = base.__name__
-        allVisitTypes.append(vt)
-    klass.allVisitTypes = allVisitTypes
+        if vt not in allVisitKeys:
+            allVisitKeys.append(vt)
+    klass.allVisitKeys = allVisitKeys
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class HelixActorList(ObservableList):
+    def add(self, actor):
+        self.append(actor)
+        return actor
 
 class HelixActor(Observable):
     """Base class for all helix actors"""
 
-    allVisitTypes = None
-    visitType = None
+    allVisitKeys = None
+    visitKind = "Actor"
 
-    geom = GeometryFactory()
+    items = None
+    ItemsFactory = HelixActorList
 
     def __new__(klass, *args, **kw):
-        if klass.allVisitTypes is None:
+        if klass.allVisitKeys is None:
             _setupAllVisitTypes(klass)
+        return super(HelixActor, klass).__new__(klass, *args, **kw)
 
-        return Observable.__new__(klass, *args, **kw)
+    def __init__(self):
+        super(HelixActor, self).__init__()
+        self.init()
 
-    def visit(self, action):
-        return action.visitActor(self)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class HelixCompositeActor(HelixActor):
-    """Composite base class for all helix actors"""
-
-    def visit(self, action):
-        return action.visitCompositeActor(self)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class HelixVisitor(Observable):
-    def visitActorByVisitTypes(self, actor, allVisitTypes=None):
-        if allVisitTypes is None:
-            allVisitTypes = actor.allVisitTypes
-
-        acceptActor = self.acceptActorByVisitType
-        for visitType in actor.allVisitTypes:
-            if acceptActor(actor, visitType):
-                break
-
-    def acceptActorByVisitType(self, actor, visitType):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+    def init(self):
+        pass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def visitActor(self, actor):
-        self.visitActorByVisitTypes(actor)
+    def accept(self, visitor):
+        return visitor.visitActor(self)
 
-    def visitCompositeActor(self, actor):
-        self.visitActorByVisitTypes(actor)
+    def acceptOnItems(self, visitor):
+        for each in self.items or ():
+            each.accept(visitor)
 

@@ -31,7 +31,7 @@ class GeometryFactory(object):
     def vecOnes(self, count=1, size=3):
         return ones((count, size), dtype=self.dtype)
     def vec(self, v, size=3):
-        return array([v], dtype=self.dtype, ndmin=size-1)
+        return array(v, dtype=self.dtype, ndmin=size-1, subok=True)
 
     def axisBoxFromDims(self, w, h, d=2):
         return AxisBox.fromDims(w, h, d)

@@ -25,7 +25,7 @@ class TestGeometry(unittest.TestCase):
         v0 = geometry.vec([-1, -1, -1])
         v1 = geometry.vec([2, 3, 4])
         abox = geometry.axisBoxFromCorners(v0, v1)
-        self.assertEqual(abox.v.tolist(), v0.tolist()+v1.tolist())
+        self.assertEqual(abox.v.tolist(), [[-1, -1, -1], [2, 3, 4], [3, 4, 5]])
         self.assertEqual(abox.vRect().tolist(), [
                 [-1.0, -1.0, -1.0],
                 [2.0, -1.0, -1.0],
