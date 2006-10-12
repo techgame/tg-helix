@@ -13,7 +13,6 @@
 from TG.observing import Observable, ObservableDict
 
 from TG.helixui.actors.helix import HelixActor
-from TG.helixui.actors.basic import ViewportBounds
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -22,12 +21,14 @@ from TG.helixui.actors.basic import ViewportBounds
 class HelixSceneCommand(Observable):
     action = None
 
+    def performCommand(self, action, scene, **kw):
+        return self.perform(scene, **kw)
     def perform(self, scene, **kw):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixScene(HelixActor):
+class HelixSceneBase(HelixActor):
     """A Helix scene is the root rendering object, which is simply a composite
     of all the actors below it.  It acts as a mediator, keeping links to event
     roots relevant to the scene.  
@@ -50,27 +51,20 @@ class HelixScene(HelixActor):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixUIScene(HelixScene):
-    viewport = None
-    ViewportFactory = ViewportBounds
-
+class HelixScene(HelixSceneBase):
     def init(self):
+        self.items = self.ItemsFactory()
         self.loadManagers()
         self.loadCommands()
 
-    def loadManagers(self):
-        pass
-
-    def loadCommands(self):
-        pass
+    def loadManagers(self): pass
+    def loadCommands(self): pass
+    def loadScene(self): pass
 
     def setup(self, renderContext):
         self.ctx = renderContext
         self.loadScene()
-
-    def loadScene(self):
-        self.items = self.ItemsFactory()
-        self.viewport = self.items.add(self.ViewportFactory())
+        self.performRenderInitial()
 
     def shutdown(self, renderContext):
         self.ctx = renderContext
@@ -83,14 +77,10 @@ class HelixUIScene(HelixScene):
 
     def resize(self, renderContext, size):
         self.ctx = renderContext
-        self.viewport.setViewportSize(size)
+        return self.performResize(size=size)
     def refresh(self, renderContext):
         self.ctx = renderContext
-        result = self.refreshRender()
-        return result
-
-    def refreshRender(self):
-        return self.render()
+        return self.performRenderRefresh()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -98,19 +88,21 @@ class HelixUIScene(HelixScene):
 
     def getCommandFor(self, action):
         return self.commands[action]
-    def addCommand(self, command, action=None):
-        if action is None:
-            action = command.action
+    def addCommand(self, action, command):
         self.commands[action] = command
     def performCommand(self, action, scene, **kw):
         cmd = self.getCommandFor(action)
-        return cmd.perform(scene, **kw)
+        return cmd(action, scene, **kw)
 
-    def render(self, **kw):
-        return self.performCommand('render', self, **kw)
-    def selectPick(self, **kw):
+    def performResize(self, **kw):
+        return self.performCommand('resize', self, **kw)
+    def performRenderInitial(self, **kw):
+        return self.performCommand('renderInitial', self, **kw)
+    def performRenderRefresh(self, **kw):
+        return self.performCommand('renderRefresh', self, **kw)
+    def performSelectByPick(self, **kw):
         return self.performCommand('selectPick', self, **kw)
-    def selectColor(self, **kw):
+    def performSelectByColor(self, **kw):
         return self.performCommand('selectColor', self, **kw)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
