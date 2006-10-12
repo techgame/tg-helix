@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import Observable, ObservableProperty, ObservableList
+from TG.observing import Observable, ObservableTypeParticipant, ObservableList
 
 from TG.helixui.geometry import geometry
 
@@ -18,19 +18,24 @@ from TG.helixui.geometry import geometry
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def _setupAllVisitTypes(klass):
-    allVisitKeys = [klass.__name__]
-    for base in klass.__mro__:
-        if base is Observable:
-            # don't trace past Observable
-            break
+class RebuildAllVisitTypes(ObservableTypeParticipant):
+    def onObservableClassInit(self, participantName, observableKlass):
+        self._rebuildAllVisitTypes(observableKlass)
 
-        vt = base.visitKind
-        if not vt:
-            vt = base.__name__
-        if vt not in allVisitKeys:
-            allVisitKeys.append(vt)
-    klass.allVisitKeys = allVisitKeys
+    def _rebuildAllVisitTypes(self, klass):
+        allVisitKeys = [klass.__name__]
+        for base in klass.__mro__:
+            if base is Observable:
+                # don't trace past Observable
+                break
+
+            vt = base.visitKind
+            if not vt:
+                vt = base.__name__
+            if vt not in allVisitKeys:
+                allVisitKeys.append(vt)
+
+        klass.allVisitKeys = allVisitKeys
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -44,14 +49,10 @@ class HelixActor(Observable):
 
     allVisitKeys = None
     visitKind = "Actor"
+    __rebuildAllVisitTypes = RebuildAllVisitTypes()
 
     items = None
     ItemsFactory = HelixActorList
-
-    def __new__(klass, *args, **kw):
-        if klass.allVisitKeys is None:
-            _setupAllVisitTypes(klass)
-        return super(HelixActor, klass).__new__(klass, *args, **kw)
 
     def __init__(self):
         super(HelixActor, self).__init__()
@@ -66,6 +67,5 @@ class HelixActor(Observable):
         return visitor.visitActor(self)
 
     def acceptOnItems(self, visitor):
-        for each in self.items or ():
-            each.accept(visitor)
+        return (each.accept(visitor) for each in self.items or ())
 

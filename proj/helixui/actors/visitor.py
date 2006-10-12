@@ -10,13 +10,19 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import Observable, ObservableDict
+from TG.observing import ObservableObject
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixVisitor(Observable):
+class IHelixVisitor(ObservableObject):
+    def visitScene(self, actor): pass
+    def visitActor(self, actor): pass
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class HelixVisitor(IHelixVisitor):
     def visitActor(self, actor):
         return self._doGenericVisitActor(actor)
     def visitScene(self, actor):

@@ -19,24 +19,11 @@ from TG.helixui.actors.basic import ViewportBounds
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneCommand(Observable):
+class HelixSceneCommand(Observable):
     action = None
 
     def perform(self, scene, **kw):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-
-class SceneVisitor(SceneCommand):
-    action = None
-
-    def __init__(self, visitor, action=None):
-        self.visitor = visitor
-        if action is None:
-            self.action = getattr(visitor, 'action', None)
-
-    # visitor is an instance of an actors.visitor.HelixVisitor
-    visitor = None 
-    def perform(self, scene, **kw):
-        return scene.accept(self.visitor)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -64,41 +51,6 @@ class HelixScene(HelixActor):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixUIScene(HelixScene):
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Scene Commands 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    managers = ObservableDict.property()
-    def getManagerFor(self, resourceKind):
-        return self.managers[resourceKind]
-    def addManager(self, manager, resourceKind=None):
-        if resourceKind is None:
-            resourceKind = command.resourceKind
-        self.managers[resourceKind] = manager
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    commands = ObservableDict.property()
-
-    def getCommandFor(self, action):
-        return self.commands[action]
-    def addCommand(self, command, action=None):
-        if action is None:
-            action = command.action
-        self.commands[action] = command
-    def performCommand(self, action, scene, **kw):
-        cmd = self.getCommandFor(action)
-        return cmd.perform(scene, **kw)
-
-    def render(self, **kw):
-        return self.performCommand('render', self, **kw)
-    def selectPick(self, **kw):
-        return self.performCommand('selectPick', self, **kw)
-    def selectColor(self, **kw):
-        return self.performCommand('selectColor', self, **kw)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     viewport = None
     ViewportFactory = ViewportBounds
 
@@ -139,4 +91,35 @@ class HelixUIScene(HelixScene):
 
     def refreshRender(self):
         return self.render()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    commands = ObservableDict.property()
+
+    def getCommandFor(self, action):
+        return self.commands[action]
+    def addCommand(self, command, action=None):
+        if action is None:
+            action = command.action
+        self.commands[action] = command
+    def performCommand(self, action, scene, **kw):
+        cmd = self.getCommandFor(action)
+        return cmd.perform(scene, **kw)
+
+    def render(self, **kw):
+        return self.performCommand('render', self, **kw)
+    def selectPick(self, **kw):
+        return self.performCommand('selectPick', self, **kw)
+    def selectColor(self, **kw):
+        return self.performCommand('selectColor', self, **kw)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    managers = ObservableDict.property()
+    def getManagerFor(self, resourceKind):
+        return self.managers[resourceKind]
+    def addManager(self, manager, resourceKind=None):
+        if resourceKind is None:
+            resourceKind = command.resourceKind
+        self.managers[resourceKind] = manager
 
