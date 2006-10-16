@@ -74,8 +74,6 @@ class RenderView(HelixView):
         pass
     def resize(self, actor, size):
         pass
-    def renderInitial(self, actor):
-        pass
     def render(self, actor):
         pass
 

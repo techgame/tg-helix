@@ -38,10 +38,8 @@ class ClearBuffers(HelixActor):
 class ClearBuffersView(RenderView):
     viewForKeys = [ClearBuffers]
 
-    def renderInitial(self, actor):
+    def render(self, actor):
         glClearColor(*actor.color)
         glClearDepth(actor.depth)
-
-    def render(self, actor):
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 

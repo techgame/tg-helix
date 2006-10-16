@@ -23,29 +23,27 @@ class RenderContext(Observable):
 
     def sceneSetup(self):
         self.setCurrent()
-        if self.scene is not None:
-            self.scene.setup(self)
+        self.scene.setup(self)
     def sceneShutdown(self):
         self.setCurrent()
-        if self.scene is not None:
-            self.scene.shutdown(self)
-    def sceneRefresh(self):
-        self.setCurrent()
-        if self.scene is not None:
-            if self.scene.refresh(self):
-                self.swapBuffers()
+        self.scene.shutdown(self)
     def sceneResize(self, viewportSize):
         self.setCurrent()
-        if self.scene is not None:
-            self.scene.resize(self, viewportSize)
+        self.scene.resize(self, viewportSize)
+    def sceneRefresh(self):
+        self.setCurrent()
+        if self.scene.refresh(self):
+            self.swapBuffers()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def getMaxViewportSize(self):
+        """getMaxViewportSize is provided by concrete implementations"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
     def setCurrent(self):
+        """setCurrent is provided by concrete implementations"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
     def swapBuffers(self):
+        """swapBuffers is provided by concrete implementations"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-
 

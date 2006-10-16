@@ -18,7 +18,7 @@ from TG.openGL.raw import gl, glu, glext
 from TG.openGL.raw.gl import *
 
 from TG.helixui.bridges.wx.basic import BasicRenderSkinModel
-from TG.helixui.stage.scene import HelixScene
+from TG.helixui.scene.scene import HelixScene
 
 from renderWidgets import RenderView, Widget, ViewportBounds, ClearBuffers
 from renderCommand import RenderSceneCommand
@@ -30,18 +30,21 @@ from renderCommand import RenderSceneCommand
 class TestWidget(Widget):
     color = (1.0, 0.0, 0.0, 0.8)
     v = [[-0.5, -0.5, 0.], [0.5, -0.5, 0.], [0.5, 0.5, 0.], [-0.5, 0.5, 0.]]
+    n = 10
 
     def __init__(self):
+        n = self.n
         self.color = random(4)
-        self.v = random(3*3).reshape((3,3)) * 2. - 1.
+        self.v = random(n*3*3).reshape((n*3,3)) * 2. - 1.
 
     def recolor(self):
         self.color = (self.color + (random(4)/100)) % 1.0
     def reshape(self):
-        self.v = random(3*3).reshape((3,3)) * 2. - 1.
+        n = self.n
+        self.v = random(n*3*3).reshape((n*3,3)) * 2. - 1.
 
     def randomly(self):
-        if random() > 0.01:
+        if random() > 0.1:
             self.recolor()
         else:
             self.reshape()
@@ -57,9 +60,11 @@ class TestWidgetView(RenderView):
         glEnd()
         actor.randomly()
 
-class TestSceneView(RenderView):
-    viewForKeys = ['TestScene']
-    def renderInitial(self, actor):
+class TestSceneSetupWidget(Widget):
+    pass
+class TestSceneSetupView(RenderView):
+    viewForKeys = ['TestSceneSetupWidget']
+    def render(self, actor):
         glEnable(GL_DEPTH_TEST)
 
         glEnable(GL_COLOR_MATERIAL)
@@ -68,7 +73,6 @@ class TestSceneView(RenderView):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-    def render(self, actor):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         glMatrixMode(GL_MODELVIEW)
@@ -80,16 +84,14 @@ class TestSceneView(RenderView):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class TestScene(HelixScene):
-    def loadCommands(self):
-        RenderSceneCommand(self)
+    def load(self):
+        RenderSceneCommand(self, RenderView.viewHost)
 
-    def loadScene(self):
-        self.items.extend([
-                ViewportBounds(),
-                ClearBuffers(),
-                ])
-        self.items.extend(TestWidget() for e in xrange(200))
-
+        self.addViewFor(TestSceneSetupWidget())
+        self.addViewFor(ViewportBounds())
+        self.addViewFor(ClearBuffers())
+        for e in xrange(100):
+            self.addViewFor(TestWidget())
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

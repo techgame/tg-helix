@@ -10,57 +10,50 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helixui.stage.scene import HelixSceneCommand
+from TG.observing import ObservableList
+
 from renderViews import RenderView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class RenderSceneCommand(HelixSceneCommand):
-    def __init__(self, scene):
-        self.scene = scene
-        scene.addCommand('resize', self.performResize)
-        scene.addCommand('renderInitial', self.performRenderInitial)
-        scene.addCommand('renderRefresh', self.performRenderRefresh)
+class ViewCollection(ObservableList):
+    def __init__(self, scene, viewFactory):
+        scene.views = self
+        self.viewFactory = viewFactory
 
-    def performResize(self, action, scene, size):
-        for actor, view in self.iterViewsForScene(action, scene):
+    def createViewForActor(self, actor):
+        return actor.accept(self.viewFactory)
+
+    def addViewFor(self, actor):
+        view = self.createViewForActor(actor)
+        self.append((actor, view))
+
+    def removeViewFor(self, actor):
+        for i in enumerate(self):
+            if views[i][0] is actor:
+                views.pop(i)
+                return True
+        else:
+            return False
+
+class RenderSceneCommand(object):
+    ViewCollectionFactory = ViewCollection
+    def __init__(self, scene, viewFactory):
+        self.scene = scene
+        scene.views = self.ViewCollectionFactory(scene, viewFactory)
+
+        scene._pub_.add(self.performResize, '@resize')
+        scene._pub_.add(self.performRefresh, '@refresh')
+
+    def performResize(self, scene, pubKey, ctx, size):
+        for actor, view in scene.views:
             view.resize(actor, size)
         return True
 
-    def performRenderInitial(self, action, scene, **kw):
-        for actor, view in self.iterViewsForScene(action, scene):
-            view.renderInitial(actor)
-        return True
-
-    def performRenderRefresh(self, action, scene, **kw):
-        for actor, view in self.iterViewsForScene(action, scene):
+    def performRefresh(self, scene, pubKey, ctx):
+        for actor, view in scene.views:
             view.render(actor)
         return True
-
-    def iterViewsForScene(self, action, scene):
-        getViewForActor = self.getViewForActor
-
-        view = getViewForActor(scene)
-        if view is not None:
-            yield scene, view
-
-        for actor in scene.items:
-            view = getViewForActor(actor)
-            if view is not None:
-                yield actor, view
-
-    def getViewForActor(self, actor):
-        try: return actor.__view
-        except AttributeError: pass
-
-        view = self.createViewForActor(actor)
-        actor.__view = view
-        return view
-    
-    def createViewForActor(self, actor):
-        return actor.accept(self.viewFactoryVisitor)
-
-    viewFactoryVisitor = RenderView.viewHost
 
