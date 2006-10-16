@@ -28,3 +28,9 @@ class HelixStage(Observable):
     def removeActor(self, actor):
         self.scene.removeViewFor(actor)
 
+    def accept(self, visitor):
+        return visitor.visitStage(self)
+
+    def acceptOnItems(self, visitor):
+        pass
+

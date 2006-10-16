@@ -4,7 +4,7 @@
 
 import wx
 
-from TG.helixui.scene.renderContext import RenderContext
+from TG.helixui.framework.renderContext import RenderContext
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

@@ -56,6 +56,14 @@ class HelixScene(Observable):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def accept(self, visitor):
+        return visitor.visitScene(self)
+
+    def acceptOnItems(self, visitor):
+        pass
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     views = None
 
     def addViewFor(self, actor):

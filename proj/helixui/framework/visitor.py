@@ -17,37 +17,40 @@ from TG.observing import ObservableObject
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class IHelixVisitor(ObservableObject):
-    def visitScene(self, actor): pass
     def visitActor(self, actor): pass
+    def visitStage(self, stage): pass
+    def visitScene(self, scene): pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixVisitor(IHelixVisitor):
     def visitActor(self, actor):
-        return self._doGenericVisitActor(actor)
-    def visitScene(self, actor):
-        return self._doGenericVisitActor(actor)
+        return self._doGenericVisit(actor)
+    def visitStage(self, stage):
+        return self._doGenericVisit(stage)
+    def visitScene(self, scene):
+        return self._doGenericVisit(scene)
 
-    def _doGenericVisitActor(self, actor):
-        actor, key, visit = self._findVisitActorByKeys(actor, actor.allVisitKeys)
-        result = visit(actor)
-        actor.acceptOnItems(self)
+    def _doGenericVisit(self, actor):
+        item, key, visit = self._findVisitByKeys(item, item.allVisitKeys)
+        result = visit(item)
+        item.acceptOnItems(self)
         return result
 
-    def _findVisitActorByKeys(self, actor, allVisitKeys):
+    def _findVisitByKeys(self, item, allVisitKeys):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixMethodVisitor(HelixVisitor):
-    def _findVisitActorByKeys(self, actor, allVisitKeys):
+    def _findVisitByKeys(self, item, allVisitKeys):
         for key in allVisitKeys:
             visit = getattr(self, 'onVisit'+key, None)
             if visit:
-                return actor, key, visit
+                return item, key, visit
         else:
-            return actor, None, self.onVisitNotFound
+            return item, None, self.onVisitNotFound
 
-    def onVisitNotFound(self, actor):
-        print '... no visit method for:', (actor, actor.allVisitKeys)
+    def onVisitNotFound(self, item):
+        print '... no visit method for:', (item, item.allVisitKeys)
 

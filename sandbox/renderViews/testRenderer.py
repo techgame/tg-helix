@@ -18,7 +18,7 @@ from TG.openGL.raw import gl, glu, glext
 from TG.openGL.raw.gl import *
 
 from TG.helixui.bridges.wx.basic import BasicRenderSkinModel
-from TG.helixui.scene.scene import HelixScene
+from TG.helixui.framework.scene import HelixScene
 
 from renderWidgets import RenderView, Widget, ViewportBounds, ClearBuffers
 from renderCommand import RenderSceneCommand

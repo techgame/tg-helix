@@ -10,37 +10,31 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.openGL.raw import gl, glu, glext
-from TG.openGL.raw.gl import *
-
-from TG.helixui.kits.ui.basic import HelixActor, ViewportBounds
-from TG.helixui.kits.ui.widget import Widget
-
-from renderViews import RenderView
+from .basic import Cell
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ViewportBoundsView(RenderView):
-    viewForKeys = [ViewportBounds] 
+class Widget(Cell):
+    """A Widget is a cell that actually displays something.
+    
+    Widgets may be composite objects, providing spaces to be occupied.
+    """
 
-    def resize(self, actor, size):
-        actor.setViewportSize(size)
-    def render(self, actor):
-        glViewport(*actor.xywh())
+    visitKind = "Widget"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ClearBuffers(HelixActor):
-    color = (0.01, 0.01, 0.01, 0.0)
-    depth = 1.0
+class Panel(Widget):
+    pass
 
-class ClearBuffersView(RenderView):
-    viewForKeys = [ClearBuffers]
+class Image(Widget):
+    pass
 
-    def render(self, actor):
-        glClearColor(*actor.color)
-        glClearDepth(actor.depth)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+class Button(Widget):
+    pass
+
+class VideoPlayer(Widget):
+    pass
 

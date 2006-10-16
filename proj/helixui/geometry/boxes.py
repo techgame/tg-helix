@@ -67,7 +67,7 @@ class AxisBox(GeometryBase):
     def depth(self): return self.size[2]
 
     def vRect(self, fillZ=True):
-        # duplicate v0 four times to make a rectangle
+        # duplicate v to make a rectangle
         r = self.v[:-1].repeat(2, 0)
         r[1,0] = r[2,0]
         r[3,0] = r[0,0]

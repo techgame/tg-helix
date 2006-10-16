@@ -11,7 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.helixui.geometry import geometry
-from TG.helixui.actors.helix import HelixActor
+from TG.helixui.framework.actors import HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -67,14 +67,4 @@ class Cell(HelixActor):
     @property
     def box(self):
         return self.bounds.box
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class Widget(Cell):
-    """A Widget is a cell that actually displays something.
-    
-    Widgets may be composite objects, providing spaces to be occupied.
-    """
-
-    visitKind = "Widget"
 

@@ -44,6 +44,12 @@ class HelixActorList(ObservableList):
         self.append(actor)
         return actor
 
+    def accept(self, visitor):
+        for actor in self:
+            actor.accept(visitor)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class HelixActor(Observable):
     """Base class for all helix actors"""
 
@@ -61,11 +67,11 @@ class HelixActor(Observable):
     def init(self):
         pass
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     def accept(self, visitor):
         return visitor.visitActor(self)
 
     def acceptOnItems(self, visitor):
-        return (each.accept(visitor) for each in self.items or ())
+        items = self.items
+        if items is not None:
+            return items.accept(visitor)
 
