@@ -74,15 +74,21 @@ class BasicRenderSkinModel(wxSkinModel):
     clientSize = (800, 800)
     frameTitle = 'Basic wxPython HelixUI Render Skin'
 
+    renderContext = None
     RenderContextFactory = wxRenderContext
     def setupCanavs(self, canvasElem, canvasObj):
         self.renderContext = self.RenderContextFactory(canvasObj)
-        self.renderContext.scene = self.createScene()
+        self.renderContext.scene = self.scene
 
     def getScene(self):
-        return self.renderContext.scene
+        scene = self._scene
+        if scene is None:
+            self.scene = self.createScene()
+        return scene
     def setScene(self, scene):
-        self.renderContext.scene = scene
+        self._scene = scene
+        if self.renderContext is not None:
+            self.renderContext.scene = scene
     scene = property(getScene, setScene)
 
     SceneFactory = None

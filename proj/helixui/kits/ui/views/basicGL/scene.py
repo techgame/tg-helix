@@ -10,27 +10,15 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import Observable, ObservableProperty, notifier
-
-from .actors import HelixActor
+from TG.helixui.kits.basicGL import BasicGLScene, BasicGLView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixStage(Observable):
-    scene = ObservableProperty()
+class UIScene(BasicGLScene):
+    pass
 
-    @notifier
-    def add(self, item):
-        self.scene.addViewFor(item)
-    @notifier
-    def remove(self, item):
-        self.scene.removeViewFor(item)
-
-    def accept(self, visitor):
-        return visitor.visitStage(self)
-
-    def acceptOnItems(self, visitor):
-        pass
+class UIView(BasicGLView):
+    pass
 

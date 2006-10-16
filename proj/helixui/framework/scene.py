@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import Observable, ObservableDict, ObservableList, notifier
+from TG.observing import ObservableObject, Observable, notifier
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -26,6 +26,14 @@ class HelixScene(Observable):
     """
 
     ctx = None
+
+    def __init__(self):
+        Observable.__init__(self)
+        self.init()
+
+    @notifier
+    def init(self):
+        pass
 
     @notifier
     def setup(self, renderContext):
@@ -70,4 +78,18 @@ class HelixScene(Observable):
         return self.views.addViewFor(actor)
     def removeViewFor(self, actor):
         return self.views.removeViewFor(actor)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Helix Views are observable
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class HelixView(ObservableObject):
+    def isHelixView(self):
+        return True
+
+    def accept(self, visitor):
+        return visitor.visitView(self)
+
+    def acceptOnItems(self, visitor):
+        pass
 

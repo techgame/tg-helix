@@ -10,27 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import Observable, ObservableProperty, notifier
+from TG.helixui.framework.stage import HelixStage
+from TG.helixui.framework.actors import HelixActor
 
-from .actors import HelixActor
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Definitions 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class HelixStage(Observable):
-    scene = ObservableProperty()
-
-    @notifier
-    def add(self, item):
-        self.scene.addViewFor(item)
-    @notifier
-    def remove(self, item):
-        self.scene.removeViewFor(item)
-
-    def accept(self, visitor):
-        return visitor.visitStage(self)
-
-    def acceptOnItems(self, visitor):
-        pass
+from .bounds import Bounds, ViewportBounds, Cell
 

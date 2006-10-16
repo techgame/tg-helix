@@ -10,27 +10,35 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import Observable, ObservableProperty, notifier
+from TG.openGL.raw.gl import *
 
-from .actors import HelixActor
+from TG.helixui.kits.general import HelixActor, ViewportBounds
+
+from .views import BasicGLView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixStage(Observable):
-    scene = ObservableProperty()
+class ClearBuffers(HelixActor):
+    color = (0.01, 0.01, 0.01, 0.0)
+    depth = 1.0
 
-    @notifier
-    def add(self, item):
-        self.scene.addViewFor(item)
-    @notifier
-    def remove(self, item):
-        self.scene.removeViewFor(item)
+class ClearBuffersView(BasicGLView):
+    viewForKeys = [ClearBuffers]
 
-    def accept(self, visitor):
-        return visitor.visitStage(self)
+    def render(self, actor):
+        glClearColor(*actor.color)
+        glClearDepth(actor.depth)
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-    def acceptOnItems(self, visitor):
-        pass
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ViewportBoundsView(BasicGLView):
+    viewForKeys = [ViewportBounds] 
+
+    def resize(self, actor, size):
+        actor.setViewportSize(size)
+    def render(self, actor):
+        glViewport(*actor.xywh())
 

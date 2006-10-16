@@ -18,8 +18,6 @@ from TG.helixui.framework.actors import HelixActor
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Bounds(HelixActor):
-    visitKind = "Bounds"
-
     box = None
 
     @property
@@ -42,13 +40,14 @@ class Bounds(HelixActor):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ViewportBounds(Bounds):
-    visitKind = "ViewportBounds"
-
     def xywh(self):
         return map(int, self.v[0:2, 0:2].flat)
     def setViewportSize(self, size):
         self.setSize(size[0], size[1])
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Cell(HelixActor):
@@ -67,4 +66,5 @@ class Cell(HelixActor):
     @property
     def box(self):
         return self.bounds.box
+
 
