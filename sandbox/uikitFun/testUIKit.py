@@ -45,7 +45,7 @@ class FunStage(UIStage):
         self.add(self)
         self.add(ViewportBounds())
         self.add(ClearBuffers())
-        self.add(FunToyView())
+        self.add(FunToy())
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
