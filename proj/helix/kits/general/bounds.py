@@ -10,8 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helixui.geometry import geometry
-from TG.helixui.framework.actors import HelixActor
+from TG.helix.geometry import geometry
+from TG.helix.framework.actors import HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

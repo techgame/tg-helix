@@ -11,8 +11,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helixui.bridges.wx.basic import BasicRenderSkinModel
-from TG.helixui.stage.scene import HelixUIScene
+from TG.helix.bridges.wx.basic import BasicRenderSkinModel
+from TG.helix.framework.scene import HelixScene
 
 from TG.openGL.raw import gl, glu, glext
 from TG.openGL.raw.gl import *
@@ -21,7 +21,7 @@ from TG.openGL.raw.gl import *
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class TestScene(HelixUIScene):
+class TestScene(HelixScene):
     def setup(self, renderContext):
         pass
     def shutdown(self, renderContext):

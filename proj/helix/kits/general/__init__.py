@@ -10,8 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helixui.framework.stage import HelixStage
-from TG.helixui.framework.actors import HelixActor
+from TG.helix.framework.stage import HelixStage
+from TG.helix.framework.actors import HelixActor
 
 from .bounds import Bounds, ViewportBounds, Cell
 

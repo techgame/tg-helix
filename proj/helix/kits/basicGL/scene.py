@@ -11,7 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.observing import ObservableList
-from TG.helixui.framework.scene import HelixScene
+from TG.helix.framework.scene import HelixScene
 from .views import BasicGLView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

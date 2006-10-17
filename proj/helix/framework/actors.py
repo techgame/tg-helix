@@ -12,7 +12,7 @@
 
 from TG.observing import Observable, ObservableTypeParticipant, ObservableList
 
-from TG.helixui.geometry import geometry
+from TG.helix.geometry import geometry
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

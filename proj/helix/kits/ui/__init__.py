@@ -10,6 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helixui.kits.general import *
+from TG.helix.kits.general import *
 from .basic import UIStage, UIItem
 

@@ -47,7 +47,7 @@ class HelixScene(Observable):
     @notifier
     def shutdown(self, renderContext):
         self.ctx = renderContext
-        self.unload(self)
+        self.unload()
         return True
     @notifier
     def unload(self): 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~ Copyright (C) 2002-2006  TechGame Networks, LLC.              ##
 ##~                                                               ##
@@ -10,37 +11,42 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.openGL.raw import gl, glu, glext
 from TG.openGL.raw.gl import *
 
-from TG.helix.kits.ui import HelixActor, ViewportBounds
-from TG.helix.kits.ui.widget import Widget
-
-from renderViews import RenderView
+from TG.helix.kits.ui.views.basicGL import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ViewportBoundsView(RenderView):
-    viewForKeys = [ViewportBounds] 
-
-    def resize(self, actor, size):
-        actor.setViewportSize(size)
-    def render(self, actor):
-        glViewport(*actor.xywh())
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class ClearBuffers(HelixActor):
-    color = (0.01, 0.01, 0.01, 0.0)
-    depth = 1.0
-
-class ClearBuffersView(RenderView):
-    viewForKeys = [ClearBuffers]
+class FunToyView(UIView):
+    viewForKeys = ['FunToy']
 
     def render(self, actor):
-        glClearColor(*actor.color)
-        glClearDepth(actor.depth)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        glColor4f(.2, .8, 1., .5)
+        glBegin(GL_QUADS)
+        glVertex2f(-1., -1.)
+        glVertex2f(1., -1.)
+        glVertex2f(1., 1.)
+        glVertex2f(-1., 1.)
+        glEnd()
+
+
+class FunUISetupView(UIView):
+    viewForKeys = ['FunStage']
+    def render(self, actor):
+        glEnable(GL_DEPTH_TEST)
+        glDepthFunc(GL_LESS)
+
+        glEnable(GL_COLOR_MATERIAL)
+        glShadeModel(GL_SMOOTH)
+
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
 

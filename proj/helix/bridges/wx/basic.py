@@ -80,10 +80,12 @@ class BasicRenderSkinModel(wxSkinModel):
         self.renderContext = self.RenderContextFactory(canvasObj)
         self.renderContext.scene = self.scene
 
+    _scene = None
     def getScene(self):
         scene = self._scene
         if scene is None:
-            self.scene = self.createScene()
+            scene = self.createScene()
+            self.scene = scene
         return scene
     def setScene(self, scene):
         self._scene = scene

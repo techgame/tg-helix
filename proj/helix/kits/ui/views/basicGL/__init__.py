@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helixui.kits.basicGL import *
+from TG.helix.kits.basicGL import *
 
 from scene import UIScene, UIView
 

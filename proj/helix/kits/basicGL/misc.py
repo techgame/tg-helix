@@ -12,7 +12,7 @@
 
 from TG.openGL.raw.gl import *
 
-from TG.helixui.kits.general import HelixActor, ViewportBounds
+from TG.helix.kits.general import HelixActor, ViewportBounds
 
 from .views import BasicGLView
 

@@ -12,8 +12,8 @@
 
 from TG.observing import ObservableObject, ObservableTypeParticipant
 
-from TG.helixui.framework.visitor import IHelixVisitor
-from TG.helixui.framework.actors import HelixActor
+from TG.helix.framework.visitor import IHelixVisitor
+from TG.helix.framework.actors import HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Views 
