@@ -10,6 +10,19 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .scene import BasicGLScene, BasicView
-from .misc import ClearBuffers
+import PIL
+
+from .widget import Widget
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Definitions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class Image(Widget):
+    visitKind = "Image"
+
+    def __init__(self, filename, pos=(0,0)):
+        Widget.__init__(self)
+        self.filename = filename
+        self.img = PIL.Image.open(filename)
 

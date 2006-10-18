@@ -10,6 +10,15 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .scene import BasicGLScene, BasicView
-from .misc import ClearBuffers
+from .widget import WidgetView
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Definitions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ImageView(WidgetView):
+    viewForKeys = ['Image']
+
+    def render(self, image):
+        self.renderBounds(image.bounds, image.color)
 

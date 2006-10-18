@@ -12,7 +12,8 @@
 
 from TG.observing import ObservableList
 from TG.helix.framework.scene import HelixScene
-from .views import BasicGLView
+
+from TG.helix.kits.general.views import BasicView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -69,7 +70,7 @@ class BasicGLRenderer(object):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BasicGLScene(HelixScene):
-    viewFactory = BasicGLView.viewFactory
+    viewFactory = BasicView.viewFactory
     Renderer = BasicGLRenderer
 
     def init(self):

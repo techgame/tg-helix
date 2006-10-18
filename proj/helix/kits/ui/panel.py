@@ -10,6 +10,16 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .scene import BasicGLScene, BasicView
-from .misc import ClearBuffers
+from .widget import Widget
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Definitions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class Panel(Widget):
+    visitKind = "Panel"
+
+    def init(self):
+        super(Panel, self).init()
+        self.items = self.ItemsFactory()
 

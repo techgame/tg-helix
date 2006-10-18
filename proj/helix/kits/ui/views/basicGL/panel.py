@@ -10,6 +10,22 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .scene import BasicGLScene, BasicView
-from .misc import ClearBuffers
+from .widget import WidgetView
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Definitions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class PanelView(WidgetView):
+    viewForKeys = ['Panel']
+
+    def init(self, panel):
+        super(PanelView, self).init(panel)
+        self.views = []
+        #for i in panel.items:
+        #    self.views.append(i)
+
+    def render(self, panel):
+        self.renderBounds(panel.bounds, panel.color)
+        self.renderItems(self.views, panel.items)
 

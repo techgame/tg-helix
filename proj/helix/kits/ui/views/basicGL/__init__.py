@@ -12,5 +12,10 @@
 
 from TG.helix.kits.basicGL import *
 
-from scene import UIScene, UIView
+from .scene import UIScene, UIView
+
+from .widget import WidgetView
+from .button import ButtonView
+from .image import ImageView
+from .panel import PanelView
 

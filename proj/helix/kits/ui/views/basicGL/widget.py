@@ -10,38 +10,38 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from itertools import izip, starmap
 from TG.openGL.raw.gl import *
 
-from TG.helix.kits.general import HelixActor, ViewportBounds
-
-from .scene import BasicView
+from .scene import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ClearBuffers(HelixActor):
-    color = (0.0, 0.0, 0.0, 0.0)
-    depth = 1.0
+class WidgetView(UIView):
+    viewForKeys = ['Widget']
 
-    def __init__(self, color=color, depth=depth):
-        pass
+    def init(self, widget):
+        print self, widget
+    def render(self, widget):
+        self.renderBounds(widget.bounds, widget.color)
 
-class ClearBuffersView(BasicView):
-    viewForKeys = [ClearBuffers]
+    def renderBounds(self, bounds, color=None):
+        rect = bounds.box.vRect()
+        if color is not None:
+            glColor4f(*color)
 
-    def render(self, actor):
-        glClearColor(*actor.color)
-        glClearDepth(actor.depth)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        glBegin(GL_QUADS)
+        for p in rect:
+            glVertex3f(*p)
+        glEnd()
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class ViewportBoundsView(BasicView):
-    viewForKeys = [ViewportBounds] 
-
-    def resize(self, actor, size):
-        actor.setViewportSize(size)
-    def render(self, actor):
-        glViewport(*actor.xywh())
+    def renderItems(self, views, items=None):
+        if items is None:
+            for v in views:
+                v.render(None)
+        else:
+            for v, i in izip(views, items):
+                v.render(i)
 

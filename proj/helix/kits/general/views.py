@@ -14,7 +14,6 @@ from TG.observing import ObservableObject, ObservableTypeParticipant
 
 from TG.helix.framework.scene import HelixView
 from TG.helix.framework.visitor import IHelixVisitor
-from TG.helix.framework.actors import HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Views 
@@ -56,26 +55,24 @@ class BuildVisitTypeViews(ObservableTypeParticipant):
     def _getKeyList(self, e):
         if isinstance(e, (list, tuple)):
             return [k for i in e for k in self._getKeyList(i)]
-
-        if isinstance(e, basestring):
+        elif isinstance(e, basestring):
             return [e]
+        elif isinstance(e, type):
+            return getattr(e, 'allVisitKeys', [e.__name__])[:1]
 
-        if isinstance(e, type):
-            if issubclass(e, HelixActor):
-                return e.allVisitKeys[0:1]
-            else:
-                return [e.__name__]
-
-        raise TypeError('Cannot get key for view: %r' % (e,))
+        raise TypeError('Unable to determine key for view: %r' % (e,))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class BasicGLView(HelixView):
+class BasicView(HelixView):
     _buildViews_ = BuildVisitTypeViews()
     viewFactory = RenderViewFactoryVisitor()
     viewForKeys = []
 
     def __init__(self, actor=None):
+        self.init(actor)
+
+    def init(self, actor):
         pass
     def resize(self, actor, size):
         pass

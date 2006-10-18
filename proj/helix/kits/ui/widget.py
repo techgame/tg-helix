@@ -23,18 +23,5 @@ class Widget(Cell):
     """
 
     visitKind = "Widget"
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class Panel(Widget):
-    pass
-
-class Image(Widget):
-    pass
-
-class Button(Widget):
-    pass
-
-class VideoPlayer(Widget):
-    pass
+    color = None
 

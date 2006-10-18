@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.kits.basicGL import BasicGLScene, BasicGLView
+from TG.helix.kits.basicGL import BasicGLScene, BasicView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -19,6 +19,6 @@ from TG.helix.kits.basicGL import BasicGLScene, BasicGLView
 class UIScene(BasicGLScene):
     pass
 
-class UIView(BasicGLView):
+class UIView(BasicView):
     pass
 
