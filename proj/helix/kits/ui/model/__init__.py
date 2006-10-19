@@ -10,8 +10,11 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.framework.stage import HelixStage
-from TG.helix.framework.actors import HelixActor
+from .basic import HelixStage, UIStage, HelixActor, UIItem
 
-from .bounds import Bounds, ViewportBounds, Cell
+from .bounds import Cell, Bounds, ViewportBounds
+from .widget import Widget
+from .button import Button
+from .image import Image
+from .panel import Panel
 

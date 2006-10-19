@@ -10,46 +10,33 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableList
-from TG.helix.framework.scene import HelixScene
-
-from TG.helix.kits.general.views import BasicView
+from TG.helix.framework.views import HelixView
+from TG.helix.framework.scene import HelixScene, notifier
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ViewCollection(ObservableList):
-    def __init__(self, viewFactory):
-        self.viewFactory = viewFactory
+class UIView(HelixView):
+    def __init__(self, viewable=None):
+        self.init(viewable)
 
-    def createViewFor(self, item):
-        isHelixView = getattr(item, 'isHelixView', lambda: False)
-        if isHelixView():
-            return item
-        else:
-            return item.accept(self.viewFactory)
+    @classmethod
+    def fromViewable(klass, viewable):
+        return klass(viewable)
 
-    def addViewFor(self, item):
-        view = self.createViewFor(item)
-        if view is not None:
-            self.append((item, view))
-
-    def removeViewFor(self, item):
-        for i in enumerate(self):
-            if views[i][0] is item:
-                views.pop(i)
-                return True
-        else:
-            return False
+    def init(self, viewable):
+        pass
+    def resize(self, viewable, size):
+        pass
+    def render(self, viewable):
+        pass
+UIView.registerViewFactory(UIView)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class BasicGLRenderer(object):
-    ViewCollectionFactory = ViewCollection
+class GLUIRenderer(object):
     def __init__(self, scene, viewFactory):
-        scene.views = self.ViewCollectionFactory(viewFactory)
-
         self.scene = scene
         self._hookScene(scene)
 
@@ -69,11 +56,12 @@ class BasicGLRenderer(object):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class BasicGLScene(HelixScene):
-    viewFactory = BasicView.viewFactory
-    Renderer = BasicGLRenderer
+class UIScene(HelixScene):
+    viewFactory = UIView.viewFactory
+    RendererFactory = GLUIRenderer
 
+    @notifier
     def init(self):
-        super(BasicGLScene, self).init()
-        BasicGLRenderer(self, self.viewFactory)
+        super(UIScene, self).init()
+        self.RendererFactory(self, self.viewFactory)
 

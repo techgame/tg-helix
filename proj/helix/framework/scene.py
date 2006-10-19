@@ -70,11 +70,3 @@ class HelixScene(Observable):
     def acceptOnItems(self, visitor):
         self.views.accept(visitor)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    views = None
-    def addViewFor(self, actor):
-        return self.views.addViewFor(actor)
-    def removeViewFor(self, actor):
-        return self.views.removeViewFor(actor)
-

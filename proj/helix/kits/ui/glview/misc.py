@@ -10,28 +10,38 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableObject, ObservableTypeParticipant
+from TG.openGL.raw.gl import *
 
-from TG.helix.framework.views import HelixView
-from TG.helix.framework.visitor import IHelixVisitor
+from TG.helix.framework.actors import HelixActor
+
+from .scene import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Views 
+#~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class BasicView(HelixView):
-    def __init__(self, actor=None):
-        self.init(actor)
+class ClearBuffers(HelixActor):
+    color = (0.0, 0.0, 0.0, 0.0)
+    depth = 1.0
 
-    @classmethod
-    def fromViewable(klass, viewable):
-        return klass(viewable)
+    def __init__(self, color=color, depth=depth):
+        pass
 
-    def init(self, actor):
-        pass
-    def resize(self, actor, size):
-        pass
+class ClearBuffersView(UIView):
+    viewForKeys = [ClearBuffers]
+
     def render(self, actor):
-        pass
-BasicView.registerViewFactory(BasicView)
+        glClearColor(*actor.color)
+        glClearDepth(actor.depth)
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ViewportBoundsView(UIView):
+    viewForKeys = ['ViewportBounds'] 
+
+    def resize(self, actor, size):
+        actor.setViewportSize(size)
+    def render(self, actor):
+        glViewport(*actor.xywh())
 

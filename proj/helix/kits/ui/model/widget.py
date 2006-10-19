@@ -10,15 +10,18 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.kits.general import HelixStage, HelixActor, Cell
+from .bounds import Cell
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class UIStage(HelixStage):
-    pass
+class Widget(Cell):
+    """A Widget is a cell that actually displays something.
+    
+    Widgets may be composite objects, providing spaces to be occupied.
+    """
 
-class UIItem(HelixActor):
-    pass
+    visitKind = "Widget"
+    color = None
 

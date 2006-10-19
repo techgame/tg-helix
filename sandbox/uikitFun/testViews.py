@@ -13,7 +13,7 @@
 
 from TG.openGL.raw.gl import *
 
-from TG.helix.kits.ui.views.basicGL import UIView
+from TG.helix.kits.ui.glview import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

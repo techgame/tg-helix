@@ -10,6 +10,11 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .scene import BasicGLScene, BasicView
-from .misc import ClearBuffers
+from .scene import UIScene, UIView
+from .misc import ViewportBoundsView, ClearBuffers, ClearBuffersView
+
+from .widget import WidgetView
+from .button import ButtonView
+from .image import ImageView
+from .panel import PanelView
 

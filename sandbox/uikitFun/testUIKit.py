@@ -11,8 +11,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.kits.ui import UIStage, UIItem, ViewportBounds
-from TG.helix.kits.ui.views.basicGL import UIScene, ClearBuffers
+from TG.helix.kits.ui.model import UIStage, UIItem, ViewportBounds
+from TG.helix.kits.ui.glview import UIScene, ClearBuffers
 
 import testViews
 

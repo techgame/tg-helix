@@ -21,16 +21,16 @@ from .actors import HelixActor
 class HelixStage(Observable):
     scene = ObservableProperty()
 
-    @notifier
-    def add(self, item):
-        self.scene.addViewFor(item)
-    @notifier
-    def remove(self, item):
-        self.scene.removeViewFor(item)
-
     def accept(self, visitor):
         return visitor.visitStage(self)
-
     def acceptOnItems(self, visitor):
         pass
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def add(self, item):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        
+    def remove(self, item):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 

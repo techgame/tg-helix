@@ -10,15 +10,15 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.kits.basicGL import BasicGLScene, BasicView
+from TG.helix.framework.stage import HelixStage, HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class UIScene(BasicGLScene):
+class UIStage(HelixStage):
     pass
 
-class UIView(BasicView):
+class UIItem(HelixActor):
     pass
 
