@@ -22,9 +22,7 @@ from .scene import UIView
 class WidgetView(UIView):
     viewForKeys = ['Widget']
 
-    def init(self, widget):
-        print self, widget
-    def render(self, widget):
+    def render(self):
         self.renderBounds(widget.bounds, widget.color)
 
     def renderBounds(self, bounds, color=None):
@@ -36,12 +34,4 @@ class WidgetView(UIView):
         for p in rect:
             glVertex3f(*p)
         glEnd()
-
-    def renderItems(self, views, items=None):
-        if items is None:
-            for v in views:
-                v.render(None)
-        else:
-            for v, i in izip(views, items):
-                v.render(i)
 

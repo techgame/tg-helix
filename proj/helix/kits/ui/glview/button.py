@@ -19,6 +19,7 @@ from .widget import WidgetView
 class ButtonView(WidgetView):
     viewForKeys = ['Button']
 
-    def render(self, button):
-        self.renderBounds(button.bounds, button.color)
+    def render(self):
+        viewable = self.viewable
+        self.renderBounds(viewable.bounds, viewable.color)
 

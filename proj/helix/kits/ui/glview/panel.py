@@ -21,11 +21,10 @@ class PanelView(WidgetView):
 
     def init(self, panel):
         super(PanelView, self).init(panel)
-        self.views = []
-        #for i in panel.items:
-        #    self.views.append(i)
+        self.subviews = self.SubViewFactory()
 
-    def render(self, panel):
+    def render(self):
+        panel = self.viewable
         self.renderBounds(panel.bounds, panel.color)
-        self.renderItems(self.views, panel.items)
+        self.renderSubviews()
 
