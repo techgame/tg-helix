@@ -68,28 +68,13 @@ class HelixScene(Observable):
         return visitor.visitScene(self)
 
     def acceptOnItems(self, visitor):
-        pass
+        self.views.accept(visitor)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     views = None
-
     def addViewFor(self, actor):
         return self.views.addViewFor(actor)
     def removeViewFor(self, actor):
         return self.views.removeViewFor(actor)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Helix Views are observable
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class HelixView(ObservableObject):
-    def isHelixView(self):
-        return True
-
-    def accept(self, visitor):
-        return visitor.visitView(self)
-
-    def acceptOnItems(self, visitor):
-        pass
 

@@ -17,25 +17,24 @@ from TG.observing import ObservableObject
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class IHelixVisitor(ObservableObject):
-    def visitActor(self, actor): pass
     def visitStage(self, stage): pass
+    def visitActor(self, actor): pass
     def visitScene(self, scene): pass
+    def visitView(self, view): pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixVisitor(IHelixVisitor):
-    def visitActor(self, actor):
-        return self._doGenericVisit(actor)
-    def visitStage(self, stage):
-        return self._doGenericVisit(stage)
-    def visitScene(self, scene):
-        return self._doGenericVisit(scene)
-
-    def _doGenericVisit(self, actor):
+    def visitAny(self, item):
         item, key, visit = self._findVisitByKeys(item, item.allVisitKeys)
         result = visit(item)
         item.acceptOnItems(self)
         return result
+
+    visitStage = visitAny
+    visitActor = visitAny
+    visitScene = visitAny
+    visitView = visitAny
 
     def _findVisitByKeys(self, item, allVisitKeys):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
