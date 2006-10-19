@@ -30,9 +30,10 @@ class ClearBuffers(HelixActor):
 class ClearBuffersView(UIView):
     viewForKeys = [ClearBuffers]
 
-    def render(self, actor):
-        glClearColor(*actor.color)
-        glClearDepth(actor.depth)
+    def render(self):
+        viewable = self.viewable
+        glClearColor(*viewable.color)
+        glClearDepth(viewable.depth)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,8 +41,8 @@ class ClearBuffersView(UIView):
 class ViewportBoundsView(UIView):
     viewForKeys = ['ViewportBounds'] 
 
-    def resize(self, actor, size):
-        actor.setViewportSize(size)
-    def render(self, actor):
-        glViewport(*actor.xywh())
+    def resize(self, size):
+        self.viewable.setViewportSize(size)
+    def render(self):
+        glViewport(*self.viewable.xywh())
 

@@ -11,7 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.helix.framework.views import HelixView
-from TG.helix.framework.scene import HelixScene, notifier
+from TG.helix.framework.scene import HelixScene
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -26,42 +26,42 @@ class UIView(HelixView):
         return klass(viewable)
 
     def init(self, viewable):
+        self.viewable = viewable
+    def resize(self, size):
         pass
-    def resize(self, viewable, size):
+    def render(self):
         pass
-    def render(self, viewable):
-        pass
-UIView.registerViewFactory(UIView)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class GLUIRenderer(object):
-    def __init__(self, scene, viewFactory):
-        self.scene = scene
-        self._hookScene(scene)
-
-    def _hookScene(self, scene, bAdd=True):
-        scene._pub_.hook(bAdd, self.performResize, '@resize')
-        scene._pub_.hook(bAdd, self.performRefresh, '@refresh')
-
-    def performResize(self, scene, pubKey, ctx, size):
-        for item, view in scene.views:
-            view.resize(item, size)
-        return True
-
-    def performRefresh(self, scene, pubKey, ctx):
-        for item, view in scene.views:
-            view.render(item)
-        return True
+uiViewFactory = UIView.registerViewFactory(UIView)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIScene(HelixScene):
-    viewFactory = UIView.viewFactory
-    RendererFactory = GLUIRenderer
+    viewForKeys = 'UIStage'
 
-    @notifier
-    def init(self):
+    def __init__(self, stage=None):
+        self.init(stage)
+
+    @classmethod
+    def fromViewable(klass, stage):
+        return klass(stage)
+
+    def init(self, stage):
         super(UIScene, self).init()
-        self.RendererFactory(self, self.viewFactory)
+        if not stage.isHelixStage():
+            raise ArgumentError("Expected an object supporting helix stage protocol")
+
+        self.stage = stage
+        for item in stage.items:
+            self.subviews.add(self.viewFactory(item))
+
+    def resize(self, ctx, size):
+        for view in self.subviews:
+            view.resize(size)
+        return True
+
+    def refresh(self, ctx):
+        for view in self.subviews:
+            view.render()
+        return True
+UIScene.registerViewFactory(UIScene, uiViewFactory)
 

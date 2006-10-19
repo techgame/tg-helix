@@ -36,7 +36,7 @@ class wxRenderContext(RenderContext):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getViewportSize(self):
+    def getMaxViewportSize(self):
         return tuple(self._glCanvas.GetClientSize())
     def setCurrent(self):
         return self._glCanvas.SetCurrent()

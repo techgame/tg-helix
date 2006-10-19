@@ -19,6 +19,7 @@ from .widget import WidgetView
 class ImageView(WidgetView):
     viewForKeys = ['Image']
 
-    def render(self, image):
-        self.renderBounds(image.bounds, image.color)
+    def render(self):
+        self.viewable = viewable
+        self.renderBounds(viewable.bounds, viewable.color)
 

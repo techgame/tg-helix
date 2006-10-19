@@ -10,13 +10,13 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableObject, Observable, notifier
+from .views import HelixView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixScene(Observable):
+class HelixScene(HelixView):
     """A Helix scene is the root rendering object, which is simply a composite
     of all the actors below it.  It acts as a mediator, keeping links to event
     roots relevant to the scene.  
@@ -25,48 +25,27 @@ class HelixScene(Observable):
     picking through rendering colours.
     """
 
-    ctx = None
-
-    def __init__(self):
-        Observable.__init__(self)
-        self.init()
-
-    @notifier
     def init(self):
-        pass
+        super(HelixScene, self).init()
+        self.subviews = self.SubViewsFactory()
 
-    @notifier
-    def setup(self, renderContext):
-        self.ctx = renderContext
-        self.load()
+    def isHelixScene(self):
         return True
-    @notifier
-    def load(self): 
-        pass
-
-    @notifier
-    def shutdown(self, renderContext):
-        self.ctx = renderContext
-        self.unload()
-        return True
-    @notifier
-    def unload(self): 
-        pass
-
-    @notifier
-    def resize(self, renderContext, size):
-        self.ctx = renderContext
-        return True
-    @notifier
-    def refresh(self, renderContext):
-        self.ctx = renderContext
-        return True
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def accept(self, visitor):
         return visitor.visitScene(self)
 
-    def acceptOnItems(self, visitor):
-        self.views.accept(visitor)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    ctx = None
+    def setup(self, ctx):
+        self.ctx = ctx
+        return True
+    def shutdown(self, ctx):
+        self.ctx = None
+        return True
+    def resize(self, ctx, size):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+    def refresh(self, ctx):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 

@@ -22,7 +22,7 @@ from TG.helix.kits.ui.glview import UIView
 class FunToyView(UIView):
     viewForKeys = ['FunToy']
 
-    def render(self, actor):
+    def render(self):
         glColor4f(.2, .8, 1., .5)
         glBegin(GL_QUADS)
         glVertex2f(-1., -1.)
@@ -33,8 +33,9 @@ class FunToyView(UIView):
 
 
 class FunUISetupView(UIView):
-    viewForKeys = ['FunStage']
-    def render(self, actor):
+    viewForKeys = ['FunUISetup']
+
+    def render(self):
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LESS)
 

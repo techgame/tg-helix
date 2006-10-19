@@ -10,27 +10,30 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import Observable, ObservableProperty, notifier
-
 from .actors import HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixStage(Observable):
-    scene = ObservableProperty()
+class HelixStage(HelixActor):
+    visitKind = "Stage"
+
+    def init(self):
+        super(HelixStage, self).init()
+        self.items = self.ItemsFactory()
+
+    def isHelixStage(self):
+        return True
 
     def accept(self, visitor):
         return visitor.visitStage(self)
-    def acceptOnItems(self, visitor):
-        pass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def add(self, item):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        return self.items.add(item)
         
     def remove(self, item):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        return self.items.remove(item)
 

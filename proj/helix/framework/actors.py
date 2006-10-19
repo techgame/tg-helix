@@ -18,24 +18,9 @@ from TG.helix.geometry import geometry
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class RebuildAllVisitTypes(ObservableTypeParticipant):
-    def onObservableClassInit(self, participantName, observableKlass):
-        self._rebuildAllVisitTypes(observableKlass)
-
-    def _rebuildAllVisitTypes(self, klass):
-        allVisitKeys = [klass.__name__]
-        for base in klass.__mro__:
-            if base is Observable:
-                # don't trace past Observable
-                break
-
-            vt = base.visitKind
-            if not vt:
-                vt = base.__name__
-            if vt not in allVisitKeys:
-                allVisitKeys.append(vt)
-
-        klass.allVisitKeys = allVisitKeys
+class HelixVisitTypesBuilder(ObservableTypeParticipant):
+    def onObservableClassInit(self, participantName, actorKlass):
+        actorKlass._buildVisitTypes()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -55,7 +40,7 @@ class HelixActor(Observable):
 
     allVisitKeys = None
     visitKind = "Actor"
-    __rebuildAllVisitTypes = RebuildAllVisitTypes()
+    _visitTypes_builder_ = HelixVisitTypesBuilder()
 
     items = None
     ItemsFactory = HelixActorList
@@ -67,6 +52,11 @@ class HelixActor(Observable):
     def init(self):
         pass
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def isHelixActor(self):
+        return True
+
     def accept(self, visitor):
         return visitor.visitActor(self)
 
@@ -74,4 +64,25 @@ class HelixActor(Observable):
         items = self.items
         if items is not None:
             return items.accept(visitor)
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @classmethod
+    def _buildVisitTypes(klass):
+        allVisitKeys = [klass.__name__]
+        for base in klass.__mro__:
+            if base is Observable:
+                # don't trace past Observable
+                break
+
+            vtList = base.visitKind
+            if not vtList:
+                vtList = [base.__name__]
+            elif isinstance(vtList, basestring):
+                vtList = [vtList]
+            for vt in vtList:
+                if vt not in allVisitKeys:
+                    allVisitKeys.append(vt)
+
+        klass.allVisitKeys = allVisitKeys
 

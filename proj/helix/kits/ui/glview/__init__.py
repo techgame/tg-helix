@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .scene import UIScene, UIView
+from .scene import uiViewFactory, UIScene, UIView
 from .misc import ViewportBoundsView, ClearBuffers, ClearBuffersView
 
 from .widget import WidgetView

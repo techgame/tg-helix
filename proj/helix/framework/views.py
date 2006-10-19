@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableObject, ObservableTypeParticipant
+from TG.observing import ObservableObject, ObservableTypeParticipant, ObservableList
 from .visitor import IHelixVisitor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -18,12 +18,15 @@ from .visitor import IHelixVisitor
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixViewFactory(IHelixVisitor):
+    def __call__(self, item):
+        return item.accept(self)
+
     def visitStage(self, stage):
-        return self.createViewFor(stage)
+        return self.createViewFor(stage, stage.allVisitKeys)
     def visitActor(self, actor):
         return self.createViewFor(actor, actor.allVisitKeys)
     def visitScene(self, scene):
-        return self.createViewFor(scene)
+        return scene
     def visitView(self, view):
         return view
 
@@ -31,7 +34,7 @@ class HelixViewFactory(IHelixVisitor):
 
     def createViewFor(self, viewable, viewKeys=None):
         if viewKeys is None:
-            viewKeys = [viewable.__class__.__name__]
+            viewKeys = [base.__name__ for base in viewable.__class__.__mro__]
         viewFactory = self.getFactoryForKey(viewKeys)
         if viewFactory is not None:
             return viewFactory(viewable)
@@ -71,14 +74,33 @@ class HelixViewFactoryBuilder(ObservableTypeParticipant):
         factory in it's namespace"""
         viewKlass._viewFactoryRegister()
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class HelixViewList(ObservableList):
+    def add(self, view):
+        self.append(view)
+        return view
+
+    def accept(self, visitor):
+        for view in self:
+            view.accept(visitor)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixView(ObservableObject):
-    _factory_builder_ = HelixViewFactoryBuilder()
     viewForKeys = []
     ViewFactoryFactory = HelixViewFactory
     viewFactory = None
+    _factory_builder_ = HelixViewFactoryBuilder()
+
+    subviews = None
+    SubViewsFactory = HelixViewList
+
+    def __init__(self):
+        self.init()
+
+    def init(self):
+        pass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -89,7 +111,9 @@ class HelixView(ObservableObject):
         return visitor.visitView(self)
 
     def acceptOnItems(self, visitor):
-        pass
+        items = self.views
+        if items is not None:
+            return items.accept(visitor)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

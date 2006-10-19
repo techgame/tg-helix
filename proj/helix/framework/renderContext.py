@@ -23,17 +23,27 @@ class RenderContext(Observable):
 
     def sceneSetup(self):
         self.setCurrent()
-        self.scene.setup(self)
+        scene = self.scene
+        if scene is not None:
+            scene.setup(self)
     def sceneShutdown(self):
         self.setCurrent()
-        self.scene.shutdown(self)
+        scene = self.scene
+        if scene is not None:
+            scene.shutdown(self)
     def sceneResize(self, viewportSize):
         self.setCurrent()
-        self.scene.resize(self, viewportSize)
+        scene = self.scene
+        if scene is not None:
+            scene.resize(self, viewportSize)
+        else: print 'scene is:', repr(scene)
     def sceneRefresh(self):
         self.setCurrent()
-        if self.scene.refresh(self):
-            self.swapBuffers()
+        scene = self.scene
+        if scene is not None:
+            if scene.refresh(self):
+                self.swapBuffers()
+        else: print 'scene is:', repr(scene)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
