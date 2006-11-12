@@ -25,7 +25,7 @@ class FunUISetup(UIItem):
     pass
 
 class FunToy(UIItem):
-    pass
+    color = (.2, .8, 1., .5)
 
 class FunStage(UIStage):
     def load(self):
@@ -44,6 +44,5 @@ if __name__=='__main__':
 
     model = BasicRenderSkinModel()
     model.scene = uiViewFactory(stage)
-
     model.skinModel()
 

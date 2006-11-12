@@ -23,7 +23,8 @@ class FunToyView(UIView):
     viewForKeys = ['FunToy']
 
     def render(self):
-        glColor4f(.2, .8, 1., .5)
+        viewable = self.viewable
+        glColor4f(*viewable.color)
         glBegin(GL_QUADS)
         glVertex2f(-1., -1.)
         glVertex2f(1., -1.)
