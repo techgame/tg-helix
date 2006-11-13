@@ -23,9 +23,13 @@ from .scene import UIView
 class ClearBuffers(HelixActor):
     color = (0.0, 0.0, 0.0, 0.0)
     depth = 1.0
+    mask = GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT
 
-    def __init__(self, color=color, depth=depth):
-        pass
+    def __init__(self, color=None, depth=None):
+        if color is not None:
+            self.color = color
+        if depth is not None:
+            self.depth = depth
 
 class ClearBuffersView(UIView):
     viewForKeys = [ClearBuffers]
@@ -34,7 +38,7 @@ class ClearBuffersView(UIView):
         viewable = self.viewable
         glClearColor(*viewable.color)
         glClearDepth(viewable.depth)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+        glClear(viewable.mask)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

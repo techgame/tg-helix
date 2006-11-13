@@ -45,7 +45,6 @@ class ViewportBounds(Bounds):
     def setViewportSize(self, size):
         self.setSize(size[0], size[1])
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
