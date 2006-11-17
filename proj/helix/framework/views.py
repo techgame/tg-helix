@@ -118,6 +118,15 @@ class HelixView(ObservableObject):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
+    def subviewsFrom(klass, iterViewables):
+        viewFactory = klass.viewFactory
+        result = klass.SubViewsFactory()
+        for viewable in iterViewables:
+            view = viewFactory(viewable)
+            result.append(view)
+        return result
+
+    @classmethod
     def fromViewable(klass, viewable):
         raise NotImplementedError('Subclass Responsibility: %r, %r' % (klass, viewable))
 

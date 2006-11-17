@@ -32,12 +32,6 @@ class UIView(HelixView):
     def render(self):
         pass
 
-    def renderSubviews(self, subviews=None):
-        if subviews is None: 
-            subviews = self.subviews
-        for v in subviews:
-            v.render()
-
 uiViewFactory = UIView.registerViewFactory(UIView)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
