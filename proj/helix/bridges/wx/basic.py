@@ -61,6 +61,8 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
             </opengl-canvas>
         </layout>
         obj.SetClientSize(ctx.model.clientSize)
+        if ctx.model.minSize:
+            obj.SetMinSize(ctx.model.minSize)
     </frame>
 </skin>
 """)
@@ -72,6 +74,7 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
 class BasicRenderSkinModel(wxSkinModel):
     xmlSkin = xmlSkin
     clientSize = (800, 800)
+    minSize = None
     frameTitle = 'Basic wxPython HelixUI Render Skin'
 
     renderContext = None
