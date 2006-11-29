@@ -36,14 +36,12 @@ class RenderContext(Observable):
         scene = self.scene
         if scene is not None:
             scene.resize(self, viewportSize)
-        else: print 'scene is:', repr(scene)
     def sceneRefresh(self):
         self.setCurrent()
         scene = self.scene
         if scene is not None:
             if scene.refresh(self):
                 self.swapBuffers()
-        else: print 'scene is:', repr(scene)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

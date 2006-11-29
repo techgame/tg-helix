@@ -19,8 +19,10 @@ from TG.observing import ObservableObject
 class IHelixVisitor(ObservableObject):
     def visitStage(self, stage): pass
     def visitActor(self, actor): pass
+    def visitActorItems(self, actor): pass
     def visitScene(self, scene): pass
     def visitView(self, view): pass
+    def visitViewItems(self, view): pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

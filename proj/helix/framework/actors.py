@@ -12,16 +12,10 @@
 
 from TG.observing import Observable, ObservableTypeParticipant, ObservableList
 
-from TG.helix.geometry import geometry
+from .viewFactory import HelixVisitTypeMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class HelixVisitTypesBuilder(ObservableTypeParticipant):
-    def onObservableClassInit(self, participantName, actorKlass):
-        actorKlass._buildVisitTypes()
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixActorList(ObservableList):
@@ -30,19 +24,20 @@ class HelixActorList(ObservableList):
         return actor
 
     def accept(self, visitor):
+        self.acceptOnItems(visitor)
+
+    def acceptOnItems(self, visitor):
         for actor in self:
             actor.accept(visitor)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixActor(Observable):
+class HelixActor(Observable, HelixVisitTypeMixin):
     """Base class for all helix actors"""
 
     allVisitKeys = None
     visitKind = "Actor"
-    _visitTypes_builder_ = HelixVisitTypesBuilder()
 
-    items = None
     ItemsFactory = HelixActorList
 
     def __init__(self):
@@ -56,33 +51,8 @@ class HelixActor(Observable):
 
     def isHelixActor(self):
         return True
-
     def accept(self, visitor):
         return visitor.visitActor(self)
-
     def acceptOnItems(self, visitor):
-        items = self.items
-        if items is not None:
-            return items.accept(visitor)
+        return visitor.visitActorItems(self)
     
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    @classmethod
-    def _buildVisitTypes(klass):
-        allVisitKeys = [klass.__name__]
-        for base in klass.__mro__:
-            if base is Observable:
-                # don't trace past Observable
-                break
-
-            vtList = base.visitKind
-            if not vtList:
-                vtList = [base.__name__]
-            elif isinstance(vtList, basestring):
-                vtList = [vtList]
-            for vt in vtList:
-                if vt not in allVisitKeys:
-                    allVisitKeys.append(vt)
-
-        klass.allVisitKeys = allVisitKeys
-
