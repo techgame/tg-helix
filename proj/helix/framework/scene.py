@@ -25,10 +25,6 @@ class HelixScene(HelixView):
     picking through rendering colours.
     """
 
-    def init(self):
-        super(HelixScene, self).init()
-        self.subviews = self.SubViewsFactory()
-
     def isHelixScene(self):
         return True
 
@@ -37,15 +33,18 @@ class HelixScene(HelixView):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    ctx = None
-    def setup(self, ctx):
-        self.ctx = ctx
+    def setup(self, size):
         return True
-    def shutdown(self, ctx):
-        self.ctx = None
+    def shutdown(self):
         return True
-    def resize(self, ctx, size):
+    def resize(self, size):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-    def refresh(self, ctx):
+    def refresh(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+
+    renderContext = None
+    def enterContext(self, renderContext):
+        self.renderContext = renderContext
+    def exitContext(self, renderContext):
+        self.renderContext = None
 

@@ -2,6 +2,9 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from __future__ import with_statement
+from contextlib import contextmanager
+
 from TG.observing import Observable, ObservableProperty
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,26 +25,29 @@ class RenderContext(Observable):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def sceneSetup(self):
-        self.setCurrent()
-        scene = self.scene
-        if scene is not None:
-            scene.setup(self)
+        with self.sceneInContext() as scene:
+            viewportSize = self.getMaxViewportSize()
+            scene.setup(viewportSize)
     def sceneShutdown(self):
-        self.setCurrent()
-        scene = self.scene
-        if scene is not None:
-            scene.shutdown(self)
+        with self.sceneInContext() as scene:
+            scene.shutdown()
     def sceneResize(self, viewportSize):
-        self.setCurrent()
-        scene = self.scene
-        if scene is not None:
-            scene.resize(self, viewportSize)
+        with self.sceneInContext() as scene:
+            scene.resize(viewportSize)
     def sceneRefresh(self):
+        with self.sceneInContext() as scene:
+            if scene.refresh():
+                self.swapBuffers()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @contextmanager
+    def sceneInContext(self):
         self.setCurrent()
         scene = self.scene
-        if scene is not None:
-            if scene.refresh(self):
-                self.swapBuffers()
+        scene.enterContext(self)
+        yield scene
+        scene.exitContext(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

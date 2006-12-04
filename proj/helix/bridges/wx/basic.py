@@ -60,9 +60,7 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
                 ctx.model.setupCanavs(elem, obj)
             </opengl-canvas>
         </layout>
-        obj.SetClientSize(ctx.model.clientSize)
-        if ctx.model.minSize:
-            obj.SetMinSize(ctx.model.minSize)
+        ctx.model.setupFrame(obj)
     </frame>
 </skin>
 """)
@@ -98,4 +96,10 @@ class BasicRenderSkinModel(wxSkinModel):
     SceneFactory = None
     def createScene(self):
         return self.SceneFactory()
+
+    def setupFrame(self, frame):
+        if self.clientSize:
+            frame.SetClientSize(self.clientSize)
+        if self.minSize:
+            frame.SetMinSize(self.minSize)
 
