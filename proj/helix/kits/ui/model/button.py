@@ -17,5 +17,5 @@ from .widget import Widget
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Button(Widget):
-    visitKind = "Button"
+    viewVisitKeys = ["Button"]
 

@@ -40,6 +40,8 @@ class Bounds(HelixActor):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ViewportBounds(Bounds):
+    viewVisitKeys = ["ViewportBounds"]
+
     def xywh(self):
         return map(int, self.v[0:2, 0:2].flat)
     def setViewportSize(self, size):
@@ -52,7 +54,7 @@ class ViewportBounds(Bounds):
 class Cell(HelixActor):
     """A basic object rooted in a space"""
 
-    visitKind = "Cell"
+    viewVisitKeys = ["Cell"]
 
     bounds = None
     BoundsFactory = Bounds

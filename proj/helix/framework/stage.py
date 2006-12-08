@@ -17,11 +17,9 @@ from .actors import HelixActor
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixStage(HelixActor):
-    visitKind = "Stage"
-
     def init(self):
         super(HelixStage, self).init()
-        self.items = self.ItemsFactory()
+        self.items = self.ActorList()
 
     def isHelixStage(self):
         return True

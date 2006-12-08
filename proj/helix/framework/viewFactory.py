@@ -18,38 +18,35 @@ from .visitor import IHelixVisitor
 #~ View factory from visitType mechanism
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixViewFactoryBuilder(ObservableTypeParticipant):
-    """This class helps to regiser view classes automatically as they are subclassed from HelixView"""
-    def onObservableClassInit(self, selfAttrName, viewKlass):
-        """Called when a subclass is created that has a reference to this
-        factory in it's namespace"""
-        viewKlass._viewFactoryRegister()
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class HelixViewFactory(IHelixVisitor):
-    def __call__(self, item):
-        return item.accept(self)
+    viewFactoryMap = None
+    def __init__(self):
+        self.viewFactoryMap = {}
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def visitStage(self, stage):
-        return self.createViewFor(stage, stage.allVisitKeys)
+        return self.createViewFor(stage, stage.allViewVisitKeys)
     def visitActor(self, actor):
-        return self.createViewFor(actor, actor.allVisitKeys)
+        return self.createViewFor(actor, actor.allViewVisitKeys)
     def visitScene(self, scene):
         return scene
     def visitView(self, view):
         return view
 
+    def __call__(self, item):
+        return item.accept(self)
+
+    def viewsFor(self, collection):
+        for v in collection:
+            yield v.accept(self)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def createViewFor(self, viewable, viewKeys=None):
-        if viewKeys is None:
-            viewKeys = [base.__name__ for base in viewable.__class__.__mro__]
+    def createViewFor(self, viewable, viewKeys):
         viewFactory = self.getFactoryForKey(viewKeys)
-        if viewFactory is not None:
-            return viewFactory(viewable)
+        return viewFactory(viewable)
 
-    viewFactoryMap = None
     def getFactoryForKey(self, viewKeys):
         viewFactoryMap = self.viewFactoryMap
         for key in viewKeys:
@@ -57,24 +54,23 @@ class HelixViewFactory(IHelixVisitor):
             if viewFactory is not None:
                 return viewFactory
         else:
-            return None
+            raise LookupError("Unable to find a viewFactory matching view keys: %r" % (viewKeys,))
 
     def addFactoryForKeys(self, viewFactory, allViewKeys):
-        allViewKeys = self._getAllViewKeys(allViewKeys)
-        viewFactoryMap = self.viewFactoryMap
-        if viewFactoryMap is None:
-            self.viewFactoryMap = viewFactoryMap = {}
-        viewFactoryMap.update((key, viewFactory) for key in allViewKeys)
+        if not isinstance(allViewKeys, list):
+            raise TypeError("allViewKeys must be a list of strings, but is a %r" % (allViewKeys.__class__, ))
+        self.viewFactoryMap.update((key, viewFactory) for key in allViewKeys)
 
-    def _getAllViewKeys(self, viewKeys):
-        if isinstance(viewKeys, (list, tuple)):
-            return [k for i in viewKeys for k in self._getAllViewKeys(i)]
-        elif isinstance(viewKeys, basestring):
-            return [viewKeys]
-        elif isinstance(viewKeys, type):
-            return getattr(viewKeys, 'allVisitKeys', [viewKeys.__name__])[:1]
-        else:
-            return list(viewKeys)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ View Factory Helpers
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class HelixViewFactoryBuilder(ObservableTypeParticipant):
+    """This class helps to regiser view classes automatically as they are subclassed from HelixView"""
+    def onObservableClassInit(self, selfAttrName, viewKlass):
+        """Called when a subclass is created that has a reference to this
+        factory in it's namespace"""
+        viewKlass.viewFactoryRegister()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -95,23 +91,23 @@ class HelixViewFactoryMixin(object):
             viewFactory = klass.ViewFactoryFactory()
         klass.viewFactory = viewFactory
         
-        klass._viewFactoryRegister()
+        klass.viewFactoryRegister()
         return viewFactory
     
     @classmethod
-    def _viewFactoryRegister(klass, viewKeys=None):
+    def viewFactoryRegister(klass, viewKeys=None):
         """Registers this subclass with the viewFactory of the root view to handle viewKeys.  
         
         If viewKeys is None, the classes' viewFactoryKeys are used.
         (The root view is the nearest superclass that "registerViewFactory" was called on.)"""
         if viewKeys is None:
-            viewKeys = klass._viewFactoryKeys()
+            viewKeys = klass.viewFactoryKeys()
         if viewKeys and klass.viewFactory:
             klass.viewFactory.addFactoryForKeys(klass.fromViewable, viewKeys)
             return True
 
     @classmethod
-    def _viewFactoryKeys(klass):
+    def viewFactoryKeys(klass):
         """Returns the list of viewable keys this view can handle"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
@@ -119,7 +115,6 @@ class HelixViewFactoryMixin(object):
     def fromViewable(klass, viewable):
         """Create an instance of the view for the viewable object"""
         raise NotImplementedError('Subclass Responsibility: %r, %r' % (klass, viewable))
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Visit Types Mechanism
@@ -135,27 +130,23 @@ class HelixVisitTypesBuilder(ObservableTypeParticipant):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixVisitTypeMixin(object):
-    visitKind = None
     _visitTypes_builder_ = HelixVisitTypesBuilder()
+
+    viewVisitKeys = []
+    allViewVisitKeys = []
 
     @classmethod
     def _buildVisitTypes(klass):
         absent = object()
-        allVisitKeys = [klass.__name__]
-        for base in klass.__mro__:
-            vtList = getattr(base, 'visitKind', absent)
-            if vtList is absent:
-                # stop tracing if visit kind is not present
-                break
 
-            vtList = base.visitKind
-            if not vtList:
-                vtList = [base.__name__]
-            elif isinstance(vtList, basestring):
-                vtList = [vtList]
-            for vt in vtList:
-                if vt not in allVisitKeys:
-                    allVisitKeys.append(vt)
+        allViewVisitKeys = [klass] + klass.viewVisitKeys
+        for base in klass.__bases__:
+            avvk = getattr(base, 'allViewVisitKeys', [])
+            # skip the first entry -- should always be base, which the subclass
+            # should not take over
+            for vvk in avvk[1:]: 
+                if vvk not in allViewVisitKeys:
+                    allViewVisitKeys.append(vvk)
 
-        klass.allVisitKeys = allVisitKeys
+        klass.allViewVisitKeys = allViewVisitKeys
 

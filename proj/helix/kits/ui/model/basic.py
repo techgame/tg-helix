@@ -17,8 +17,8 @@ from TG.helix.framework.stage import HelixStage, HelixActor
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIStage(HelixStage):
-    visitKind = "UIStage"
+    viewVisitKeys = ["UIStage"]
 
 class UIItem(HelixActor):
-    visitKind = "UIItem"
+    viewVisitKeys = []
 

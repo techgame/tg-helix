@@ -22,6 +22,6 @@ class Widget(Cell):
     Widgets may be composite objects, providing spaces to be occupied.
     """
 
-    visitKind = "Widget"
+    viewVisitKeys = ["Widget"]
     color = None
 

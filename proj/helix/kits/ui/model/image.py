@@ -19,7 +19,7 @@ from .widget import Widget
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Image(Widget):
-    visitKind = "Image"
+    viewVisitKeys = ["Image"]
 
     def __init__(self, filename, pos=(0,0)):
         Widget.__init__(self)

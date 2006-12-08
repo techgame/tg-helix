@@ -22,7 +22,7 @@ class LayoutCell(Cell):
     Follows the composite pattern.
     """
 
-    visitKind = "LayoutCell"
+    viewVisitKeys = ["LayoutCell"]
 
     strategy = None
 

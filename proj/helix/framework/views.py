@@ -21,10 +21,8 @@ class HelixViewList(ObservableList):
     def add(self, view):
         self.append(view)
         return view
-
     def accept(self, visitor):
         self.acceptOnItems(visitor)
-
     def acceptOnItems(self, visitor):
         for view in self:
             view.accept(visitor)
@@ -32,9 +30,8 @@ class HelixViewList(ObservableList):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixView(ObservableObject, HelixViewFactoryMixin):
+    ViewList = HelixViewList
     viewForKeys = []
-
-    SubViewsFactory = HelixViewList
 
     def __init__(self):
         super(HelixView, self).__init__()
@@ -55,24 +52,17 @@ class HelixView(ObservableObject, HelixViewFactoryMixin):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
-    def iterSubviewsFrom(klass, iterViewables):
-        """Yiels views registerd to handle the items in the viewable iterator"""
-        viewFactory = klass.viewFactory
-        for viewable in iterViewables:
-            yield viewFactory(viewable)
-
-    @classmethod
-    def subviewsFrom(klass, iterViewables, subviews=None):
+    def subviewsFrom(klass, viewables, subviews=None):
         """Creates views registerd to handle the items in the viewable iterator, and appends them to subviews"""
         if subviews is None:
-            subviews = klass.SubViewsFactory()
-        subviews.extend(klass.iterSubviewsFrom(iterViewables))
+            subviews = klass.ViewList()
+        subviews.extend(klass.viewFactory.viewsFor(viewables))
         return subviews
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
-    def _viewFactoryKeys(klass):
+    def viewFactoryKeys(klass):
         """Returns the list of viewable keys this view can handle"""
         return klass.viewForKeys
 

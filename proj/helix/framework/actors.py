@@ -22,10 +22,8 @@ class HelixActorList(ObservableList):
     def add(self, actor):
         self.append(actor)
         return actor
-
     def accept(self, visitor):
         self.acceptOnItems(visitor)
-
     def acceptOnItems(self, visitor):
         for actor in self:
             actor.accept(visitor)
@@ -35,10 +33,9 @@ class HelixActorList(ObservableList):
 class HelixActor(Observable, HelixVisitTypeMixin):
     """Base class for all helix actors"""
 
-    allVisitKeys = None
-    visitKind = "Actor"
-
-    ItemsFactory = HelixActorList
+    ActorList = HelixActorList
+    viewVisitKeys = []
+    allViewVisitKeys = None
 
     def __init__(self):
         super(HelixActor, self).__init__()

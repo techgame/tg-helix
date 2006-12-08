@@ -22,9 +22,10 @@ import testViews
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class FunUISetup(UIItem):
-    pass
+    viewVisitKeys = ['FunUISetup']
 
 class FunToy(UIItem):
+    viewVisitKeys = ['FunToy']
     color = (.2, .8, 1., .5)
 
 class FunStage(UIStage):

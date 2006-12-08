@@ -37,7 +37,7 @@ uiViewFactory = UIView.registerViewFactory(UIView)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIScene(HelixScene):
-    viewForKeys = 'UIStage'
+    viewForKeys = ['UIStage']
 
     def __init__(self, stage=None):
         self.init(stage)

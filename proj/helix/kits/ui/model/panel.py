@@ -17,7 +17,7 @@ from .widget import Widget
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Panel(Widget):
-    visitKind = "Panel"
+    viewVisitKeys = ["Panel"]
 
     def init(self):
         super(Panel, self).init()
