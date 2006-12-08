@@ -45,10 +45,9 @@ class RenderContext(Observable):
     def sceneInContext(self):
         self.setCurrent()
         scene = self.scene
-        if scene is not None:
-            scene.enterContext(self)
-            yield scene
-            scene.exitContext(self)
+        scene.enterContext(self)
+        yield scene
+        scene.exitContext(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
