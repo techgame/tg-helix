@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableObject, ObservableTypeParticipant, ObservableList
+from TG.observing import ObservableObject, ObservableList
 from .viewFactory import HelixViewFactoryMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,14 +59,14 @@ class HelixView(ObservableObject, HelixViewFactoryMixin):
         """Yiels views registerd to handle the items in the viewable iterator"""
         viewFactory = klass.viewFactory
         for viewable in iterViewables:
-            yield viewFactory(viewable), viewable
+            yield viewFactory(viewable)
 
     @classmethod
     def subviewsFrom(klass, iterViewables, subviews=None):
         """Creates views registerd to handle the items in the viewable iterator, and appends them to subviews"""
         if subviews is None:
             subviews = klass.SubViewsFactory()
-        subviews.extend(self.iterSubviewsFrom(iterViewables)
+        subviews.extend(klass.iterSubviewsFrom(iterViewables))
         return subviews
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -10,6 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.observing import ObservableTypeParticipant
+
 from .visitor import IHelixVisitor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,10 +140,12 @@ class HelixVisitTypeMixin(object):
 
     @classmethod
     def _buildVisitTypes(klass):
+        absent = object()
         allVisitKeys = [klass.__name__]
         for base in klass.__mro__:
-            if base is Observable:
-                # don't trace past Observable
+            vtList = getattr(base, 'visitKind', absent)
+            if vtList is absent:
+                # stop tracing if visit kind is not present
                 break
 
             vtList = base.visitKind
