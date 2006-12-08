@@ -52,15 +52,15 @@ class UIScene(HelixScene):
             raise ArgumentError("Expected an object supporting helix stage protocol")
 
         self.stage = stage
-        self.subviews = self.subviewsFrom(stage.items)
+        self.views = self.viewListFor(stage.items)
 
     def resize(self, size):
-        for view in self.subviews:
+        for view in self.views:
             view.resize(size)
         return True
 
     def refresh(self):
-        for view in self.subviews:
+        for view in self.views:
             view.render()
         return True
 UIScene.registerViewFactory(UIScene, uiViewFactory)

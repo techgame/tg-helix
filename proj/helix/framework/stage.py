@@ -23,15 +23,11 @@ class HelixStage(HelixActor):
 
     def isHelixStage(self):
         return True
-
     def accept(self, visitor):
         return visitor.visitStage(self)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     def add(self, item):
         return self.items.add(item)
-        
     def remove(self, item):
         return self.items.remove(item)
 

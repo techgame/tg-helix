@@ -21,7 +21,7 @@ class PanelView(WidgetView):
 
     def init(self, panel):
         super(PanelView, self).init(panel)
-        self.subviews = self.SubViewFactory()
+        self.subviews = self.viewListFor([])
 
     def render(self):
         panel = self.viewable

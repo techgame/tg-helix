@@ -79,6 +79,8 @@ class HelixViewFactoryMixin(object):
     _viewFactory_builder_ = HelixViewFactoryBuilder()
     viewFactory = None
 
+    viewForKeys = []
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @staticmethod
@@ -98,10 +100,10 @@ class HelixViewFactoryMixin(object):
     def viewFactoryRegister(klass, viewKeys=None):
         """Registers this subclass with the viewFactory of the root view to handle viewKeys.  
         
-        If viewKeys is None, the classes' viewFactoryKeys are used.
+        If viewKeys is None, the classes' viewForKeys is used.
         (The root view is the nearest superclass that "registerViewFactory" was called on.)"""
         if viewKeys is None:
-            viewKeys = klass.viewFactoryKeys()
+            viewKeys = klass.viewForKeys
         if viewKeys and klass.viewFactory:
             klass.viewFactory.addFactoryForKeys(klass.fromViewable, viewKeys)
             return True

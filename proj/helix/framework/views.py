@@ -31,7 +31,6 @@ class HelixViewList(ObservableList):
 
 class HelixView(ObservableObject, HelixViewFactoryMixin):
     ViewList = HelixViewList
-    viewForKeys = []
 
     def __init__(self):
         super(HelixView, self).__init__()
@@ -52,22 +51,10 @@ class HelixView(ObservableObject, HelixViewFactoryMixin):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
-    def subviewsFrom(klass, viewables, subviews=None):
-        """Creates views registerd to handle the items in the viewable iterator, and appends them to subviews"""
-        if subviews is None:
-            subviews = klass.ViewList()
-        subviews.extend(klass.viewFactory.viewsFor(viewables))
-        return subviews
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    @classmethod
-    def viewFactoryKeys(klass):
-        """Returns the list of viewable keys this view can handle"""
-        return klass.viewForKeys
-
-    @classmethod
-    def fromViewable(klass, viewable):
-        """Create an instance of the view for the viewable object"""
-        raise NotImplementedError('Subclass Responsibility: %r, %r' % (klass, viewable))
+    def viewListFor(klass, viewables, viewList=None):
+        """Extends viewList with views registered to handle viewables"""
+        if viewList is None:
+            viewList = klass.ViewList()
+        viewList.extend(klass.viewFactory.viewsFor(viewables))
+        return viewList
 

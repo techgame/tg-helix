@@ -34,8 +34,6 @@ class HelixActor(Observable, HelixVisitTypeMixin):
     """Base class for all helix actors"""
 
     ActorList = HelixActorList
-    viewVisitKeys = []
-    allViewVisitKeys = None
 
     def __init__(self):
         super(HelixActor, self).__init__()
