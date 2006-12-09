@@ -12,7 +12,8 @@
 
 import PIL.Image
 
-from TG.openGL.data.rect import Rect
+from TG.openGL.data import Rect, Color, Vector
+
 from TG.helix.framework.stage import HelixStage, HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,8 +45,28 @@ class Widget(UIItem):
     viewVisitKeys = ["Widget"]
 
     box = Rect()
+
     def init(self):
         self.box = self.box.copy()
+        if self._color is not None:
+            self._color = self._color.copy()
+
+    _color = None #Color()
+    def getColor(self): 
+        return self._color
+    def setColor(self, color): 
+        if color is None:
+            self._color = None
+            return
+
+        if self._color is None:
+            self._color = Color(1)
+        self._color.set(color)
+    def delColor(self): 
+        self._color = None
+    color = property(getColor, setColor, delColor)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Button(Widget):
     viewVisitKeys = ["Button"]
@@ -68,6 +89,6 @@ class Panel(Widget):
     viewVisitKeys = ["Panel"]
 
     def init(self):
-        super(Panel, self).init()
-        self.items = self.ItemsFactory()
+        Widget.init(self)
+        self.children = self.ActorList()
 

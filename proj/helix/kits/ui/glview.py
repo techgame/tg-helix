@@ -11,6 +11,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from functools import partial
+
+from TG.openGL.data import Vector
 from TG.openGL.raw.gl import *
 
 from TG.helix.framework.viewFactory import HelixViewFactory
@@ -43,6 +45,8 @@ class UIScene(HelixScene):
         self.views = self.viewListFor(stage.items)
 
     def resize(self, size):
+        size = Vector(list(size)+[0])
+
         for view in self.views:
             view.resize(size)
         return True
@@ -57,6 +61,9 @@ class UIScene(HelixScene):
     def render(self):
         self.glClearBuffers()
 
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
 class UIView(HelixView):
     viewForKeys = []
     viewFactory = uiViewFactory
@@ -69,7 +76,7 @@ class UIView(HelixView):
         return klass(viewable)
 
     def init(self, viewable):
-        self.viewable = viewable
+        pass
     def resize(self, size):
         pass
     def render(self):
@@ -80,13 +87,30 @@ class UIView(HelixView):
 class ViewportView(UIView):
     viewForKeys = ['Viewport'] 
 
+    def init(self, viewport):
+        self.viewport = viewport
+
     def resize(self, size):
-        self.viewable.box.size = size
-    def render(self):
-        box = self.viewable.box
-        x, y = box.pos[:2]
-        w, h = box.size[:2]
+        self.viewport.box.size = size
+
+        box = self.viewport.box
+        x, y, z = box.pos
+        w, h, d = box.size
+        if z == d == 0:
+            z = -10
+            d =  20
+
         glViewport(x, y, w, h)
+
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(x, x+w, y, y+w, z, z+d)
+
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+    def render(self):
+        glLoadIdentity()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Widget Views
@@ -95,18 +119,17 @@ class ViewportView(UIView):
 class WidgetView(UIView):
     viewForKeys = ['Widget']
 
+    def init(self, widget):
+        self.widget = widget
+        widget.widgetView = self
+
     def render(self):
-        self.renderBounds(widget.bounds, widget.color)
+        self.renderBox(widget)
 
-    def renderBounds(self, bounds, color=None):
-        rect = bounds.box.vRect()
-        if color is not None:
-            glColor4f(*color)
-
-        glBegin(GL_QUADS)
-        for p in rect:
-            glVertex3f(*p)
-        glEnd()
+    def renderBox(self, widget):
+        glColor4fv(widget.color.ctypes.data_as(glColor4fv.api.argtypes[0]))
+        r = widget.box
+        glRectfv(r.v0.ctypes.data_as(glRectfv.api.argtypes[0]), r.v1.ctypes.data_as(glRectfv.api.argtypes[1]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -114,25 +137,26 @@ class ImageView(WidgetView):
     viewForKeys = ['Image']
 
     def render(self):
-        self.viewable = viewable
-        self.renderBounds(viewable.bounds, viewable.color)
+        self.renderBox(self.widget)
 
 class PanelView(WidgetView):
     viewForKeys = ['Panel']
 
     def init(self, panel):
-        super(PanelView, self).init(panel)
-        self.subviews = self.viewListFor([])
+        WidgetView.init(self, panel)
+        self.children = self.viewListFor([])
 
     def render(self):
-        panel = self.viewable
-        self.renderBounds(panel.bounds, panel.color)
-        self.renderSubviews()
+        panel = self.widget
+        self.renderBox(panel)
+
+        for e in self.children:
+            e.render()
 
 class ButtonView(WidgetView):
     viewForKeys = ['Button']
 
     def render(self):
-        viewable = self.viewable
-        self.renderBounds(viewable.bounds, viewable.color)
+        button = self.widget
+        self.renderBox(button)
 
