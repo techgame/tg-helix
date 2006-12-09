@@ -56,10 +56,10 @@ class HelixViewFactory(IHelixVisitor):
         else:
             raise LookupError("Unable to find a viewFactory matching view keys: %r" % (viewKeys,))
 
-    def addFactoryForKeys(self, viewFactory, allViewKeys):
-        if not isinstance(allViewKeys, list):
-            raise TypeError("allViewKeys must be a list of strings, but is a %r" % (allViewKeys.__class__, ))
-        self.viewFactoryMap.update((key, viewFactory) for key in allViewKeys)
+    def addFactoryForKeys(self, viewFactory, viewKeys):
+        if not isinstance(viewKeys, list):
+            raise TypeError("viewKeys must be a list, but is a %r" % (viewKeys.__class__, ))
+        self.viewFactoryMap.update((key, viewFactory) for key in viewKeys)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ View Factory Helpers
