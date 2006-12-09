@@ -74,28 +74,15 @@ class HelixViewFactoryBuilder(ObservableTypeParticipant):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def _getViewFactory_(): None
+def _setViewFactory_(value):
+    raise RuntimeError("viewFactory can only be set at class creation")
+
 class HelixViewFactoryMixin(object):
-    ViewFactoryFactory = HelixViewFactory
-    _viewFactory_builder_ = HelixViewFactoryBuilder()
-    viewFactory = None
-
     viewForKeys = []
+    _viewFactory_builder_ = HelixViewFactoryBuilder()
+    viewFactory = property(_getViewFactory_, _setViewFactory_)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    @staticmethod
-    def registerViewFactory(klass, viewFactory=None):
-        """Registeres a new view factory for a root view object.  Starts a new hierarchy of views for a certain namespace"""
-        if klass.__subclasses__():
-            raise RuntimeError("View factories must be registered before any subclasses are created")
-
-        if viewFactory is None:
-            viewFactory = klass.ViewFactoryFactory()
-        klass.viewFactory = viewFactory
-        
-        klass.viewFactoryRegister()
-        return viewFactory
-    
     @classmethod
     def viewFactoryRegister(klass, viewKeys=None):
         """Registers this subclass with the viewFactory of the root view to handle viewKeys.  
@@ -108,10 +95,10 @@ class HelixViewFactoryMixin(object):
             klass.viewFactory.addFactoryForKeys(klass.fromViewable, viewKeys)
             return True
 
-    @classmethod
-    def viewFactoryKeys(klass):
-        """Returns the list of viewable keys this view can handle"""
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+    #@classmethod
+    #def viewFactoryKeys(klass):
+    #    """Returns the list of viewable keys this view can handle"""
+    #    raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
     @classmethod
     def fromViewable(klass, viewable):
