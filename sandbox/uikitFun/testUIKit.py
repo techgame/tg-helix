@@ -12,8 +12,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.helix.bridges.wx.basic import BasicRenderSkinModel
-from TG.helix.kits.ui.model import UIStage, UIItem, ViewportBounds
-from TG.helix.kits.ui.glview import uiViewFactory, ClearBuffers
+from TG.helix.kits.ui.model import UIStage, UIItem, Viewport
+from TG.helix.kits.ui.glview import uiViewFactory
 
 import testViews
 
@@ -31,8 +31,7 @@ class FunToy(UIItem):
 class FunStage(UIStage):
     def load(self):
         self.add(FunUISetup())
-        self.add(ViewportBounds())
-        self.add(ClearBuffers())
+        self.add(Viewport())
         self.add(FunToy())
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

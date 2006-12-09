@@ -13,3 +13,4 @@ Icon?
 \.svn/
 
 syntax: regexp
+.*/uiOld/.*
