@@ -12,15 +12,26 @@ from TG.observing import Observable, ObservableProperty
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class RenderContext(Observable):
-    scene = ObservableProperty()
+    scene = ObservableProperty(None)
+    @scene.fget
+    def getScene(self, _paGet_):
+        scene = _paGet_()
+        if scene is None:
+            scene = self.findScene()
+            self.scene = scene
+        return scene
+
     @scene.fset
-    def setScene(self, scene, _propSet_):
-        lastScene = self.scene
+    def setScene(self, scene, _paSet_):
+        lastScene = _paSet_.fget()
         if lastScene is not None:
             self.sceneShutdown()
-        _propSet_(scene)
+        _paSet_(scene)
         if scene is not None:
             self.sceneSetup()
+
+    def findScene(self):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

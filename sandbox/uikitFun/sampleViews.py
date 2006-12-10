@@ -22,6 +22,8 @@ from TG.helix.kits.ui.glview import UIView
 class FunToyView(UIView):
     viewForKeys = ['FunToy']
 
+    def init(self, viewable):
+        self.viewable = viewable
     def render(self):
         viewable = self.viewable
         glColor4f(*viewable.color)
@@ -37,18 +39,7 @@ class FunUISetupView(UIView):
     viewForKeys = ['FunUISetup']
 
     def render(self):
-        glEnable(GL_DEPTH_TEST)
-        glDepthFunc(GL_LESS)
-
-        glEnable(GL_COLOR_MATERIAL)
-        glShadeModel(GL_SMOOTH)
-
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
 
 

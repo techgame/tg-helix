@@ -91,11 +91,34 @@ class ViewportView(UIView):
         self.viewport = viewport
 
     def resize(self, size):
+        self.viewport.onViewResize(size)
+
+        box = self.viewport.box
+        x, y = box.pos[:2]
+        w, h = box.size[:2]
+
+        glViewport(x, y, w, h)
+
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+
+    def render(self):
+        glLoadIdentity()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class OrthoViewportView(ViewportView):
+    viewForKeys = ['OrthoViewport'] 
+
+    def resize(self, size):
         self.viewport.box.size = size
 
         box = self.viewport.box
-        x, y, z = box.pos
-        w, h, d = box.size
+        x, y, z = box.pos[:3]
+        w, h, d = box.size[:3]
         if z == d == 0:
             z = -10
             d =  20
@@ -107,9 +130,6 @@ class ViewportView(UIView):
         glOrtho(x, x+w, y, y+w, z, z+d)
 
         glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-
-    def render(self):
         glLoadIdentity()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

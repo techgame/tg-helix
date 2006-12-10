@@ -33,6 +33,12 @@ class Viewport(UIItem):
     def init(self):
         self.box = self.box.copy()
 
+    def onViewResize(self, viewSize):
+        self.box.size = viewSize
+
+class OrthoViewport(UIItem):
+    viewVisitKeys = ["OrthoViewport"]
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Widgets
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

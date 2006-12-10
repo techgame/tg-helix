@@ -11,13 +11,19 @@ from TG.helix.framework.renderContext import RenderContext
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxRenderContext(RenderContext):
-    def __init__(self, glCanvas=None):
+    hostModel = None
+
+    def __init__(self, glCanvas=None, hostModel=None):
         if glCanvas is not None:
             self.setup(glCanvas)
+        self.hostModel = hostModel
 
     def setup(self, glCanvas):
         self._glCanvas = glCanvas
         self._captureRenderEvents()
+
+    def findScene(self):
+        return self.hostModel.findSceneFor(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -78,24 +78,19 @@ class BasicRenderSkinModel(wxSkinModel):
     renderContext = None
     RenderContextFactory = wxRenderContext
     def setupCanavs(self, canvasElem, canvasObj):
-        ctx = self.RenderContextFactory(canvasObj)
-        ctx.scene = self.scene
-        self.renderContext = ctx
+        self.renderContext = self.RenderContextFactory(canvasObj, self)
 
-    _scene = None
-    def getScene(self):
-        if self.renderContext is not None:
-            return self.renderContext.scene
-        else: return self._scene
-    def setScene(self, scene):
-        if self.renderContext is not None:
-            self.renderContext.scene = scene
-        else: self._scene = scene
-    scene = property(getScene, setScene)
+    def setupStage(self, stage, viewFactory):
+        self.stage = stage
+        self.viewFactory = viewFactory
 
-    SceneFactory = None
-    def createScene(self):
-        return self.SceneFactory()
+    viewFactory = None
+    def findSceneFor(self, renderContext):
+        assert renderContext is self.renderContext
+        sceneView = self.viewFactory(self.stage)
+        if not sceneView.isHelixScene():
+            raise RuntimeError("View returned for stage is not a Helix Scene")
+        return sceneView
 
     def setupFrame(self, frame):
         if self.clientSize:

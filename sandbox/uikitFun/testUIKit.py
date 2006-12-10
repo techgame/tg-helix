@@ -15,7 +15,7 @@ from TG.helix.bridges.wx.basic import BasicRenderSkinModel
 from TG.helix.kits.ui.model import UIStage, UIItem, Viewport
 from TG.helix.kits.ui.glview import uiViewFactory
 
-import testViews
+import sampleViews
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene
@@ -43,6 +43,6 @@ if __name__=='__main__':
     stage.load()
 
     model = BasicRenderSkinModel()
-    model.scene = uiViewFactory(stage)
+    model.setupStage(stage, uiViewFactory)
     model.skinModel()
 
