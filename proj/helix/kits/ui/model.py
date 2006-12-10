@@ -36,7 +36,7 @@ class Viewport(UIItem):
     def onViewResize(self, viewSize):
         self.box.size = viewSize
 
-class OrthoViewport(UIItem):
+class OrthoViewport(Viewport):
     viewVisitKeys = ["OrthoViewport"]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

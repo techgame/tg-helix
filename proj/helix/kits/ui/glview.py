@@ -14,6 +14,7 @@ from functools import partial
 
 from TG.openGL.data import Vector
 from TG.openGL.raw.gl import *
+from TG.openGL.raw.glext import GL_TEXTURE_RECTANGLE_ARB
 
 from TG.helix.framework.viewFactory import HelixViewFactory
 from TG.helix.framework.views import HelixView
@@ -127,7 +128,7 @@ class OrthoViewportView(ViewportView):
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(x, x+w, y, y+w, z, z+d)
+        glOrtho(x, x+w, y, y+h, z, z+d)
 
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
@@ -144,12 +145,37 @@ class WidgetView(UIView):
         widget.widgetView = self
 
     def render(self):
-        self.renderBox(widget)
+        self.renderBox(self.widget)
 
     def renderBox(self, widget):
-        glColor4fv(widget.color.ctypes.data_as(glColor4fv.api.argtypes[0]))
+        if widget.color is not None:
+            glColor4f(*widget.color.flat[:4])
+
         r = widget.box
-        glRectfv(r.v0.ctypes.data_as(glRectfv.api.argtypes[0]), r.v1.ctypes.data_as(glRectfv.api.argtypes[1]))
+
+        v00 = r.v0[:3]
+        v10 = v00.copy()
+        v11 = r.v1[:3]
+        v01 = v00.copy()
+
+        v10[0] = v11[0]
+        v01[1] = v11[1]
+
+        glDisable(GL_TEXTURE_2D)
+        glDisable(GL_TEXTURE_RECTANGLE_ARB)
+
+        glDisableClientState(GL_VERTEX_ARRAY)
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+        glDisableClientState(GL_COLOR_ARRAY)
+
+        #glColor3ub(0xff, 0, 0)
+        #glBegin(GL_LINE_LOOP)
+        glBegin(GL_QUADS)
+        glVertex3f(*v00)
+        glVertex3f(*v01)
+        glVertex3f(*v11)
+        glVertex3f(*v10)
+        glEnd()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
