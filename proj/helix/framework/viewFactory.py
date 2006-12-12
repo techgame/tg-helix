@@ -67,7 +67,7 @@ class HelixViewFactory(IHelixVisitor):
 
 class HelixViewFactoryBuilder(ObservableTypeParticipant):
     """This class helps to regiser view classes automatically as they are subclassed from HelixView"""
-    def onObservableClassInit(self, selfAttrName, viewKlass):
+    def onObservableClassInit(self, selfAttrName, viewKlass, tcinfo):
         """Called when a subclass is created that has a reference to this
         factory in it's namespace"""
         viewKlass.viewFactoryRegister()
@@ -111,7 +111,7 @@ class HelixViewFactoryMixin(object):
 
 class HelixVisitTypesBuilder(ObservableTypeParticipant):
     """Compiles the actor visit types automatically as they are subclassed from HelixActor."""
-    def onObservableClassInit(self, participantName, actorKlass):
+    def onObservableClassInit(self, participantName, actorKlass, tcinfo):
         """Called when a subclass is created that has a reference to this
         factory in it's namespace"""
         actorKlass._buildVisitTypes()
