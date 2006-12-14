@@ -33,13 +33,20 @@ class HelixViewFactory(IHelixVisitor):
         return scene
     def visitView(self, view):
         return view
-
-    def __call__(self, item):
-        return item.accept(self)
+    def visit(self, item):
+        accept = getattr(item, 'accept', None)
+        if accept is not None:
+            return accept(self)
+        elif isinstance(item, tuple):
+            return self.createViewFor(item[0], item[1])
+        else:
+            return self.createViewFor(item, item.__class__.__mro__)
+    __call__ = visit
 
     def viewsFor(self, collection):
-        for v in collection:
-            yield v.accept(self)
+        for item in collection:
+            if item is not None:
+                yield self.visit(item)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -94,11 +101,6 @@ class HelixViewFactoryMixin(object):
         if viewKeys and klass.viewFactory:
             klass.viewFactory.addFactoryForKeys(klass.fromViewable, viewKeys)
             return True
-
-    #@classmethod
-    #def viewFactoryKeys(klass):
-    #    """Returns the list of viewable keys this view can handle"""
-    #    raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
     @classmethod
     def fromViewable(klass, viewable):

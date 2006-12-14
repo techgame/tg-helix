@@ -11,38 +11,37 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.bridges.wx.basic import BasicRenderSkinModel
-from TG.helix.kits.ui.model import UIStage, UIItem, Viewport
-from TG.helix.kits.ui.glview import uiViewFactory
+from TG.openGL.raw.gl import *
 
-import sampleViews
+from TG.helix.kits.ui import uiModel
+from TG.helix.kits.ui import uiView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class FunUISetup(UIItem):
-    viewVisitKeys = ['FunUISetup']
-
-class FunToy(UIItem):
-    viewVisitKeys = ['FunToy']
-    color = (.2, .8, 1., .5)
-
-class FunStage(UIStage):
+class SandboxStage(uiModel.UIStage):
     def load(self):
-        self.add(FunUISetup())
-        self.add(Viewport())
-        self.add(FunToy())
+        vp = self.add(uiModel.OrthoViewport())
+        self.button = self.add(uiModel.Button())
+        vp.box._pub_.add(self.onVPChange)
+
+    def onVPChange(self, vpbox, key, info=None):
+        box = self.button.box
+        box.setRect(vpbox, 1.5)
+        box.pos = 0.5 * (vpbox.size - box.size)
+        self.button.color.set('#ff0000' if box.pos[0]>box.pos[1] else '#00ff00')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if __name__=='__main__':
-    stage = FunStage()
+    stage = SandboxStage()
     stage.load()
 
+    from TG.helix.bridges.wx.basic import BasicRenderSkinModel
     model = BasicRenderSkinModel()
-    model.setupStage(stage, uiViewFactory)
+    model.setupStage(stage, uiView.uiViewFactory)
     model.skinModel()
 

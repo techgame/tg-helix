@@ -13,17 +13,24 @@
 
 from TG.openGL.raw.gl import *
 
-from TG.helix.kits.ui.glview import UIView
+from TG.helix.kits.ui.uiModel import UIStage, UIItem, Viewport
+from TG.helix.kits.ui.uiView import uiViewFactory, UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Definitions 
+#~ Scene
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class FunToy(UIItem):
+    viewVisitKeys = ['FunToy']
+    color = (.2, .8, 1., .5)
 
 class FunToyView(UIView):
     viewForKeys = ['FunToy']
 
     def init(self, viewable):
+        super(FunToyView, self).init(viewable)
         self.viewable = viewable
+
     def render(self):
         viewable = self.viewable
         glColor4f(*viewable.color)
@@ -34,12 +41,21 @@ class FunToyView(UIView):
         glVertex2f(-1., 1.)
         glEnd()
 
+class FunStage(UIStage):
+    def load(self):
+        self.add(Viewport())
+        self.add(FunToy())
 
-class FunUISetupView(UIView):
-    viewForKeys = ['FunUISetup']
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Main 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def render(self):
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+if __name__=='__main__':
+    stage = FunStage()
+    stage.load()
 
+    from TG.helix.bridges.wx.basic import BasicRenderSkinModel
+    model = BasicRenderSkinModel()
+    model.setupStage(stage, uiViewFactory)
+    model.skinModel()
 
