@@ -28,6 +28,10 @@ class UIStage(HelixStage):
 class UIItem(HelixActor):
     viewVisitKeys = []
 
+    def set(self, val=None, **kwattr):
+        for n,v in (val or kwattr).iteritems():
+            setattr(self, n, v)
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Viewport settings
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,9 +39,7 @@ class UIItem(HelixActor):
 class Viewport(UIItem):
     viewVisitKeys = ["Viewport"]
 
-    def init(self):
-        super(Viewport, self).init()
-        self.box = glData.Rect(dtype='i')
+    box = glData.Recti.property()
 
     def onViewResize(self, viewSize):
         self.box.size = viewSize
@@ -56,15 +58,8 @@ class Widget(UIItem):
     """
     viewVisitKeys = ["Widget"]
 
-    box = glData.Rect.property()
-    color = glData.Color.property()
-
-    def init(self):
-        super(Widget, self).init()
-        if self.color is not None:
-            self.color = glData.Color(self.color)
-        if self.box is not None:
-            self.box = glData.Rect(self.box)
+    box = glData.Rectf.property(propKind='asType')
+    color = glData.Color.property(default=[], propKind='asType')
 
 class Button(Widget):
     viewVisitKeys = ["Button"]

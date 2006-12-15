@@ -7,6 +7,7 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
 from .uiViewBase import UIScene, UIView, uiViewFactory
+from . import uiGLDataViews
 from . import uiViewportViews
 from . import uiWidgetViews
 

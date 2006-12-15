@@ -21,16 +21,20 @@ from TG.helix.kits.ui import uiView
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SandboxStage(uiModel.UIStage):
-    def load(self):
+    def init(self):
+        uiModel.UIStage.init(self)
+
         vp = self.add(uiModel.OrthoViewport())
         button = self.add(uiModel.Button())
 
         @vp.box._pub_.add
         def onVPChange(vpbox, attr, info=None, button=button):
             button.box.setRect(vpbox, 1.5, .5)
-            button.color.set('#44f' if vpbox.aspect>button.box.aspect else '#8f8')
+            button.color = '#44f' if vpbox.aspect>button.box.aspect else '#8f8'
 
         button2 = self.add(uiModel.Button())
+        button2.set(color='#a0f')
+
         @button.box._pub_.add
         def obc(bbox, attr, info=None, bt2=button2):
             bt2.box.setRect(bbox, 1, .5)
@@ -41,7 +45,6 @@ class SandboxStage(uiModel.UIStage):
 
 if __name__=='__main__':
     stage = SandboxStage()
-    stage.load()
 
     from TG.helix.bridges.wx.basic import BasicRenderSkinModel
     model = BasicRenderSkinModel()

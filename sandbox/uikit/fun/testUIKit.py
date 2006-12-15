@@ -42,7 +42,8 @@ class FunToyView(UIView):
         glEnd()
 
 class FunStage(UIStage):
-    def load(self):
+    def init(self):
+        UIStage.init(self)
         self.add(Viewport())
         self.add(FunToy())
 
@@ -52,7 +53,6 @@ class FunStage(UIStage):
 
 if __name__=='__main__':
     stage = FunStage()
-    stage.load()
 
     from TG.helix.bridges.wx.basic import BasicRenderSkinModel
     model = BasicRenderSkinModel()

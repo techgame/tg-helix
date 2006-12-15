@@ -21,38 +21,40 @@ from TG.helix.kits.ui import uiView
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SandboxStage(uiModel.UIStage):
-    def load(self):
+    def init(self):
+        uiModel.UIStage.init(self)
+
         vp = self.add(uiModel.OrthoViewport())
         button = self.add(uiModel.Button())
 
         @vp.box._pub_.add
         def onVPChange(vpbox, key, info=None, button=button):
             button.box.setRect(vpbox, 1.5, .5)
-            button.color.set('#88f' if vpbox.aspect>button.box.aspect else '#8f8')
+            button.color = '#88f' if vpbox.aspect>button.box.aspect else '#8f8'
 
         button2 = self.add(uiModel.Button())
-        button2.color.set('#faa4')
+        button2.color = '#faa4'
 
         @button.box._pub_.add
         def obc(bbox, key, info=None, bt2=button2):
             bt2.box.setRect(bbox, .5, 1)
 
         button3 = self.add(uiModel.Button())
-        button3.color.set('#aff4')
+        button3.color = '#aff4'
 
         @button.box._pub_.add
         def obc(bbox, key, info=None, bt3=button3):
             bt3.box.setRect(bbox, .5, 0)
 
         button4 = self.add(uiModel.Button())
-        button4.color.set('#44f4')
+        button4.color = '#44f4'
 
         @button.box._pub_.add
         def obc(bbox, key, info=None, bt4=button4):
             bt4.box.setRect(bbox, 2., 1)
 
         button5 = self.add(uiModel.Button())
-        button5.color.set('#f444')
+        button5.color = '#f444'
 
         @button.box._pub_.add
         def obc(bbox, key, info=None, bt5=button5):
@@ -64,7 +66,6 @@ class SandboxStage(uiModel.UIStage):
 
 if __name__=='__main__':
     stage = SandboxStage()
-    stage.load()
 
     from TG.helix.bridges.wx.basic import BasicRenderSkinModel
     model = BasicRenderSkinModel()
