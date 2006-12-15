@@ -76,14 +76,15 @@ class UIView(HelixView):
     def fromViewable(klass, viewable):
         return klass(viewable)
 
-    def _onViewableChange(self, viewable, attr, info=None):
-        pass
-        #print '... onViewableChange:', attr, 'of:', viewable
-
     def init(self, viewable):
         if viewable is not None:
             viewable._pub_.add(self._onViewableChange)
         self._dirty = []
+
+    def _onViewableChange(self, viewable, attr, info=None): 
+        pass
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def resize(self, size):
         pass
@@ -94,7 +95,7 @@ class UIView(HelixView):
         self.dequeue(fn)
         self._dirty.append((fn, args))
     def dequeue(self, fn):
-        self._dirty[:] = [e for e in self._dirty if e[0] != fn]
+        self._dirty[:] = (e for e in self._dirty if e[0] != fn)
 
     def performQueueActions(self):
         queue = self._dirty[:]

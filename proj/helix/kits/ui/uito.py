@@ -1,3 +1,20 @@
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+##~ Copyright (C) 2002-2006  TechGame Networks, LLC.              ##
+##~                                                               ##
+##~ This library is free software; you can redistribute it        ##
+##~ and/or modify it under the terms of the BSD style License as  ##
+##~ found in the LICENSE file included with this distribution.    ##
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Imports 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from TG.observing import ObservableProperty
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Definitions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIItemTypeObserver(ObservableTypeParticipant):
     def __init__(self, propMap):
@@ -9,6 +26,11 @@ class UIItemTypeObserver(ObservableTypeParticipant):
             self.propMap.update(propMapUpdate)
         return self
 
+    def __copy__(self):
+        return self.copy()
+
+    def onObservableClassNew(self, selfAttrName, uiItemKlass, tcinfo):
+        pass
     def onObservableClassInit(self, selfAttrName, uiItemKlass, tcinfo):
         kvars = tcinfo['kvars']
         propMap = self.propMap
@@ -26,6 +48,4 @@ class UIItemTypeObserver(ObservableTypeParticipant):
             else: iv = iv.copy()
 
             setattr(uiItem, n, iv)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

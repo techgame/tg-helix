@@ -26,14 +26,37 @@ class SandboxStage(uiModel.UIStage):
         button = self.add(uiModel.Button())
 
         @vp.box._pub_.add
-        def onVPChange(vpbox, attr, info=None, button=button):
+        def onVPChange(vpbox, key, info=None, button=button):
             button.box.setRect(vpbox, 1.5, .5)
-            button.color.set('#44f' if vpbox.aspect>button.box.aspect else '#8f8')
+            button.color.set('#88f' if vpbox.aspect>button.box.aspect else '#8f8')
 
         button2 = self.add(uiModel.Button())
+        button2.color.set('#faa4')
+
         @button.box._pub_.add
-        def obc(bbox, attr, info=None, bt2=button2):
-            bt2.box.setRect(bbox, 1, .5)
+        def obc(bbox, key, info=None, bt2=button2):
+            bt2.box.setRect(bbox, .5, 1)
+
+        button3 = self.add(uiModel.Button())
+        button3.color.set('#aff4')
+
+        @button.box._pub_.add
+        def obc(bbox, key, info=None, bt3=button3):
+            bt3.box.setRect(bbox, .5, 0)
+
+        button4 = self.add(uiModel.Button())
+        button4.color.set('#44f4')
+
+        @button.box._pub_.add
+        def obc(bbox, key, info=None, bt4=button4):
+            bt4.box.setRect(bbox, 2., 1)
+
+        button5 = self.add(uiModel.Button())
+        button5.color.set('#f444')
+
+        @button.box._pub_.add
+        def obc(bbox, key, info=None, bt5=button5):
+            bt5.box.setRect(bbox, 2., 0)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

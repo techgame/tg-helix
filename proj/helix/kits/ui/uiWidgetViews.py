@@ -93,21 +93,28 @@ class BoxView(VertexView):
 class WidgetView(UIView):
     viewForKeys = ['Widget']
 
+    partsByName = ['color', 'box']
     def init(self, widget):
         UIView.init(self, widget)
-        self.updateWidget(widget)
+        self.update(widget)
 
     def _onViewableChange(self, viewable, attr, info=None):
         UIView._onViewableChange(self, viewable, attr, info=None)
 
-        if attr in ('color', 'box'):
-            self.updateWidget(viewable)
+        if attr in self.partsByName:
+            self.update(viewable, [attr])
 
-    def updateWidget(self, widget):
-        self.parts = self.viewListFor([widget.color, widget.box])
+    def update(self, widget, partNames=None):
+        if partNames is None:
+            partNames = self.partsByName
+
+        for name in partNames:
+            part = getattr(widget, name)
+            partView = self.viewFactory(part)
+            setattr(self, name, partView)
 
     def render(self):
         UIView.render(self)
-        for p in self.parts:
-            p.render()
+        for attr in self.partsByName:
+            getattr(self, attr).render()
 

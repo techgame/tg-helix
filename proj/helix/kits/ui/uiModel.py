@@ -12,11 +12,11 @@
 
 import PIL.Image
 
+from TG.observing import Observable, ObservableProperty
+
 from TG.openGL import data as glData
 
 from TG.helix.framework.stage import HelixStage, HelixActor
-
-from TG.observing import ObservableTypeParticipant
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ UI Basics
@@ -56,8 +56,8 @@ class Widget(UIItem):
     """
     viewVisitKeys = ["Widget"]
 
-    box = glData.Rect()
-    color = None
+    box = glData.Rect.property()
+    color = glData.Color.property()
 
     def init(self):
         super(Widget, self).init()
@@ -68,9 +68,4 @@ class Widget(UIItem):
 
 class Button(Widget):
     viewVisitKeys = ["Button"]
-
-    color = '#fff'
-
-class Geometry(UIItem):
-    pass
 
