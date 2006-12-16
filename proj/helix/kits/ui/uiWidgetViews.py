@@ -10,6 +10,8 @@
 #~ Imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.openGL.data.image import ImageTexture
+
 from .uiViewBase import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -20,6 +22,7 @@ class WidgetView(UIView):
     viewForKeys = ['Widget']
 
     partsByName = ['color', 'box']
+
     def init(self, widget):
         UIView.init(self, widget)
         self.update(widget)
@@ -35,12 +38,30 @@ class WidgetView(UIView):
             partNames = self.partsByName
 
         for name in partNames:
-            part = getattr(widget, name)
-            partView = self.viewFactory(part)
-            setattr(self, name, partView)
+            part = getattr(widget, name, None)
+            if part is not None:
+                partView = self.viewFactory(part)
+                setattr(self, name, partView)
 
     def render(self):
         UIView.render(self)
         for attr in self.partsByName:
             getattr(self, attr).render()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ImageView(WidgetView):
+    viewForKeys = ['Image']
+
+    partsByName = ['color', 'imageTexView', 'texCoordsView', 'box']
+
+    imageTex = ImageTexture.property()
+
+    def init(self, uiImage):
+        WidgetView.init(self, uiImage)
+
+        self.imageTex.loadImage(uiImage.image)
+        self.imageTexView = self.viewFactory(self.imageTex)
+        self.texCoords = self.imageTex.texCoordsForImage()
+        self.texCoordsView = self.viewFactory(self.texCoords)
 

@@ -27,19 +27,11 @@ class SandboxStage(uiModel.UIStage):
         uiModel.UIStage.init(self)
 
         vp = self.add(uiModel.OrthoViewport())
-        button = self.add(uiModel.Button())
+        img = self.add(uiModel.Image('media/starshape.png'))
 
         @vp.box._pub_.add
-        def onVPChange(vpbox, attr, info=None, button=button):
-            button.box.setRect(vpbox, 1.5, .5)
-            button.color = '#44f' if vpbox.aspect>button.box.aspect else '#8f8'
-
-        button2 = self.add(uiModel.Button())
-        button2.set(color='#f00b')
-
-        @button.box._pub_.add
-        def obc(bbox, attr, info=None, bt2=button2):
-            bt2.box.setRect(bbox, 1, .5)
+        def onVPChange(vpbox, attr, info=None, img=img):
+            img.box.alignIn(.5, vpbox)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

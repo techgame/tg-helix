@@ -13,17 +13,23 @@
 from functools import partial
 from TG.openGL.raw import gl
 from TG.openGL import data as glData
+from TG.openGL.data import texture
 from .uiViewBase import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ColorView(UIView):
+class GLDataView(UIView):
+    viewForKeys = []
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ColorView(GLDataView):
     viewForKeys = [glData.ColorArray]
 
     def init(self, color):
-        UIView.init(self, None)
+        GLDataView.init(self, None)
         self.updateColor(color)
 
     def updateColor(self, color):
@@ -35,52 +41,51 @@ class ColorView(UIView):
             self.glColorV = lambda: None
 
     def render(self):
-        UIView.render(self)
+        GLDataView.render(self)
 
         self.glColorV()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GeometryView(UIView):
-    viewForKeys = [glData.VertexArray]
+class GeometryView(GLDataView):
+    viewForKeys = [glData.DataArrayBase]
 
     def init(self, geom):
-        UIView.init(self, None)
+        GLDataView.init(self, None)
         self.updateGeom(geom)
 
     def updateGeom(self, geom):
         self.geom = geom
         if geom is None:
-            return
+            return False
 
-        arrPtr = geom.glinfo.glArrayPointer
-        self.glArrPtr = partial(arrPtr, 
+        self.glArrEnable = partial(
+                geom.glinfo.glEnableArray, 
+                geom.glinfo.glKindId)
+        self.glArrPtr = partial(
+                geom.glinfo.glArrayPointer, 
                 geom.shape[-1],
                 geom.glTypeId,
                 geom.strides[-1]*geom.shape[-1],
-                geom.ctypes.data_as(arrPtr.api.argtypes[-1]))
+                geom.ctypes.data_as(geom.glinfo.glArrayPointer.api.argtypes[-1]))
+        return True
 
     def render(self):
-        UIView.render(self)
+        GLDataView.render(self)
 
         geom = self.geom
-        if geom is None: return
+        if geom is None: 
+            return False
 
-        gl.glEnableClientState(geom.glinfo.glKindId)
+        self.glArrEnable()
         self.glArrPtr()
-        count = (geom.size/geom.shape[-1])
-        gl.glDrawArrays(gl.GL_QUADS, 0, count)
+        return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BoxView(GeometryView):
     viewForKeys = [glData.Rect]
-    sizeScale = glData.VertexArray(
-           [[0., 0., 1.],
-            [1., 0., 0.],
-            [1., 1., 0.],
-            [0., 1., 1.]], '3f')
-
+    vertexScale = glData.VertexArray([[0., 0., 1.], [1., 0., 0.], [1., 1., 0.], [0., 1., 1.]], '3f')
 
     def init(self, aBox):
         GeometryView.init(self, None)
@@ -88,9 +93,38 @@ class BoxView(GeometryView):
         self.enqueue(self.updateBox, aBox)
 
     def updateBox(self, aBox):
-        geom = aBox.pos + aBox.size * self.sizeScale
+        geom = aBox.pos + aBox.size*self.vertexScale
         self.updateGeom(geom)
 
-    def _onBoxChange(self, aBox, key, info=None):
+    def updateGeom(self, geom):
+        if not GeometryView.updateGeom(self, geom):
+            return False
+
+        count = (geom.size/geom.shape[-1])
+        self.glArrDraw = partial(
+                gl.glDrawArrays, 
+                gl.GL_QUADS, 0, count)
+        return True
+
+    def _onBoxChange(self, aBox, attrName, info=None):
         self.enqueue(self.updateBox, aBox)
+
+    def render(self):
+        if not GeometryView.render(self):
+            return False
+
+        self.glArrDraw()
+        return True
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class TextureView(GLDataView):
+    viewForKeys = [texture.Texture]
+
+    def init(self, aTexture):
+        GLDataView.init(self, None)
+        self.aTexture = aTexture
+
+    def render(self):
+        self.aTexture.select()
 
