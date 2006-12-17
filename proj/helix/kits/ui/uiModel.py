@@ -69,9 +69,6 @@ class UIWidget(UIItem):
 class UIPanel(UIWidget):
     viewVisitKeys = ["UIPanel"]
 
-class UIButton(UIWidget):
-    viewVisitKeys = ["UIButton"]
-
 class UIImage(UIWidget):
     viewVisitKeys = ["UIImage"]
 
@@ -105,4 +102,30 @@ class UIImage(UIWidget):
             imageData.putband(premult, idx)
 
         self.image = image
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UIButton(UIWidget):
+    viewVisitKeys = ["UIButton"]
+
+    stateMap = {}
+    def addState(self, stateKey, stateImage):
+        if not self.stateMap:
+            self.stateMap = {}
+        stateImg = UIImage(stateImage)
+
+        self.box.growSize(stateImg.box.size)
+        stateImg.box = self.box
+        self.stateMap[stateKey] = stateImg
+        if self.state is None:
+            self.state = stateKey
+
+    stateui = None
+    _state = None
+    def getState(self):
+        return self._state
+    def setState(self, state):
+        self.stateui = self.stateMap[state]
+        self._state = state
+    state = property(getState, setState)
 

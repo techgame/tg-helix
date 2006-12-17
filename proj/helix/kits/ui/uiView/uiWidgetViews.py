@@ -53,7 +53,7 @@ class UIWidgetView(UIView):
 class UIImageView(UIWidgetView):
     viewForKeys = ['UIImage']
 
-    partsByName = ['color', 'imageTexView', 'texCoordsView', 'box']
+    partsByName = ['color', 'box']
 
     imageTex = ImageTexture.property()
 
@@ -61,7 +61,22 @@ class UIImageView(UIWidgetView):
         UIWidgetView.init(self, uiImage)
 
         self.imageTex.loadImage(uiImage.image)
-        self.imageTexView = self.viewFactory(self.imageTex)
         self.texCoords = self.imageTex.texCoordsForImage()
         self.texCoordsView = self.viewFactory(self.texCoords)
+
+    def render(self):
+        UIView.render(self)
+
+        self.color.render()
+        self.imageTex.select()
+        self.texCoordsView.render()
+        self.box.render()
+        self.imageTex.deselect()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UIButtonView(UIWidgetView):
+    viewForKeys = ['UIButton']
+
+    partsByName = ['color', 'stateui']
 

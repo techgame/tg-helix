@@ -116,15 +116,3 @@ class BoxView(GeometryView):
         self.glArrDraw()
         return True
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class TextureView(GLDataView):
-    viewForKeys = [texture.Texture]
-
-    def init(self, aTexture):
-        GLDataView.init(self, None)
-        self.aTexture = aTexture
-
-    def render(self):
-        self.aTexture.select()
-
