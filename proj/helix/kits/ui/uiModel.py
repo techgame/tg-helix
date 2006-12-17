@@ -41,41 +41,44 @@ class UIItem(HelixActor):
 #~ Viewport settings
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Viewport(UIItem):
-    viewVisitKeys = ["Viewport"]
+class UIViewport(UIItem):
+    viewVisitKeys = ["UIViewport"]
 
     box = glData.Recti.property()
 
     def onViewResize(self, viewSize):
-        self.box.size = viewSize
+        self.box.size.set(viewSize)
 
-class OrthoViewport(Viewport):
-    viewVisitKeys = ["OrthoViewport"]
+class UIOrthoViewport(UIViewport):
+    viewVisitKeys = ["UIOrthoViewport"]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Widgets
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Widget(UIItem):
+class UIWidget(UIItem):
     """A Widget is a cell that actually displays something.
     
     Widgets may be composite objects, providing spaces to be occupied.
     """
-    viewVisitKeys = ["Widget"]
+    viewVisitKeys = ["UIWidget"]
 
     box = glData.Rectf.property()
     color = glData.Color.property([])
 
-class Button(Widget):
-    viewVisitKeys = ["Button"]
+class UIPanel(UIWidget):
+    viewVisitKeys = ["UIPanel"]
 
-class Image(Widget):
-    viewVisitKeys = ["Image"]
+class UIButton(UIWidget):
+    viewVisitKeys = ["UIButton"]
+
+class UIImage(UIWidget):
+    viewVisitKeys = ["UIImage"]
 
     image = None
 
     def __init__(self, image, **kwattr):
-        super(Image, self).__init__()
+        super(UIImage, self).__init__()
         self.loadImage(image)
         if kwattr:
             self.set(kwattr)
@@ -85,7 +88,7 @@ class Image(Widget):
             image = self.openImage(image)
 
         self.image = image
-        self.box.setSize(image.size)
+        self.box.size.set(image.size)
     openImage = staticmethod(PIL.Image.open)
 
     def premultiply(self):

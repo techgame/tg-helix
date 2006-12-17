@@ -13,7 +13,7 @@
 
 from TG.openGL.raw.gl import *
 
-from TG.helix.kits.ui.uiModel import UIStage, UIItem, Viewport
+from TG.helix.kits.ui.uiModel import UIStage, UIItem, UIViewport
 from TG.helix.kits.ui.uiView import uiViewFactory, UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,16 +35,16 @@ class FunToyView(UIView):
         viewable = self.viewable
         glColor4f(*viewable.color)
         glBegin(GL_QUADS)
-        glVertex2f(-1., -1.)
-        glVertex2f(1., -1.)
-        glVertex2f(1., 1.)
-        glVertex2f(-1., 1.)
+        glVertex2f(-.9, -.9)
+        glVertex2f(.9, -.9)
+        glVertex2f(.9, .9)
+        glVertex2f(-.9, .9)
         glEnd()
 
 class FunStage(UIStage):
     def init(self):
         UIStage.init(self)
-        self.add(Viewport())
+        self.add(UIViewport())
         self.add(FunToy())
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

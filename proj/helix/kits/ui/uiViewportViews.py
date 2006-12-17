@@ -18,8 +18,8 @@ from .uiViewBase import UIView
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ViewportView(UIView):
-    viewForKeys = ['Viewport'] 
+class UIViewportView(UIView):
+    viewForKeys = ['UIViewport'] 
 
     def init(self, viewport):
         self.viewport = viewport
@@ -44,8 +44,8 @@ class ViewportView(UIView):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class OrthoViewportView(ViewportView):
-    viewForKeys = ['OrthoViewport'] 
+class UIOrthoViewportView(UIViewportView):
+    viewForKeys = ['UIOrthoViewport'] 
 
     def resize(self, size):
         self.viewport.onViewResize(size)

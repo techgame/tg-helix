@@ -18,8 +18,8 @@ from .uiViewBase import UIView
 #~ Widget Views
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class WidgetView(UIView):
-    viewForKeys = ['Widget']
+class UIWidgetView(UIView):
+    viewForKeys = ['UIWidget']
 
     partsByName = ['color', 'box']
 
@@ -50,15 +50,15 @@ class WidgetView(UIView):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ImageView(WidgetView):
-    viewForKeys = ['Image']
+class UIImageView(UIWidgetView):
+    viewForKeys = ['UIImage']
 
     partsByName = ['color', 'imageTexView', 'texCoordsView', 'box']
 
     imageTex = ImageTexture.property()
 
     def init(self, uiImage):
-        WidgetView.init(self, uiImage)
+        UIWidgetView.init(self, uiImage)
 
         self.imageTex.loadImage(uiImage.image)
         self.imageTexView = self.viewFactory(self.imageTex)

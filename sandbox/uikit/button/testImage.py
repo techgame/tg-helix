@@ -26,12 +26,20 @@ class SandboxStage(uiModel.UIStage):
     def init(self):
         uiModel.UIStage.init(self)
 
-        vp = self.add(uiModel.OrthoViewport())
-        img = self.add(uiModel.Image('media/starshape.png'))
+        vp = self.add(uiModel.UIOrthoViewport())
+        starImg = self.add(uiModel.UIImage('media/starShape.png'))
+        tgLogoImg = self.add(uiModel.UIImage('media/tg-logo.png'))
+        buttonImg = self.add(uiModel.UIImage('media/button.png'))
 
         @vp.box._pub_.add
-        def onVPChange(vpbox, attr, info=None, img=img):
-            img.box.alignIn(.5, vpbox)
+        def onVPChange(vpbox, attr, info=None):
+            buttonImg.box.alignIn(.5, vpbox)
+
+            starImg.box.alignIn(.5, vpbox)
+            starImg.box.bottom = buttonImg.box.top + 20
+
+            tgLogoImg.box.alignIn(.5, vpbox)
+            tgLogoImg.box.top = buttonImg.box.bottom - 20
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 
