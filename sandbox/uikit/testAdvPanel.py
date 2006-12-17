@@ -20,26 +20,45 @@ from TG.helix.kits.ui import uiView
 #~ Scene
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-inVPChange = False
-
 class SandboxStage(uiModel.UIStage):
     def init(self):
         uiModel.UIStage.init(self)
 
         vp = self.add(uiModel.UIOrthoViewport())
-        starImg = self.add(uiModel.UIImage('media/starShape.png'))
-        tgLogoImg = self.add(uiModel.UIImage('media/tg-logo.png'))
-        buttonImg = self.add(uiModel.UIImage('media/button.png'))
+        panel = self.add(uiModel.UIPanel())
 
         @vp.box._pub_.add
-        def onVPChange(vpbox, attr, info=None):
-            buttonImg.box.alignIn(.5, vpbox)
+        def onVPChange(vpbox, key):
+            panel.box.setRect(vpbox, 1.5, .5)
+            panel.color = '#88f' if vpbox.aspect>panel.box.aspect else '#8f8'
 
-            starImg.box.alignIn(.5, vpbox)
-            starImg.box.bottom = buttonImg.box.top + 20
+        panel2 = self.add(uiModel.UIPanel())
+        panel2.color = '#faa4'
 
-            tgLogoImg.box.alignIn(.5, vpbox)
-            tgLogoImg.box.top = buttonImg.box.bottom - 20
+        @panel.box._pub_.add
+        def obc(bbox, key):
+            panel2.box.setRect(bbox, .5, 1)
+
+        panel3 = self.add(uiModel.UIPanel())
+        panel3.color = '#aff4'
+
+        @panel.box._pub_.add
+        def obc(bbox, key):
+            panel3.box.setRect(bbox, .5, 0)
+
+        panel4 = self.add(uiModel.UIPanel())
+        panel4.color = '#44f4'
+
+        @panel.box._pub_.add
+        def obc(bbox, key):
+            panel4.box.setRect(bbox, 2., 1)
+
+        panel5 = self.add(uiModel.UIPanel())
+        panel5.color = '#f444'
+
+        @panel.box._pub_.add
+        def obc(bbox, key):
+            panel5.box.setRect(bbox, 2., 0)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 
