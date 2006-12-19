@@ -35,15 +35,6 @@ class HelixActor(Observable, HelixVisitTypeMixin):
 
     ActorList = HelixActorList
 
-    def __init__(self):
-        super(HelixActor, self).__init__()
-        self.init()
-
-    def init(self):
-        pass
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     def isHelixActor(self):
         return True
     def accept(self, visitor):

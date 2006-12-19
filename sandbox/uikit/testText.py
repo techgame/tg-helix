@@ -24,23 +24,13 @@ inVPChange = False
 
 class SandboxStage(uiModel.UIStage):
     def load(self):
-        vp = self.add(uiModel.UIOrthoViewport())
-        panel = self.add(uiModel.UIPanel(color='#fff'))
-        panel.box = vp.box
+        viewport = uiModel.UIOrthoViewport()
+        self.add(viewport)
 
-        button = self.add(uiModel.UIButton())
-        button.addState('normal', 'media/button-normal.png')
-        button.addState('hover', 'media/button-hover.png')
-        button.addState('down', 'media/button-down.png')
-        button.addState('down-hover', 'media/button-down-hover.png')
-        button.addState('disabled', 'media/button-normal.png')
-
-        l = button.stateMap.keys()
-
-        @panel.box._pub_.add
-        def obc(bbox, attr):
-            button.box.alignIn(.5, bbox)
-            button.state = l[(l.index(button.state) + 1) % len(l)]
+        font = uiModel.UIFont('/Library/Fonts/Arial', 64)
+        text = uiModel.UIText('TG.helix.kits.ui', font, align=.5, color='#f')
+        text.box = viewport.box
+        self.add(text)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

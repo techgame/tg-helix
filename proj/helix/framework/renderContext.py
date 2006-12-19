@@ -17,6 +17,7 @@ class RenderContext(Observable):
     def getScene(self, _paGet_):
         scene = _paGet_()
         if scene is None:
+            self.setCurrent()
             scene = self.findScene()
             self.scene = scene
         return scene

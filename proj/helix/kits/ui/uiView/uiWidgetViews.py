@@ -25,7 +25,7 @@ class UIWidgetView(UIView):
 
     def init(self, widget):
         UIView.init(self, widget)
-        self.update(widget)
+        self.update(widget, self.partsByName)
 
     def _onViewableChange(self, viewable, attr, info=None):
         UIView._onViewableChange(self, viewable, attr, info=None)
@@ -34,9 +34,6 @@ class UIWidgetView(UIView):
             self.update(viewable, [attr])
 
     def update(self, widget, partNames=None):
-        if partNames is None:
-            partNames = self.partsByName
-
         for name in partNames:
             part = getattr(widget, name, None)
             if part is not None:

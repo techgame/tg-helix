@@ -23,9 +23,7 @@ from TG.helix.kits.ui import uiView
 inVPChange = False
 
 class SandboxStage(uiModel.UIStage):
-    def init(self):
-        uiModel.UIStage.init(self)
-
+    def load(self):
         vp = self.add(uiModel.UIOrthoViewport())
         panel = self.add(uiModel.UIPanel())
 

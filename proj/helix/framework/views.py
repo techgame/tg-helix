@@ -32,15 +32,6 @@ class HelixViewList(ObservableList):
 class HelixView(ObservableObject, HelixViewFactoryMixin):
     ViewList = HelixViewList
 
-    def __init__(self):
-        super(HelixView, self).__init__()
-        self.init()
-
-    def init(self):
-        pass
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     def isHelixView(self):
         return True
     def accept(self, visitor):

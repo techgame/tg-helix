@@ -42,8 +42,7 @@ class FunToyView(UIView):
         glEnd()
 
 class FunStage(UIStage):
-    def init(self):
-        UIStage.init(self)
+    def load(self):
         self.add(UIViewport())
         self.add(FunToy())
 

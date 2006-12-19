@@ -17,9 +17,7 @@ from .actors import HelixActor
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixStage(HelixActor):
-    def init(self):
-        super(HelixStage, self).init()
-        self.items = self.ActorList()
+    items = HelixActor.ActorList.property()
 
     def isHelixStage(self):
         return True

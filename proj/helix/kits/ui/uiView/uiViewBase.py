@@ -30,6 +30,7 @@ class UIScene(HelixScene):
     viewFactory = uiViewFactory
 
     def __init__(self, stage=None):
+        super(UIScene, self).__init__()
         self.init(stage)
 
     @classmethod
@@ -37,11 +38,11 @@ class UIScene(HelixScene):
         return klass(stage)
 
     def init(self, stage):
-        super(UIScene, self).init()
         if not stage.isHelixStage():
             raise ArgumentError("Expected an object supporting helix stage protocol")
 
         self.stage = stage
+        self.stage.load()
         self.views = self.viewListFor(stage.items)
 
     def resize(self, size):
@@ -70,6 +71,7 @@ class UIView(HelixView):
     viewFactory = uiViewFactory
 
     def __init__(self, viewable=None):
+        super(UIView, self).__init__()
         self.init(viewable)
 
     @classmethod
@@ -79,7 +81,7 @@ class UIView(HelixView):
     def init(self, viewable):
         if viewable is not None:
             viewable._pub_.add(self._onViewableChange)
-        self._dirty = []
+        self._queueActions = []
 
     def _onViewableChange(self, viewable, attr, info=None): 
         pass
@@ -91,16 +93,19 @@ class UIView(HelixView):
     def render(self):
         self.performQueueActions()
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     def enqueue(self, fn, *args):
         self.dequeue(fn)
-        self._dirty.append((fn, args))
+        self._queueActions.append((fn, args))
     def dequeue(self, fn):
-        self._dirty[:] = (e for e in self._dirty if e[0] != fn)
-
+        itemsToRemove = [e for e in self._queueActions if e[0] == fn]
+        for e in itemsToRemove:
+            self._queueActions.remove(e)
     def performQueueActions(self):
-        queue = self._dirty[:]
-        self._dirty[:] = []
+        queue = self._queueActions[:]
+        self._queueActions[:] = []
 
-        for fn, args in queue:
-            fn(*args)
+        for fnAction, args in queue:
+            fnAction(*args)
 

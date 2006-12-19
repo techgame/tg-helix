@@ -15,6 +15,7 @@ import PIL.Image
 from TG.observing import Observable, ObservableProperty
 
 from TG.openGL import data as glData
+from TG.openGL import text as glText
 
 from TG.helix.framework.stage import HelixStage, HelixActor
 
@@ -24,6 +25,9 @@ from TG.helix.framework.stage import HelixStage, HelixActor
 
 class UIStage(HelixStage):
     viewVisitKeys = ["UIStage"]
+
+    def load(self):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
 class UIItem(HelixActor):
     viewVisitKeys = []
@@ -65,6 +69,16 @@ class UIWidget(UIItem):
 
     box = glData.Rectf.property()
     color = glData.Color.property([])
+
+    def getPos(self): return self.box.pos
+    def setPos(self, pos): self.box.pos.set(pos)
+    pos = property(getPos, setPos)
+
+    def getSize(self): return self.box.size
+    def setSize(self, size): self.box.size.set(size)
+    size = property(getSize, setSize)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIPanel(UIWidget):
     viewVisitKeys = ["UIPanel"]
@@ -128,4 +142,61 @@ class UIButton(UIWidget):
         self.stateui = self.stateMap[state]
         self._state = state
     state = property(getState, setState)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UIFont(UIItem):
+    viewVisitKeys = ["UIFont"]
+
+    font = None
+    def __init__(self, face, size=None, **kw):
+        UIItem.__init__(self)
+        self.font = glText.fromFace(face, size, **kw)
+
+    @classmethod
+    def fromItem(klass, font):
+        if isinstance(font, tuple):
+            font = klass(*font)
+        elif isinstance(font, dict):
+            font = klass(**font)
+        else:
+            font = klass(font)
+        return font
+        
+class UIText(UIWidget):
+    viewVisitKeys = ["UIText"]
+
+    font = None
+    text = ''
+    wrapMode = 'basic'
+
+
+    line = 1
+    lineSpacing = 1
+    crop = True
+
+    align = glData.Vector.property([0., 0., 0.], dtype='3f')
+    wrapAxis = 0
+    roundValues = True
+
+    def __init__(self, text=None, font=None, **kwattr):
+        UIWidget.__init__(self)
+
+        if kwattr:
+            self.set(kwattr)
+
+        if text is not None:
+            self.text = text
+
+        if font is not None:
+            self.font = font
+
+    _font = None
+    def getFont(self):
+        return self._font
+    def setFont(self, font):
+        if not isinstance(font, UIItem):
+            font = UIFont.fromItem(font)
+        self._font = font
+    font = property(getFont, setFont)
 
