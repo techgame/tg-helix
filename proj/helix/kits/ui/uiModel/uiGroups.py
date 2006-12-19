@@ -12,7 +12,7 @@
 
 import numpy
 
-from uiModelBase import UIItem, glData, numpy
+from .uiBase import UIItem, glData, numpy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

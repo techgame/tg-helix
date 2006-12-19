@@ -12,7 +12,7 @@
 
 import PIL.Image
 
-from uiModelBase import UIItem, glData, numpy
+from .uiBase import UIItem, glData, numpy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Widgets

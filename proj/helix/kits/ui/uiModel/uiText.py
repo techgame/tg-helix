@@ -12,7 +12,7 @@
 
 from TG.openGL.text.freetypeFontLoader import FreetypeFontLoader
 
-from uiModelWidgets import UIItem, UIWidget, glData, numpy
+from .uiWidgets import UIItem, UIWidget, glData, numpy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
