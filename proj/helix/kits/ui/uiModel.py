@@ -11,6 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import PIL.Image
+import numpy
 
 from TG.observing import Observable, ObservableProperty
 
@@ -44,6 +45,15 @@ class UIItem(HelixActor):
         for n,v in (val or kwattr).iteritems():
             setattr(self, n, v)
 
+    @classmethod
+    def fromItem(klass, item):
+        if isinstance(item, tuple):
+            return klass(*item)
+        elif isinstance(item, dict):
+            return klass(**item)
+        else:
+            return klass(item)
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Viewport settings
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,9 +69,52 @@ class UIViewport(UIItem):
 class UIOrthoViewport(UIViewport):
     viewVisitKeys = ["UIOrthoViewport"]
 
+class UIBlend(UIItem):
+    viewVisitKeys = ["UIBlend"]
+    flyweights = {
+        }
+    def __new__(klass, mode):
+        self = klass.flyweights.get(mode, None)
+        if self is None:
+            self = UIItem.__new__(klass, mode)
+        return self
+
+    def __init__(self, mode):
+        self._mode = mode
+        self.flyweights[mode] = self
+
+    _mode = None
+    def getMode(self):
+        return self._mode
+    mode = property(getMode)
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Widgets
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UIList(UIItem):
+    viewVisitKeys = ["UIList"]
+
+    items = UIItem.ActorList.property()
+    box = glData.Rectf.property()
+
+    def __init__(self, items, **kwattr):
+        if kwattr:
+            self.set(kwattr)
+        self.items[:] = items
+        self.items._pub_.add(self._onItemsChange)
+
+        self.calcBox()
+
+    def _onItemsChange(self, items, attr):
+        self.calcBox()
+
+    def calcBox(self):
+        pos = numpy.vstack(i.box.pos for i in self.items if hasattr(i, 'box')).min(0)
+        corner = numpy.vstack(i.box.corner for i in self.items if hasattr(i, 'box')).max(0)
+        box = glData.Rectf.fromCorners(pos, corner)
+        self.box = box
+        return box
 
 class UIComposite(UIItem):
     viewVisitKeys = ["UIComposite"]
@@ -142,6 +195,7 @@ class UIImage(UIWidget):
             imageData.putband(premult, idx)
 
         self.image = image
+        return self
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -149,14 +203,15 @@ class UIButton(UIWidget):
     viewVisitKeys = ["UIButton"]
 
     stateMap = {}
-    def addState(self, stateKey, stateImage):
+    def addState(self, stateKey, stateui):
         if not self.stateMap:
             self.stateMap = {}
-        stateImg = UIImage(stateImage)
 
-        self.box.growSize(stateImg.box.size)
-        stateImg.box = self.box
-        self.stateMap[stateKey] = stateImg
+        if not isinstance(stateui, UIItem):
+            stateui = UIImage.fromItem(stateui)
+
+        self.box.growSize(stateui.box.size)
+        self.stateMap[stateKey] = stateui
         if self.state is None:
             self.state = stateKey
 
@@ -184,15 +239,6 @@ class UIFont(UIItem):
     def getFont(self):
         return self._fontLoader.font
     font = property(getFont)
-
-    @classmethod
-    def fromItem(klass, font):
-        if isinstance(font, tuple):
-            return klass(*font)
-        elif isinstance(font, dict):
-            return klass(**font)
-        else:
-            return klass(font)
         
 class UIText(UIWidget):
     viewVisitKeys = ["UIText"]
@@ -230,4 +276,50 @@ class UIText(UIWidget):
             font = UIFont.fromItem(font)
         self._font = font
     font = property(getFont, setFont)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UIGrid(UIComposite):
+    border = glData.Vector.property([10, 10, 0], dtype='3f')
+    def __init__(self, gridItems, gridCells, **kwattr):
+        super(UIGrid, self).__init__()
+        self.gridItems = gridItems
+        self.gridCells = gridCells
+
+        if kwattr:
+            self.set(kwattr)
+
+        self._pub_.add(self._onGridUpdate)
+        self.box._pub_.add(self._onGridUpdate, 'size')
+        self.boxComp.size = self.box.size
+
+    def _onGridUpdate(self, item, attr):
+        self.layout()
+
+    def layout(self):
+        border = self.border
+        gridCells = self.gridCells
+
+        fullCellSize = (self.boxComp.size[:2] - border[:2])/self.gridCells
+        cellRect = glData.Rect.fromPosSize(border, fullCellSize - border[:2])
+
+        fullCellRect = glData.Rect.fromSize(fullCellSize)
+        advRight = fullCellRect.at((1,0,0))
+        advDown = -fullCellRect.at((0,1,0))
+
+        gridTopLeft = self.boxComp.at((0, 1, 0)) + (border * (1, -1, 0)) + advDown
+
+        gridItems = []
+        iterItems = iter(self.gridItems)
+        try:
+            for row in xrange(gridCells[1]):
+                for col in xrange(gridCells[0]):
+                    item = iterItems.next()
+                    cellRect.pos.set(gridTopLeft + row*advDown + col*advRight)
+                    item.box.setRect(cellRect, item.box.aspect, 0.5)
+                    gridItems.append(item)
+        except StopIteration:
+            pass
+
+        self.items[:] = gridItems
 

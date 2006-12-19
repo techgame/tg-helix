@@ -10,7 +10,7 @@
 #~ Imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.openGL.raw.gl import *
+from TG.openGL.raw import gl
 
 from .uiViewBase import UIView
 
@@ -31,16 +31,16 @@ class UIViewportView(UIView):
         x, y = box.pos[:2]
         w, h = box.size[:2]
 
-        glViewport(x, y, w, h)
+        gl.glViewport(x, y, w, h)
 
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glLoadIdentity()
 
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+        gl.glLoadIdentity()
 
     def render(self):
-        glLoadIdentity()
+        gl.glLoadIdentity()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -57,12 +57,32 @@ class UIOrthoViewportView(UIViewportView):
             z = -10
             d =  20
 
-        glViewport(x, y, w, h)
+        gl.glViewport(x, y, w, h)
 
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glOrtho(x, x+w, y, y+h, z, z+d)
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glLoadIdentity()
+        gl.glOrtho(x, x+w, y, y+h, z, z+d)
 
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
+        gl.glMatrixMode(gl.GL_MODELVIEW)
+        gl.glLoadIdentity()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UIBlendViews(UIView):
+    viewForKeys = ['UIBlend'] 
+
+    blendModes = {
+        'none': (gl.GL_ONE, gl.GL_ZERO),
+        'blend': (gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA),
+        'multiply': (gl.GL_DST_COLOR, gl.GL_ONE_MINUS_SRC_ALPHA),
+        }
+
+    blendFunc = blendModes['blend']
+
+    def init(self, uiBlend):
+        self.blendFunc = self.blendModes[uiBlend.mode]
+        gl.glEnable(gl.GL_BLEND)
+
+    def render(self):
+        gl.glBlendFunc(*self.blendFunc)
 

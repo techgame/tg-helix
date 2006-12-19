@@ -87,7 +87,7 @@ class UIView(HelixView):
             viewable._pub_.add(self._onViewableChange)
         self._queueActions = []
 
-    def _onViewableChange(self, viewable, attr, info=None): 
+    def _onViewableChange(self, viewable, attr):
         pass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

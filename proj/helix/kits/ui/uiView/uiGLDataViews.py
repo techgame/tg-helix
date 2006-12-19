@@ -14,6 +14,7 @@ from functools import partial
 from TG.openGL.raw import gl
 from TG.openGL import data as glData
 from TG.openGL.data import texture
+
 from .uiViewBase import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
