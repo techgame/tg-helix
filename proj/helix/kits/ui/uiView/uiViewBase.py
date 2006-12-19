@@ -42,8 +42,11 @@ class UIScene(HelixScene):
             raise ArgumentError("Expected an object supporting helix stage protocol")
 
         self.stage = stage
-        self.stage.load()
+        self.stage.loadForScene(self)
         self.views = self.viewListFor(stage.items)
+
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def resize(self, size):
         size = Vector(size+(0.,))
@@ -61,9 +64,6 @@ class UIScene(HelixScene):
     def render(self):
         self.glClearBuffers()
 
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIView(HelixView):
@@ -76,7 +76,11 @@ class UIView(HelixView):
 
     @classmethod
     def fromViewable(klass, viewable):
-        return klass(viewable)
+        view = getattr(viewable, '__ui_view', None)
+        if view is None:
+            view = klass(viewable)
+            setattr(viewable, '__ui_view', view)
+        return view
 
     def init(self, viewable):
         if viewable is not None:

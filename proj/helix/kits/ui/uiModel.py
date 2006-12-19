@@ -16,6 +16,7 @@ from TG.observing import Observable, ObservableProperty
 
 from TG.openGL import data as glData
 from TG.openGL import text as glText
+from TG.openGL.text.freetypeFontLoader import FreetypeFontLoader
 
 from TG.helix.framework.stage import HelixStage, HelixActor
 
@@ -26,6 +27,8 @@ from TG.helix.framework.stage import HelixStage, HelixActor
 class UIStage(HelixStage):
     viewVisitKeys = ["UIStage"]
 
+    def loadForScene(self, scene):
+        self.load()
     def load(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
@@ -60,11 +63,24 @@ class UIOrthoViewport(UIViewport):
 #~ Widgets
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class UIComposite(UIItem):
+    viewVisitKeys = ["UIComposite"]
+    items = UIItem.ActorList.property()
+
+    box = glData.Rectf.property()
+    boxComp = glData.Rectf.property()
+
+    def getPos(self): return self.box.pos
+    def setPos(self, pos): self.box.pos.set(pos)
+    pos = property(getPos, setPos)
+
+    def getSize(self): return self.box.size
+    def setSize(self, size): self.box.size.set(size)
+    size = property(getSize, setSize)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class UIWidget(UIItem):
-    """A Widget is a cell that actually displays something.
-    
-    Widgets may be composite objects, providing spaces to be occupied.
-    """
     viewVisitKeys = ["UIWidget"]
 
     box = glData.Rectf.property()
@@ -86,21 +102,31 @@ class UIPanel(UIWidget):
 class UIImage(UIWidget):
     viewVisitKeys = ["UIImage"]
 
-    image = None
-
-    def __init__(self, image, **kwattr):
+    def __init__(self, image=None, **kwattr):
         super(UIImage, self).__init__()
-        self.loadImage(image)
+
+        if image is not None:
+            self.loadImage(image)
+
         if kwattr:
             self.set(kwattr)
 
-    def loadImage(self, image):
+    openImage = staticmethod(PIL.Image.open)
+    def loadImage(self, image, forceSize=None):
         if isinstance(image, basestring):
             image = self.openImage(image)
-
         self.image = image
+
+    _image = None
+    def getImage(self):
+        return self._image
+    def setImage(self, image):
+        self._image = image
         self.box.size.set(image.size)
-    openImage = staticmethod(PIL.Image.open)
+    image = property(getImage, setImage)
+
+    def resizeImage(self, size):
+        self.image = self.image.resize(size)
 
     def premultiply(self):
         image = self.image
@@ -148,20 +174,25 @@ class UIButton(UIWidget):
 class UIFont(UIItem):
     viewVisitKeys = ["UIFont"]
 
-    font = None
-    def __init__(self, face, size=None, **kw):
-        UIItem.__init__(self)
-        self.font = glText.fromFace(face, size, **kw)
+    def __init__(self, face, size, **kw):
+        super(UIItem, self).__init__()
+        self.load(face, size, **kw)
+
+    def load(self, face, size, **kw):
+        self._fontLoader = FreetypeFontLoader(face, size, **kw)
+
+    def getFont(self):
+        return self._fontLoader.font
+    font = property(getFont)
 
     @classmethod
     def fromItem(klass, font):
         if isinstance(font, tuple):
-            font = klass(*font)
+            return klass(*font)
         elif isinstance(font, dict):
-            font = klass(**font)
+            return klass(**font)
         else:
-            font = klass(font)
-        return font
+            return klass(font)
         
 class UIText(UIWidget):
     viewVisitKeys = ["UIText"]
@@ -180,7 +211,7 @@ class UIText(UIWidget):
     roundValues = True
 
     def __init__(self, text=None, font=None, **kwattr):
-        UIWidget.__init__(self)
+        super(UIWidget, self).__init__()
 
         if kwattr:
             self.set(kwattr)

@@ -10,12 +10,59 @@
 #~ Imports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from numpy import where
+
+from TG.openGL.raw import gl
 from TG.openGL.data.image import ImageTexture
 
 from .uiViewBase import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Widget Views
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UICompositeView(UIView):
+    viewForKeys = ['UIComposite']
+
+    def init(self, uiComposite):
+        UIView.init(self, None)
+        self.uiComposite = uiComposite
+        uiComposite._pub_.add(self.updateBox, 'box')
+        uiComposite._pub_.add(self.updateBox, 'boxComp')
+        uiComposite.box._pub_.add(self.updateBox)
+        uiComposite.boxComp._pub_.add(self.updateBox)
+
+        uiComposite.items._pub_.add(self.onUpdateItems, 'self')
+        self.updateItems(uiComposite.items)
+
+    def updateItems(self, items, attr=None):
+        self.enqueue(self.onUpdateItems)
+    def onUpdateItems(self):
+        self.views = self.viewListFor(self.uiComposite.items)
+
+    def updateBox(self, box, attr=None):
+        self.enqueue(self.onUpdateBox)
+    def onUpdateBox(self):
+        box = self.uiComposite.box
+        boxComp = self.uiComposite.boxComp
+        self.pos = (box.pos + boxComp.pos).round().tolist()
+        size = where(boxComp.size > 1, boxComp.size, 1)
+        self.scale = (box.size/size).tolist()
+
+    pos = (0,0,0)
+    scale = (1,1,1)
+
+    def render(self):
+        UIView.render(self)
+        gl.glPushMatrix()
+        try:
+            gl.glTranslatef(*self.pos)
+            gl.glScalef(*self.scale)
+            for view in self.views:
+                view.render()
+        finally:
+            gl.glPopMatrix()
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIWidgetView(UIView):

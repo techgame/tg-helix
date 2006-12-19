@@ -20,8 +20,6 @@ from TG.helix.kits.ui import uiView
 #~ Scene
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-inVPChange = False
-
 class SandboxStage(uiModel.UIStage):
     def load(self):
         viewport = uiModel.UIOrthoViewport()
