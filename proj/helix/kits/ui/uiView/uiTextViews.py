@@ -30,8 +30,8 @@ class UIFontView(UIView):
         UIView.init(self, uiFont)
         self.update(uiFont, self.partsByName)
 
-    def _onViewableChange(self, viewable, attr, info=None):
-        UIView._onViewableChange(self, viewable, attr, info=None)
+    def _onViewableChange(self, viewable, attr):
+        UIView._onViewableChange(self, viewable, attr)
         if attr in partsByName:
             self.update(viewable, attr)
 
@@ -64,8 +64,8 @@ class UITextView(UIView):
         self.text = self.TextDisplayFactory()
         self.update(uiText, self.partsByName)
 
-    def _onViewableChange(self, viewable, attr, info=None):
-        UIView._onViewableChange(self, viewable, attr, info=None)
+    def _onViewableChange(self, viewable, attr):
+        UIView._onViewableChange(self, viewable, attr)
         self.update(viewable, [attr])
 
     def update(self, uiText, parts):

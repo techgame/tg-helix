@@ -107,7 +107,7 @@ class BoxView(GeometryView):
                 gl.GL_QUADS, 0, count)
         return True
 
-    def _onBoxChange(self, aBox, attrName, info=None):
+    def _onBoxChange(self, aBox, attrName):
         self.enqueue(self.updateBox, aBox)
 
     def render(self):

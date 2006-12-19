@@ -79,8 +79,8 @@ class UIWidgetView(UIView):
         UIView.init(self, widget)
         self.update(widget, self.partsByName)
 
-    def _onViewableChange(self, viewable, attr, info=None):
-        UIView._onViewableChange(self, viewable, attr, info=None)
+    def _onViewableChange(self, viewable, attr):
+        UIView._onViewableChange(self, viewable, attr)
 
         if attr in self.partsByName:
             self.update(viewable, [attr])
