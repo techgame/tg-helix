@@ -6,9 +6,10 @@
 ##~ found in the LICENSE file included with this distribution.    ##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
-from .uiViewBase import UIScene, UIView, uiViewFactory
+from .uiBaseViews import UIScene, UIView, uiViewFactory
 from . import uiGLDataViews
-from . import uiViewportViews
+from . import uiMiscViews
 from . import uiWidgetViews
 from . import uiTextViews
+from . import uiGroupViews
 

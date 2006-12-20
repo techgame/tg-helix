@@ -36,7 +36,7 @@ class UIBlend(UIItem):
     def __new__(klass, mode):
         self = klass.flyweights.get(mode, None)
         if self is None:
-            self = UIItem.__new__(klass, mode)
+            self = super(UIItem, klass).__new__(klass, mode)
         return self
 
     def __init__(self, mode):

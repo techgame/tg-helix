@@ -21,35 +21,30 @@ from .uiBase import UIItem, glData, numpy
 class UIList(UIItem):
     viewVisitKeys = ["UIList"]
 
-    items = UIItem.ActorList.property()
     box = glData.Rectf.property()
+    boxComp = glData.Rectf.property()
+    items = UIItem.ActorList.property(propKind='astype')
 
-    def __init__(self, items, **kwattr):
+    scale = False
+    translate = True
+
+    def __init__(self, items=None, **kwattr):
+        super(UIList, self).__init__()
         if kwattr:
             self.set(kwattr)
-        self.items[:] = items
+
+        self._pub_.add(self._onItemsChange, 'items')
         self.items._pub_.add(self._onItemsChange)
 
-        self.calcBox()
+        if items is not None:
+            self.items = items
+
+    @items.fset
+    def setItems(self, items, _paSet_):
+        _paSet_.fget()[:] = items
 
     def _onItemsChange(self, items, attr):
         self.calcBox()
-
-    def calcBox(self):
-        pos = numpy.vstack(i.box.pos for i in self.items if hasattr(i, 'box')).min(0)
-        corner = numpy.vstack(i.box.corner for i in self.items if hasattr(i, 'box')).max(0)
-        box = glData.Rectf.fromCorners(pos, corner)
-        self.box = box
-        return box
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class UIComposite(UIItem):
-    viewVisitKeys = ["UIComposite"]
-    items = UIItem.ActorList.property()
-
-    box = glData.Rectf.property()
-    boxComp = glData.Rectf.property()
 
     def getPos(self): return self.box.pos
     def setPos(self, pos): self.box.pos.set(pos)
@@ -58,6 +53,24 @@ class UIComposite(UIItem):
     def getSize(self): return self.box.size
     def setSize(self, size): self.box.size.set(size)
     size = property(getSize, setSize)
+
+    def calcBox(self):
+        boxes = [i.box for i in self.items if hasattr(i, 'box')]
+        if boxes:
+            pos = numpy.vstack(b.pos for b in boxes).min(0)
+            corner = numpy.vstack(b.corner for b in boxes).max(0)
+            self.boxComp.setCorners(pos, corner)
+        else:
+            self.boxComp.setCorners(0, 0)
+
+        self.box.size.set(self.boxComp.corner)
+        return self.boxComp
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UIComposite(UIList):
+    viewVisitKeys = ["UIComposite"]
+    scale = True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

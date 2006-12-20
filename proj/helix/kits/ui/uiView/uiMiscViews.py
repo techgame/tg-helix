@@ -12,7 +12,7 @@
 
 from TG.openGL.raw import gl
 
-from .uiViewBase import UIView
+from .uiBaseViews import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

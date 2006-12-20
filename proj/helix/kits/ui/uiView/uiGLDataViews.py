@@ -15,7 +15,7 @@ from TG.openGL.raw import gl
 from TG.openGL import data as glData
 from TG.openGL.data import texture
 
-from .uiViewBase import UIView
+from .uiBaseViews import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -95,6 +95,7 @@ class BoxView(GeometryView):
 
     def updateBox(self, aBox):
         geom = aBox.pos + aBox.size*self.vertexScale
+        self.geom = geom
         self.updateGeom(geom)
 
     def updateGeom(self, geom):
