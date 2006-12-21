@@ -33,18 +33,23 @@ class HelixScene(HelixView):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def setup(self, size):
+    def setup(self, evtSources=[], **kwinfo):
+        self.setupEvtSources(evtSources)
         return True
+
     def shutdown(self):
         return True
+
+    def refreshInitial(self, size):
+        self.resize(size)
+        return self.refresh()
     def resize(self, size):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
     def refresh(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
-    renderContext = None
-    def enterContext(self, renderContext):
-        self.renderContext = renderContext
-    def exitContext(self, renderContext):
-        self.renderContext = None
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def setupEvtSources(self, evtSources=[]):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 

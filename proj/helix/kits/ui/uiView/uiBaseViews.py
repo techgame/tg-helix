@@ -19,6 +19,9 @@ from TG.helix.framework.viewFactory import HelixViewFactory
 from TG.helix.framework.views import HelixView
 from TG.helix.framework.scene import HelixScene
 
+from TG.helix.bridges.eventSource import EventRoot
+from TG.helix.bridges.viewportEvents import GLViewportEventHandler
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,6 +52,8 @@ class UIScene(HelixScene):
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def resize(self, size):
+        self.render()
+
         size = Vector(size+(0.,))
         for view in self.views:
             view.resize(size)
@@ -63,6 +68,14 @@ class UIScene(HelixScene):
     glClearBuffers = staticmethod(partial(glClear, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT))
     def render(self):
         self.glClearBuffers()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    evtRoot = EventRoot.property()
+    def setupEvtSources(self, evtSources=[]):
+        evtRoot = self.evtRoot
+        evtRoot.addSourceGroup(evtSources)
+        evtRoot.addHandler(GLViewportEventHandler(self))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

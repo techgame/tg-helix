@@ -18,6 +18,7 @@ class EventHandler(object):
     """Event handlers are part of the Chain of Responsibility pattern.  They
     are links in that chain that may or may not handle the event.
     """
+    kind = None
 
 class EventHandlingStrategy(EventHandler):
     """An instance of the composite and strategy patterns, this object decides

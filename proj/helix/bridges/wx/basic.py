@@ -11,12 +11,11 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import sys
-import time
+from TG.skinning.toolkits.wx import wx, wxSkinModel, XMLSkin
 
-from TG.skinning.toolkits.wx import wxSkinModel, XMLSkin
-
-from renderContext import wxRenderContext
+from .viewportEvents import wxGLViewportEventSource
+from .keyboardEvents import wxGLKeyboardEventSource
+from .mouseEvents import wxGLMouseEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Constants / Variables / Etc. 
@@ -71,30 +70,53 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
 
 class BasicRenderSkinModel(wxSkinModel):
     xmlSkin = xmlSkin
-    clientSize = (800, 800)
-    minSize = None
-    frameTitle = 'Basic wxPython HelixUI Render Skin'
 
-    renderContext = None
-    RenderContextFactory = wxRenderContext
-    def setupCanavs(self, canvasElem, canvasObj):
-        self.renderContext = self.RenderContextFactory(canvasObj, self)
+    frameTitle = 'Basic wxPython HelixUI Render Skin'
+    clientSize = (800, 800)
+    minSize = (800, 800)
+
+    setupSceneAfter = False
 
     def setupStage(self, stage, viewFactory):
         self.stage = stage
         self.viewFactory = viewFactory
 
-    viewFactory = None
-    def findSceneFor(self, renderContext):
-        assert renderContext is self.renderContext
-        sceneView = self.viewFactory(self.stage)
-        if not sceneView.isHelixScene():
-            raise RuntimeError("View returned for stage is not a Helix Scene")
-        return sceneView
+    def setupCanavs(self, canvasElem, canvasObj):
+        self.evtSources = [
+            wxGLViewportEventSource(canvasObj),
+            wxGLMouseEventSource(canvasObj),
+            wxGLKeyboardEventSource(canvasObj),
+            ]
+
+        assert self.stage is not None
+        if self.setupSceneAfter:
+            wx.CallAfter(self.setupScene)
+        else:
+            self.setupScene()
 
     def setupFrame(self, frame):
+        if self.frameTitle:
+            frame.SetTitle(self.frameTitle)
         if self.clientSize:
             frame.SetClientSize(self.clientSize)
         if self.minSize:
             frame.SetMinSize(self.minSize)
+
+    def findStageScene(self, stage=None):
+        if stage is None:
+            stage = self.stage
+        scene = self.viewFactory(stage)
+        if not scene.isHelixScene():
+            raise RuntimeError("View returned for stage is not a Helix Scene")
+        return scene
+
+    def setupScene(self):
+        vpEvtSrc = self.evtSources[0]
+        vpEvtSrc.setViewCurrent()
+
+        self.scene = self.findStageScene(self.stage)
+        self.scene.setup(evtSources=self.evtSources, model=self)
+
+        if self.setupSceneAfter:
+            vpEvtSrc.sendInitial()
 

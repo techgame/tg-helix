@@ -75,6 +75,8 @@ class UIComposite(UIList):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIGrid(UIComposite):
+    viewVisitKeys = ["UIGrid"]
+
     border = glData.Vector.property([10, 10, 0], dtype='3f')
     def __init__(self, gridItems, gridCells, **kwattr):
         super(UIGrid, self).__init__()
