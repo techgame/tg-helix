@@ -44,7 +44,7 @@ class wxGLMouseEventSource(wxEventSourceMixin, GLMouseEventSource):
             pos=(evt.m_x, eoHeight - evt.m_y), # change to bottom left orientation
             buttonSource=srcBtn,
             buttons=((evt.m_leftDown and 0x1) | (evt.m_rightDown and 0x2) | (evt.m_middleDown and 0x4)),
-            modifers=((evt.m_altDown and 0x1) | (evt.m_controlDown and 0x2) | (evt.m_shiftDown and 0x4) | (evt.m_metaDown and 0x8)),
+            modifiers=((evt.m_altDown and 0x1) | (evt.m_controlDown and 0x2) | (evt.m_shiftDown and 0x4) | (evt.m_metaDown and 0x8)),
             timestamp=evt.GetTimestamp())
 
         if etype == 'wheel':

@@ -28,7 +28,8 @@ class GLKeyboardEventSource(GLEventSource):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KeyboardEventHandler(EventHandler):
-    kind = 'keyboard'
+    eventKinds = ['keyboard']
+
     modifierByBit = {
         0x1: 'alt',
         0x2: 'control',

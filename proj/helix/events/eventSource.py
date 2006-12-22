@@ -26,11 +26,12 @@ class EventSource(object):
     """
 
     kind = None
-    def iterHandlers(self):
+    def iterHandlers(self, kind=None):
         if self.root is None:
             return iter(())
-
-        return self.root.iterHandlers(self.kind)
+        if kind is None:
+            kind = self.kind
+        return self.root.iterHandlers(kind)
 
     _root = None
     def getRoot(self):
@@ -40,7 +41,7 @@ class EventSource(object):
     root = property(getRoot, setRoot)
 
     def acceptVisitor(self, visitor):
-        return visitor.visitEventSource(self)
+        return visitor.visitEventSource(self, [self.kind])
 
 class GLEventSource(EventSource):
     def getViewSize(self):
@@ -72,47 +73,46 @@ class EventRoot(ObservableObjectWithProp):
     def iterHandlers(self, kind):
         return iter(self.handlersByKind[kind])
 
+    def __iadd__(self, item):
+        self.visit(item)
+        return self
+
     def visit(self, item):
-        item.acceptVisitor(self)
+        acceptVisitor = getattr(item, 'acceptVisitor', None)
+        if acceptVisitor is not None:
+            return acceptVisitor(self)
+
+        else: return self.visitGroup(item)
+
+    def visitGroup(self, itemGroup):
+        for subItem in itemGroup:
+            self.visit(subItem)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def visitEventSource(self, evtSrc):
-        self.addSource(evtSrc)
+    def visitEventSource(self, evtSrc, eventKinds):
+        for kind in eventKinds:
+            if kind not in self.handlersByKind:
+                self.handlersByKind[kind] = self.HandlerList()
+            evtSrc.setRoot(self)
 
-    def addSource(self, evtSrc):
-        kind = evtSrc.kind
-        if kind not in self.handlersByKind:
-            self.handlersByKind[kind] = self.HandlerList()
-        evtSrc.setRoot(self)
-
-        sources = self.sources.get(kind)
-        if sources is None:
-            sources = self.SourceList()
-            self.sources[kind] = sources
-        if evtSrc not in sources:
-            sources.append(evtSrc)
-
-    def addSourceGroup(self, evtSources):
-        for evtSrc in evtSources:
-            self.addSource(evtSrc)
+            sources = self.sources.get(kind)
+            if sources is None:
+                sources = self.SourceList()
+                self.sources[kind] = sources
+            if evtSrc not in sources:
+                sources.append(evtSrc)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def visitHandler(self, evth):
-        self.addHandler(evth)
+    def visitEventHandler(self, evth, eventKinds):
+        for kind in eventKinds:
+            handlers = self.handlersByKind.get(kind)
+            if handlers is None:
+                handlers = self.HandlerList()
+                self.handlersByKind[kind] = handlers
+            evth.setRoot(self)
 
-    def addHandler(self, evth):
-        kind = evth.kind
-        handlers = self.handlersByKind.get(kind)
-        if handlers is None:
-            handlers = self.HandlerList()
-            self.handlersByKind[kind] = handlers
-
-        if evth not in handlers:
-            handlers.append(evth)
-
-    def addHandlerGroup(self, evtHandlerGroup):
-        for evth in evtHandlerGroup:
-            self.addHandler(evth)
+            if evth not in handlers:
+                handlers.append(evth)
 

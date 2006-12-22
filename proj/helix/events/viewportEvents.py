@@ -44,7 +44,7 @@ class GLViewportEventSource(GLEventSource):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class GLViewportEventHandler(EventHandler):
-    kind = 'viewport'
+    eventKinds = ['viewport']
     scene = None
 
     def __init__(self, scene):

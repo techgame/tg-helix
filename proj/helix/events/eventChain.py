@@ -18,10 +18,17 @@ class EventHandler(object):
     """Event handlers are part of the Chain of Responsibility pattern.  They
     are links in that chain that may or may not handle the event.
     """
-    kind = None
+    eventKinds = []
 
     def acceptVisitor(self, visitor):
-        return visitor.visitEventHandler(self)
+        return visitor.visitEventHandler(self, self.eventKinds)
+
+    _root = None
+    def getRoot(self):
+        return self._root
+    def setRoot(self, root):
+        self._root = root
+    root = property(getRoot, setRoot)
 
 class EventHandlingStrategy(EventHandler):
     """An instance of the composite and strategy patterns, this object decides

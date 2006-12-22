@@ -19,8 +19,7 @@ from TG.helix.framework.viewFactory import HelixViewFactory
 from TG.helix.framework.views import HelixView
 from TG.helix.framework.scene import HelixScene
 
-from TG.helix.events.eventSource import EventRoot
-from TG.helix.events.viewportEvents import GLViewportEventHandler
+from .uiEvents import UISceneEventsMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -28,7 +27,7 @@ from TG.helix.events.viewportEvents import GLViewportEventHandler
 
 uiViewFactory = HelixViewFactory()
 
-class UIScene(HelixScene):
+class UIScene(UISceneEventsMixin, HelixScene):
     viewForKeys = ['UIStage']
     viewFactory = uiViewFactory
 
@@ -68,14 +67,6 @@ class UIScene(HelixScene):
     glClearBuffers = staticmethod(partial(glClear, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT))
     def render(self):
         self.glClearBuffers()
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    evtRoot = EventRoot.property()
-    def setupEvtSources(self, evtSources=[]):
-        evtRoot = self.evtRoot
-        evtRoot.addSourceGroup(evtSources)
-        evtRoot.addHandler(GLViewportEventHandler(self))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

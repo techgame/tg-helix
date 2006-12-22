@@ -28,7 +28,7 @@ class GLMouseEventSource(GLEventSource):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MouseEventHandler(EventHandler):
-    kind = 'mouse'
+    eventKinds = ['mouse']
 
     buttonByBit = {
         0x1: 'left',

@@ -41,7 +41,7 @@ class wxGLKeyboardEventSource(wxEventSourceMixin, GLKeyboardEventSource):
             etype=etype,
             ukey=unikey,
             uchar=(unichr(unikey) if unikey else u''),
-            modifers=((evt.m_altDown and 0x1) | (evt.m_controlDown and 0x2) | (evt.m_shiftDown and 0x4) | (evt.m_metaDown and 0x8)),
+            modifiers=((evt.m_altDown and 0x1) | (evt.m_controlDown and 0x2) | (evt.m_shiftDown and 0x4) | (evt.m_metaDown and 0x8)),
             timestamp=evt.GetTimestamp())
 
         if etype == 'char':
