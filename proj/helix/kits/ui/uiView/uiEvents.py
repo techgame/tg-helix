@@ -25,6 +25,7 @@ class KMEventHandler(MouseEventHandler, KeyboardEventHandler):
     eventKinds = ['mouse', 'keyboard']
 
     def key(self, glview, info):
+        return True
         if info['etype'] == 'char':
             if info['token']:
                 t = u'<%s>' % info['token']
@@ -33,6 +34,7 @@ class KMEventHandler(MouseEventHandler, KeyboardEventHandler):
             sys.stdout.flush()
 
     def mouse(self, glview, info):
+        return True
         print info['pos'], info['buttons']
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

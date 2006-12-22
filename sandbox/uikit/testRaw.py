@@ -13,7 +13,7 @@
 
 from TG.openGL.raw.gl import *
 
-from TG.helix.kits.ui.uiModel import UIStage, UIItem, UIViewport
+from TG.helix.kits.ui.uiModel import UIStage, UIItem, UIViewport, UIBlend
 from TG.helix.kits.ui.uiView import uiViewFactory, UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,6 +44,8 @@ class FunToyView(UIView):
 class FunStage(UIStage):
     def load(self):
         self.add(UIViewport())
+        self.add(UIBlend())
+
         self.add(FunToy())
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

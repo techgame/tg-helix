@@ -12,25 +12,15 @@
 
 import PIL.Image
 
-from .uiBase import UIItem, glData, numpy
+from .uiBase import UIItem, UIItemWithBox, glData, numpy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Widgets
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class UIWidget(UIItem):
+class UIWidget(UIItemWithBox):
     viewVisitKeys = ["UIWidget"]
-
-    box = glData.Rectf.property()
     color = glData.Color.property([])
-
-    def getPos(self): return self.box.pos
-    def setPos(self, pos): self.box.pos.set(pos)
-    pos = property(getPos, setPos)
-
-    def getSize(self): return self.box.size
-    def setSize(self, size): self.box.size.set(size)
-    size = property(getSize, setSize)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -85,33 +75,4 @@ class UIImage(UIWidget):
 
         self.image = image
         return self
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Button
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class UIButton(UIWidget):
-    viewVisitKeys = ["UIButton"]
-
-    stateMap = {}
-    def addState(self, stateKey, stateui):
-        if not self.stateMap:
-            self.stateMap = {}
-
-        if not isinstance(stateui, UIItem):
-            stateui = UIImage.fromItem(stateui)
-
-        self.box.growSize(stateui.box.size)
-        self.stateMap[stateKey] = stateui
-        if self.state is None:
-            self.state = stateKey
-
-    stateui = None
-    _state = None
-    def getState(self):
-        return self._state
-    def setState(self, state):
-        self.stateui = self.stateMap[state]
-        self._state = state
-    state = property(getState, setState)
 

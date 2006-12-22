@@ -23,6 +23,8 @@ from TG.helix.kits.ui import uiView
 class SandboxStage(uiModel.UIStage):
     def load(self):
         vp = self.add(uiModel.UIOrthoViewport())
+        self.add(uiModel.UIBlend())
+
         panel = self.add(uiModel.UIPanel())
 
         @vp.box._pub_.add

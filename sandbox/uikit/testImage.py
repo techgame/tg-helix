@@ -23,6 +23,8 @@ from TG.helix.kits.ui import uiView
 class SandboxStage(uiModel.UIStage):
     def load(self):
         vp = self.add(uiModel.UIOrthoViewport())
+        self.add(uiModel.UIBlend())
+
         tgLogoImg = self.add(uiModel.UIImage('media/tg-logo.png'))
         starImg = self.add(uiModel.UIImage('media/starShape.png'))
 

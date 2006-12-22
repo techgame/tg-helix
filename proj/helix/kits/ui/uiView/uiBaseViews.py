@@ -12,8 +12,9 @@
 
 from functools import partial
 
+from TG.openGL import data as glData
 from TG.openGL.data import Vector
-from TG.openGL.raw.gl import *
+from TG.openGL.raw import gl
 
 from TG.helix.framework.viewFactory import HelixViewFactory
 from TG.helix.framework.views import HelixView
@@ -31,6 +32,8 @@ class UIScene(UISceneEventsMixin, HelixScene):
     viewForKeys = ['UIStage']
     viewFactory = uiViewFactory
 
+    views = HelixScene.ViewList.property()
+
     def __init__(self, stage=None):
         super(UIScene, self).__init__()
         self.init(stage)
@@ -47,9 +50,6 @@ class UIScene(UISceneEventsMixin, HelixScene):
         self.stage.loadForScene(self)
         self.views = self.viewListFor(stage.items)
 
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
     def resize(self, size):
         self.render()
 
@@ -60,11 +60,12 @@ class UIScene(UISceneEventsMixin, HelixScene):
 
     def refresh(self):
         self.render()
+
         for view in self.views:
             view.render()
         return True
 
-    glClearBuffers = staticmethod(partial(glClear, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT))
+    glClearBuffers = staticmethod(partial(gl.glClear, gl.GL_COLOR_BUFFER_BIT|gl.GL_DEPTH_BUFFER_BIT))
     def render(self):
         self.glClearBuffers()
 
@@ -80,10 +81,10 @@ class UIView(HelixView):
 
     @classmethod
     def fromViewable(klass, viewable):
-        view = getattr(viewable, '__ui_view', None)
+        view = getattr(viewable, '__uiview', None)
         if view is None:
             view = klass(viewable)
-            setattr(viewable, '__ui_view', view)
+            setattr(viewable, '__uiview', view)
         return view
 
     def init(self, viewable):

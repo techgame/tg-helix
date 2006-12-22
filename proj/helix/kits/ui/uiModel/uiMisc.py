@@ -10,13 +10,13 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .uiBase import UIItem, glData, numpy
+from .uiBase import UIItem, UIItemWithBox, glData, numpy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Viewport settings
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class UIViewport(UIItem):
+class UIViewport(UIItemWithBox):
     viewVisitKeys = ["UIViewport"]
 
     box = glData.Recti.property()
@@ -33,18 +33,21 @@ class UIBlend(UIItem):
     viewVisitKeys = ["UIBlend"]
     flyweights = {
         }
-    def __new__(klass, mode):
+    def __new__(klass, mode=None):
         self = klass.flyweights.get(mode, None)
         if self is None:
             self = super(UIItem, klass).__new__(klass, mode)
+            self.flyweights[mode] = self
         return self
 
-    def __init__(self, mode):
-        self._mode = mode
-        self.flyweights[mode] = self
+    def __init__(self, mode=None):
+        if mode is not None:
+            self._mode = mode
 
     _mode = None
     def getMode(self):
         return self._mode
     mode = property(getMode)
+UIBlend.flyweights[None] = UIBlend('blend')
+assert UIBlend().mode == 'blend'
 

@@ -12,18 +12,16 @@
 
 import numpy
 
-from .uiBase import UIItem, glData, numpy
+from .uiBase import UIItemWithBox, glData, numpy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class UIList(UIItem):
+class UIList(UIItemWithBox):
     viewVisitKeys = ["UIList"]
 
-    box = glData.Rectf.property()
-    boxComp = glData.Rectf.property()
-    items = UIItem.ActorList.property(propKind='astype')
+    items = UIItemWithBox.ActorList.property(propKind='astype')
 
     scale = False
     translate = True
@@ -33,9 +31,6 @@ class UIList(UIItem):
         if kwattr:
             self.set(kwattr)
 
-        self._pub_.add(self._onItemsChange, 'items')
-        self.items._pub_.add(self._onItemsChange)
-
         if items is not None:
             self.items = items
 
@@ -43,28 +38,12 @@ class UIList(UIItem):
     def setItems(self, items, _paSet_):
         _paSet_.fget()[:] = items
 
-    def _onItemsChange(self, items, attr):
-        self.calcBox()
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getPos(self): return self.box.pos
-    def setPos(self, pos): self.box.pos.set(pos)
-    pos = property(getPos, setPos)
-
-    def getSize(self): return self.box.size
-    def setSize(self, size): self.box.size.set(size)
-    size = property(getSize, setSize)
-
-    def calcBox(self):
-        boxes = [i.box for i in self.items if hasattr(i, 'box')]
-        if boxes:
-            pos = numpy.vstack(b.pos for b in boxes).min(0)
-            corner = numpy.vstack(b.corner for b in boxes).max(0)
-            self.boxComp.setCorners(pos, corner)
-        else:
-            self.boxComp.setCorners(0, 0)
-
-        self.box.size.set(self.boxComp.corner)
-        return self.boxComp
+    def getItemBox(self, items=None):
+        if items is None: items = self.items
+        return glData.Rect.fromUnion(i.box for i in items if hasattr(i, 'box'))
+    itemBox = property(getItemBox)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -80,15 +59,16 @@ class UIGrid(UIComposite):
     border = glData.Vector.property([10, 10, 0], dtype='3f')
     def __init__(self, gridItems, gridCells, **kwattr):
         super(UIGrid, self).__init__()
-        self.gridItems = gridItems
-        self.gridCells = gridCells
+        self.gridCells = gridCells + (1,)
+
+        n = numpy.prod(gridCells)
+        self.items = [item for i, item in zip(xrange(n), gridItems)]
 
         if kwattr:
             self.set(kwattr)
 
-        self._pub_.add(self._onGridUpdate)
-        self.box._pub_.add(self._onGridUpdate, 'size')
-        self.boxComp.size = self.box.size
+        self._pub_.add(self._onGridUpdate, 'box')
+        self.box._pub_.add(self._onGridUpdate)
 
     def _onGridUpdate(self, item, attr):
         self.layout()
@@ -97,26 +77,27 @@ class UIGrid(UIComposite):
         border = self.border
         gridCells = self.gridCells
 
-        fullCellSize = (self.boxComp.size[:2] - border[:2])/self.gridCells
-        cellRect = glData.Rect.fromPosSize(border, fullCellSize - border[:2])
+        gridSize = self.box.size
+        fullCellSize = (gridSize - border)/self.gridCells
+        cellRect = glData.Rect.fromPosSize(border, fullCellSize - border)
 
-        fullCellRect = glData.Rect.fromSize(fullCellSize)
-        advRight = fullCellRect.at((1,0,0))
-        advDown = -fullCellRect.at((0,1,0))
+        advRight = (1,0,0)*fullCellSize
+        advDown = (0,-1,0)*fullCellSize
 
-        gridTopLeft = self.boxComp.at((0, 1, 0)) + (border * (1, -1, 0)) + advDown
+        gridTopLeft = (border * (1,-1,0)) + advDown
+        gridTopLeft[1] += gridSize[1]
 
-        gridItems = []
-        iterItems = iter(self.gridItems)
+        iterItems = iter(self.items)
         try:
             for row in xrange(gridCells[1]):
                 for col in xrange(gridCells[0]):
                     item = iterItems.next()
-                    cellRect.pos.set(gridTopLeft + row*advDown + col*advRight)
-                    item.box.setRect(cellRect, item.box.aspect, 0.5)
-                    gridItems.append(item)
+
+                    cr = cellRect.copy()
+                    cr.pos.set(gridTopLeft + row*advDown + col*advRight)
+                    cr.setAspect(item.box.aspect, 0.5)
+
+                    item.boxScale = cr.copy()
         except StopIteration:
             pass
-
-        self.items[:] = gridItems
 

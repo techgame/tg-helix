@@ -10,9 +10,10 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .uiBase import UIStage, UIItem, glData, numpy
+from .uiBase import UIStage, UIItem, UIItemWithBox, glData, numpy
 from .uiMisc import UIViewport, UIOrthoViewport, UIBlend
-from .uiWidgets import UIWidget, UIPanel, UIImage, UIButton
+from .uiWidgets import UIWidget, UIPanel, UIImage
+from .uiButton import UIButton
 from .uiText import UIFont, UIText
 from .uiGroups import UIList, UIComposite, UIGrid
 

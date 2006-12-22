@@ -23,6 +23,8 @@ from TG.helix.kits.ui import uiView
 class SandboxStage(uiModel.UIStage):
     def load(self):
         viewport = uiModel.UIOrthoViewport()
+        self.add(uiModel.UIBlend())
+
         self.add(viewport)
 
         font = uiModel.UIFont('/Library/Fonts/Arial', 64)

@@ -49,3 +49,16 @@ class UIItem(HelixActor):
         else:
             return klass(item)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class UIItemWithBox(UIItem):
+    box = glData.Rectf.property()
+
+    def getPos(self): return self.box.pos
+    def setPos(self, pos): self.box.pos.set(pos)
+    pos = property(getPos, setPos)
+
+    def getSize(self): return self.box.size
+    def setSize(self, size): self.box.size.set(size)
+    size = property(getSize, setSize)
+

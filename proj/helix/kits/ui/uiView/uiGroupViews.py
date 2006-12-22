@@ -16,42 +16,10 @@ from TG.openGL.raw import gl
 
 from TG.helix.framework.actors import HelixActorList
 
-from .uiBaseViews import UIView
+from .uiBaseViews import UIView, glData
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ List Views
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class ListView(UIView):
-    viewForKeys = [list]
-
-    def init(self, viewable):
-        UIView.init(self, None)
-        self.viewable = viewable
-
-    def render(self):
-        for view in self.viewFactory.viewsFor(self.viewable):
-            view.render()
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class ObservableListView(UIView):
-    viewForKeys = ['UIList', UIView.ViewList, HelixActorList]
-
-    def init(self, viewable):
-        UIView.init(self, viewable)
-        self.update(viewable)
-
-    def _onViewableChange(self, viewable, attr):
-        self.update(viewable)
-
-    def update(self, viewable):
-        self.views = self.viewListFor(viewable)
-
-    def render(self):
-        for view in self.views:
-            view.render()
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIListView(UIView):
@@ -63,44 +31,39 @@ class UIListView(UIView):
         UIView.init(self, None)
         self.viewable = viewable
 
-        viewable._pub_.add(self.updateViews, 'items')
-        viewable.items._pub_.add(self.updateViews)
+        viewable._pub_.add(self.onUpdateViews, 'items')
+        viewable.items._pub_.add(self.onUpdateViews)
 
-        viewable._pub_.add(self.updateBox, 'box')
-        viewable.box._pub_.add(self.updateBox)
-
-        viewable._pub_.add(self.updateScaling, 'scale')
-        viewable._pub_.add(self.updateScaling, 'boxComp')
-        viewable.boxComp._pub_.add(self.updateScaling)
+        viewable.box._pub_.add(self.onUpdateBox)
+        viewable._pub_.add(self.onUpdateBox, 'box')
+        viewable._pub_.add(self.onUpdateBox, 'translate')
+        viewable._pub_.add(self.onUpdateBox, 'scale')
+        viewable._pub_.add(self.onUpdateBox, 'boxScale')
 
         self.updateViews()
-        self.onUpdateBox()
-        self.onUpdateScaling()
+        self.updateBox()
 
-    def updateBox(self, *args):
-        self.enqueue(self.onUpdateBox)
-    def onUpdateBox(self):
+    def onUpdateViews(self, *args):
+        self.enqueue(self.updateViews)
+    def updateViews(self):
+        self.views = self.viewListFor(self.viewable.items)
+        self.updateBox()
+
+    def onUpdateBox(self, *args):
+        self.enqueue(self.updateBox)
+    def updateBox(self):
         if self.viewable.translate:
             self.pos = self.viewable.box.pos.tolist()
-        self.onUpdateScaling()
 
-    def updateScaling(self, *args):
-        self.enqueue(self.onUpdateBox)
-    def onUpdateScaling(self):
-        if not self.viewable.scale:
-            pass
+        boxScale = getattr(self.viewable, 'boxScale', None)
+        if boxScale is not None:
+            box = self.viewable.box
+            self.pos = (box.pos + boxScale.pos).tolist()
 
-        box = self.viewable.box
-        boxComp = self.viewable.boxComp
-        self.pos = (box.pos + boxComp.pos).tolist()
-        if boxComp.size.any():
-            size = where(boxComp.size > 1, boxComp.size, 1)
-            self.scale = (box.size/size).tolist()
-        else:
+            size = where(box.size > 1, box.size, 1)
+            self.scale = (boxScale.size/size).tolist()
+        else: 
             self.scale = None
-
-    def updateViews(self, *args):
-        self.views = self.viewListFor(self.viewable.items)
 
     def render(self):
         UIView.render(self)
