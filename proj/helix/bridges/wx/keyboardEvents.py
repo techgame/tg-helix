@@ -11,7 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .common import wx, wxEventSourceMixin
-from ..keyboardEvents import GLKeyboardEventSource
+from TG.helix.events.keyboardEvents import GLKeyboardEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

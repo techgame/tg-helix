@@ -19,8 +19,8 @@ from TG.helix.framework.viewFactory import HelixViewFactory
 from TG.helix.framework.views import HelixView
 from TG.helix.framework.scene import HelixScene
 
-from TG.helix.bridges.eventSource import EventRoot
-from TG.helix.bridges.viewportEvents import GLViewportEventHandler
+from TG.helix.events.eventSource import EventRoot
+from TG.helix.events.viewportEvents import GLViewportEventHandler
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

@@ -39,6 +39,9 @@ class EventSource(object):
         self._root = root
     root = property(getRoot, setRoot)
 
+    def acceptVisitor(self, visitor):
+        return visitor.visitEventSource(self)
+
 class GLEventSource(EventSource):
     def getViewSize(self):
         """getSize is provided by concrete implementations"""
@@ -69,6 +72,14 @@ class EventRoot(ObservableObjectWithProp):
     def iterHandlers(self, kind):
         return iter(self.handlersByKind[kind])
 
+    def visit(self, item):
+        item.acceptVisitor(self)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def visitEventSource(self, evtSrc):
+        self.addSource(evtSrc)
+
     def addSource(self, evtSrc):
         kind = evtSrc.kind
         if kind not in self.handlersByKind:
@@ -85,6 +96,11 @@ class EventRoot(ObservableObjectWithProp):
     def addSourceGroup(self, evtSources):
         for evtSrc in evtSources:
             self.addSource(evtSrc)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def visitHandler(self, evth):
+        self.addHandler(evth)
 
     def addHandler(self, evth):
         kind = evth.kind

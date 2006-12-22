@@ -20,6 +20,9 @@ class EventHandler(object):
     """
     kind = None
 
+    def acceptVisitor(self, visitor):
+        return visitor.visitEventHandler(self)
+
 class EventHandlingStrategy(EventHandler):
     """An instance of the composite and strategy patterns, this object decides
     how to forward events to other handlers.  

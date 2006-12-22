@@ -73,7 +73,7 @@ class BasicRenderSkinModel(wxSkinModel):
 
     frameTitle = 'Basic wxPython HelixUI Render Skin'
     clientSize = (800, 800)
-    minSize = (800, 800)
+    minSize = (200, 200)
 
     setupSceneAfter = False
 
