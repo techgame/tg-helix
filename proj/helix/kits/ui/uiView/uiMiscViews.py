@@ -26,30 +26,37 @@ class UIViewportView(UIView):
 
     def resize(self, size):
         self.viewport.onViewResize(size)
+        self.renderViewport()
+        self.renderProjection()
 
+    def render(self):
+        self.renderProjection()
+
+    def renderPick(self, selector):
+        selector.renderProjection(self.viewport.box)
+        self.renderProjection(False)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def renderViewport(self):
         box = self.viewport.box
         x, y = box.pos[:2]
         w, h = box.size[:2]
 
         gl.glViewport(x, y, w, h)
 
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glLoadIdentity()
-
-        gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glLoadIdentity()
-
-    def render(self):
-        gl.glLoadIdentity()
+    def renderProjection(self, replaceProjection=True):
+        if replaceProjection:
+            gl.glMatrixMode(gl.GL_PROJECTION)
+            gl.glLoadIdentity()
+            gl.glMatrixMode(gl.GL_MODELVIEW)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIOrthoViewportView(UIViewportView):
     viewForKeys = ['UIOrthoViewport'] 
 
-    def resize(self, size):
-        self.viewport.onViewResize(size)
-
+    def renderProjection(self, replaceProjection=True):
         box = self.viewport.box
         x, y, z = box.pos[:3]
         w, h, d = box.size[:3]
@@ -57,14 +64,11 @@ class UIOrthoViewportView(UIViewportView):
             z = -10
             d =  20
 
-        gl.glViewport(x, y, w, h)
-
         gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glLoadIdentity()
+        if replaceProjection:
+            gl.glLoadIdentity()
         gl.glOrtho(x, x+w, y, y+h, z, z+d)
-
         gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glLoadIdentity()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -75,6 +79,7 @@ class UIBlendViews(UIView):
         'none': (gl.GL_ONE, gl.GL_ZERO),
         'blend': (gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA),
         'multiply': (gl.GL_DST_COLOR, gl.GL_ONE_MINUS_SRC_ALPHA),
+        'screen': NotImplemented,
         }
 
     blendFunc = blendModes['blend']

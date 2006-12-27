@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from __future__ import with_statement
 from functools import partial
 
 from TG.openGL import data as glData
@@ -65,6 +66,9 @@ class UIScene(UISceneEventsMixin, HelixScene):
             view.render()
         return True
 
+    def renderPick(self, selector):
+        self.render()
+
     glClearBuffers = staticmethod(partial(gl.glClear, gl.GL_COLOR_BUFFER_BIT|gl.GL_DEPTH_BUFFER_BIT))
     def render(self):
         self.glClearBuffers()
@@ -101,6 +105,10 @@ class UIView(HelixView):
         pass
     def render(self):
         self.performQueueActions()
+
+    def renderPick(self, selector):
+        selector.setItem(self)
+        self.render()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
