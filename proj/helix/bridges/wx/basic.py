@@ -16,6 +16,7 @@ from TG.skinning.toolkits.wx import wx, wxSkinModel, XMLSkin
 from .viewportEvents import wxGLViewportEventSource
 from .keyboardEvents import wxGLKeyboardEventSource
 from .mouseEvents import wxGLMouseEventSource
+from .timerEvents import wxGLTimerEventSource, wxGLIdleEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Constants / Variables / Etc. 
@@ -86,6 +87,8 @@ class BasicRenderSkinModel(wxSkinModel):
             wxGLViewportEventSource(canvasObj),
             wxGLMouseEventSource(canvasObj),
             wxGLKeyboardEventSource(canvasObj),
+            wxGLTimerEventSource(canvasObj),
+            wxGLIdleEventSource(canvasObj),
             ]
 
         assert self.stage is not None

@@ -39,18 +39,20 @@ class wxGLMouseEventSource(wxEventSourceMixin, GLMouseEventSource):
         etype, srcBtn = self.wxEtypeMap[evt.GetEventType()]
         eoHeight = evt.GetEventObject().GetClientSize()[1]
 
-        info = dict(
-            etype=etype,
-            pos=(evt.m_x, eoHeight - evt.m_y), # change to bottom left orientation
-            buttonSource=srcBtn,
-            buttons=((evt.m_leftDown and 0x1) | (evt.m_rightDown and 0x2) | (evt.m_middleDown and 0x4)),
-            modifiers=((evt.m_altDown and 0x1) | (evt.m_controlDown and 0x2) | (evt.m_shiftDown and 0x4) | (evt.m_metaDown and 0x8)),
-            timestamp=evt.GetTimestamp())
+        # mouseState is more accurate for combinations of buttons
+        mouseState = wx.GetMouseState()
+        info = self.newInfo(
+                etype=etype,
+                pos=(evt.X, eoHeight - evt.Y), # change to bottom left orientation
+                buttons=((mouseState.LeftDown() and 0x1) | (mouseState.RightDown() and 0x2) | (mouseState.MiddleDown() and 0x4)),
+                modifiers=((evt.AltDown() and 0x1) | (evt.ControlDown() and 0x2) | (evt.ShiftDown() and 0x4) | (evt.MetaDown() and 0x8)),
+                buttonSource=srcBtn,
+                )
 
         if etype == 'wheel':
             info.update(
-                wheel=evt.m_wheelRotation,
-                wheelLinesPer=evt.m_linesPerAction,
+                wheel=evt.WheelRotation,
+                wheelLinesPer=evt.LinesPerAction,
                 wheelIsPage=evt.IsPageScroll())
 
         if not self.sendMouse(info):

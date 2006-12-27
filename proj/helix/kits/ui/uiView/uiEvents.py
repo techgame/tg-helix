@@ -23,13 +23,14 @@ from TG.helix.events.eventSource import EventRoot
 from TG.helix.events.viewportEvents import GLViewportEventHandler
 from TG.helix.events.mouseEvents import MouseEventHandler
 from TG.helix.events.keyboardEvents import KeyboardEventHandler
+from TG.helix.events.timerEvents import IdleEventHandler, TimerEventHandler
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class KMEventHandler(MouseEventHandler, KeyboardEventHandler):
-    eventKinds = ['mouse', 'keyboard']
+class KMEventHandler(MouseEventHandler, KeyboardEventHandler, IdleEventHandler, TimerEventHandler):
+    eventKinds = ['mouse', 'keyboard', 'idle', 'timer']
 
     def __init__(self, scene):
         super(KMEventHandler, self).__init__()
@@ -41,11 +42,19 @@ class KMEventHandler(MouseEventHandler, KeyboardEventHandler):
 
     def mouse(self, glview, info):
         glview.setViewCurrent()
-        selection = self.scene.pick(info['pos'], info)
         if info['etype'] in ('up', 'down', 'dclick'):
+            selection = self.scene.pick(info['pos'], info)
             print
             pprint.pprint(info)
             pprint.pprint(selection)
+        return True
+
+    def idle(self, glview, info):
+        glview.setViewCurrent()
+        return False
+
+    def timer(self, glview, info):
+        glview.setViewCurrent()
         return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

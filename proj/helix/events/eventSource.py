@@ -10,6 +10,9 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import sys
+import time
+
 from TG.observing import ObservableObjectWithProp, ObservableDict, ObservableList
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,6 +47,13 @@ class EventSource(object):
         return visitor.visitEventSource(self, [self.kind])
 
 class GLEventSource(EventSource):
+    if sys.platform.startswith('win'):
+        # time.clock is the fastest updating query on unix heritage platforms
+        newTimestamp = staticmethod(time.clock)
+    else:
+        # time.time is the fastest updating query on windows
+        newTimestamp = staticmethod(time.time)
+
     def getViewSize(self):
         """getSize is provided by concrete implementations"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
@@ -53,6 +63,10 @@ class GLEventSource(EventSource):
     def viewSwapBuffers(self):
         """viewSwapBuffers is provided by concrete implementations"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+
+    def newInfo(self, **kw):
+        kw.update(timestamp=self.newTimestamp())
+        return kw
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Event Root to coordinate the EventSources with the event Handlers
