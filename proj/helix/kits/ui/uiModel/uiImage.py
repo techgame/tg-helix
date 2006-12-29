@@ -66,7 +66,7 @@ class UITexture(UIItem):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIImage(UIWidget):
-    viewVisitKeys = ["UITexture"]
+    viewVisitKeys = ["UIImage"]
 
     def __init__(self, image=None, **kwattr):
         super(UIImage, self).__init__()
