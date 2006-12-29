@@ -127,7 +127,7 @@ class TextBufferedDisplay(object):
         buff.sendData(geometry)
         buff.unbind()
 
-    def render(self, glColor4f=gl.glColor4f):
+    def render(self):
         geom = self.geometry
         if not geom: return
 

@@ -12,7 +12,8 @@
 
 from TG.observing import ObservableDict
 from .uiBase import UIItem, UIItemWithBox, glData, numpy
-from .uiWidgets import UIWidget, UIImage
+from .uiWidgets import UIWidget
+from .uiImage import UIImage
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Button

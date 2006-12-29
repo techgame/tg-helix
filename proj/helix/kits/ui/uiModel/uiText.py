@@ -62,6 +62,8 @@ class UIText(UIWidget):
         if font is not None:
             self.font = font
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     _font = None
     def getFont(self):
         return self._font

@@ -10,8 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import PIL.Image
-
 from .uiBase import UIItem, UIItemWithBox, glData, numpy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,53 +24,4 @@ class UIWidget(UIItemWithBox):
 
 class UIPanel(UIWidget):
     viewVisitKeys = ["UIPanel"]
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Images
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class UIImage(UIWidget):
-    viewVisitKeys = ["UIImage"]
-
-    def __init__(self, image=None, **kwattr):
-        super(UIImage, self).__init__()
-
-        if image is not None:
-            self.loadImage(image)
-
-        if kwattr:
-            self.set(kwattr)
-
-    openImage = staticmethod(PIL.Image.open)
-    def loadImage(self, image, forceSize=None):
-        if isinstance(image, basestring):
-            image = self.openImage(image)
-        self.image = image
-
-    _image = None
-    def getImage(self):
-        return self._image
-    def setImage(self, image):
-        self._image = image
-        self.box.size.set(image.size)
-    image = property(getImage, setImage)
-
-    def resizeImage(self, size):
-        self.image = self.image.resize(size)
-
-    def premultiply(self):
-        image = self.image
-        bands = image.getbands()
-        assert bands[-1] == 'A', bands
-
-        imageData = self.image.getdata()
-
-        a = imageData.getband(len(bands)-1)
-        
-        for idx in xrange(len(bands)-1):
-            premult = a.chop_multiply(imageData.getband(idx))
-            imageData.putband(premult, idx)
-
-        self.image = image
-        return self
 
