@@ -13,7 +13,7 @@
 from TG.openGL.data import Rect
 
 import numpy
-from numpy import vstack, zeros_like, floor
+from numpy import vstack, zeros_like, floor, ceil
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -27,8 +27,14 @@ class Cell(object):
         self.minSize = numpy.array(minSize)
         self.maxSize = numpy.array(maxSize)
 
+    def adjustAxisSize(self, axisSize, axis):
+        maxSize = self.maxSize
+        idx = (maxSize > 0) & (maxSize < axisSize)
+        axisSize[idx] = maxSize[idx]
+        return axisSize
+
     def layoutIn(self, pos, size):
-        self.box = Rect.fromPosSize(pos, size)
+        self.box = Rect.fromPosSize(ceil(pos), floor(size))
         print self.weight, self.box
         return self.box.size
 
@@ -38,69 +44,78 @@ class LayoutBase(object):
 
 class AxisLayout(object):
     axis = numpy.array([1,0,0], 'b')
+    _passToken = 0
     def layout(self, cells, box):
+        passToken = self._passToken + 1
+        self._passToken = passToken
+
         # determin hidden
-        visCells = self.cellsVisible(cells)
+        visCells = self.cellsVisible(cells, passToken)
 
         # determin minsize
-        weights, minSizes, maxSizes = self.cellsStats(visCells)
+        weights, minSizes = self.cellsStats(visCells, passToken)
 
         axis = self.axis
-        nonAxisSize = (1-axis)*box.size
 
         minSizes *= axis
-        maxSizes *= axis
         availSize = (axis*box.size) - minSizes.sum(0)
 
         weightSum = weights.sum()
-        axisSize = (minSizes + weights*availSize/weightSum)
+        axisSizes = minSizes + weights*availSize/weightSum
 
-        # now we deal with max sizes that have been exceeded, redistributing
-        # them to other items
-        idxMaxSizes = (weights > 0).any(-1) & (maxSizes > 0).any(-1)
-        while True:
-            idxOverage = idxMaxSizes & (axisSize > maxSizes).any(-1)
-            if not idxOverage.any():
+        # allow cells to adjust for maxsize, rounding, etc
+        for x in xrange(10): # max of ten tries
+            adjSizes = self.cellsAdjustedSize(visCells, passToken, axisSizes, axis)
+            idxAdj = (adjSizes != 0).any(-1)
+            if not idxAdj.any():
                 break
 
-            deltaWeights = weights[idxOverage].sum()
-            weights[idxOverage] = 0
+            axisSizes -= adjSizes
+            availSize = adjSizes.sum(0)
 
-            deltaSize = axisSize[idxOverage] - maxSizes[idxOverage]
-            axisSize[idxOverage] -= deltaSize
+            weightSum -= weights[idxAdj].sum()
+            weights[idxAdj] = 0
 
-            weightSum -= deltaWeights
             if weightSum <= 0:
-                # we can't fill up the layout because we've run out of cells to grow
                 break
 
-            availSize = deltaSize.sum(0)
-            axisSize += weights*availSize/weightSum
+            axisSizes += weights*availSize/weightSum
 
-        # trim the axisSize to whole integers
-        axisSize = floor(axisSize)
+        fpos, fsize = self.cellsLayoutIn(visCells, passToken, axisSizes, axis, box)
 
-        pos = box.pos.copy()
-        # let each cell know it's new pos and size
-        for idx, c in enumerate(visCells):
-            c.layoutIn(pos, axisSize[idx] + nonAxisSize)
-            pos += axisSize[idx]
+        return box.fromPosSize(fpos, fsize)
 
-    def cellsVisible(self, cells):
+    def cellsVisible(self, cells, passToken):
         isItemVisible = self.isItemVisible
-        return [i for i in cells if isItemVisible(i)]
+        return [c for c in cells if isItemVisible(c)]
     def isItemVisible(self, item):
         return item.visible
 
-    def cellsStats(self, cells):
+    def cellsStats(self, cells, passToken):
         minSizes = []
-        maxSizes = []
         weights = []
-        for i in cells:
-            weights.append(i.weight)
-            minSizes.append(i.minSize)
-            maxSizes.append(i.maxSize)
-        return (vstack(weights), vstack(minSizes), vstack(maxSizes))
+        for c in cells:
+            weights.append(c.weight)
+            minSizes.append(c.minSize)
+        return (vstack(weights), vstack(minSizes))
+
+    def cellsAdjustedSize(self, cells, passToken, axisSizes, axis):
+        adjSizes = []
+        for c, asize in zip(cells, axisSizes):
+            adjSizes.append(asize - c.adjustAxisSize(asize.copy(), axis))
+        return vstack(adjSizes)
+
+    def cellsLayoutIn(self, cells, passToken, axisSizes, axis, box):
+        nonAxisSize = (1-axis)*box.size
+        pos = box.pos.copy()
+
+        # let each cell know it's new pos and size
+        for idx, c in enumerate(cells):
+            c.layoutIn(pos, axisSizes[idx] + nonAxisSize)
+            pos += axisSizes[idx]
+
+        return box.pos, (axisSizes.sum(0) + nonAxisSize)
+
 
 class HLayout(AxisLayout):
     axis = numpy.array([1,0,0], 'b')
@@ -116,10 +131,10 @@ class DLayout(AxisLayout):
 if __name__=='__main__':
     cells = [
         Cell(0, (100, 100, 0)),
-        Cell(1, (100, 100, 0), (200,200,0)),
-        Cell(0, (100, 100, 0)),
+        Cell(1, (100, 100, 0)),# (200,200,0)),
+        Cell(.5, (100, 100, 0)),
         ]
 
     vl = VLayout()
-    vl.layout(cells, Rect.fromPosSize((200,200), (800, 800)))
+    print vl.layout(cells, Rect.fromPosSize((200,200), (800, 800)))
 
