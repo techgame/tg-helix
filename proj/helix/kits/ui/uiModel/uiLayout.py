@@ -10,62 +10,68 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.openGL.data import Rect
+from TG.observing import ObservableObjectWithProp
+from TG.openGL.data import Rect, Vector
 
 import numpy
-from numpy import vstack, zeros_like, floor, ceil
+from numpy import vstack, zeros_like
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Definitions 
+#~ Layouts
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Cell(object):
-    visible = True
-
-    def __init__(self, weight=0, minSize=(0,0,0), maxSize=(0,0,0)):
-        self.weight = weight
-        self.minSize = numpy.array(minSize)
-        self.maxSize = numpy.array(maxSize)
-
-    def adjustAxisSize(self, axisSize, axis):
-        maxSize = self.maxSize
-        idx = (maxSize > 0) & (maxSize < axisSize)
-        axisSize[idx] = maxSize[idx]
-        return axisSize
-
-    def layoutIn(self, pos, size):
-        self.box = Rect.fromPosSize(ceil(pos), floor(size))
-        print self.weight, self.box
-        return self.box.size
-
-class LayoutBase(object):
+class LayoutBase(ObservableObjectWithProp):
     def layout(self, cells, box):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
-class AxisLayout(object):
-    axis = numpy.array([1,0,0], 'b')
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     _passToken = 0
-    def layout(self, cells, box):
+    def nextPassToken(self):
         passToken = self._passToken + 1
         self._passToken = passToken
+        return (self, passToken)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def cellsVisible(self, cells):
+        return [c for c in cells if c.visible]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Axis Layouts
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class AxisLayout(LayoutBase):
+    axis = Vector.property([0,0,0], dtype='3b')
+    outsideBorders = Vector.property([0,0,0], dtype='3b')
+    insideBorders = Vector.property([0,0,0], dtype='3b')
+
+    nAdjustTries = 3
+    _passToken = 0
+    def layout(self, cells, box, trial=False):
+        passToken = self.nextPassToken()
 
         # determin hidden
-        visCells = self.cellsVisible(cells, passToken)
+        visCells = self.cellsVisible(cells)
+        axisSizes = self.axisSizesFor(visCells, passToken, box)
+        fpos, fsize = self.layoutCellsIn(visCells, passToken, axisSizes, box)
 
+        return box.fromPosSize(fpos, fsize)
+
+    def axisSizesFor(self, cells, passToken, box):
         # determin minsize
-        weights, minSizes = self.cellsStats(visCells, passToken)
-
         axis = self.axis
+        weights, minSizes = self.cellsStats(cells)
 
-        minSizes *= axis
-        availSize = (axis*box.size) - minSizes.sum(0)
+        borders = axis*(2*self.outsideBorders + (len(cells)-1)*self.insideBorders)
+        availSize = axis*box.size - borders - minSizes.sum(0)
 
         weightSum = weights.sum()
         axisSizes = minSizes + weights*availSize/weightSum
 
         # allow cells to adjust for maxsize, rounding, etc
-        for x in xrange(10): # max of ten tries
-            adjSizes = self.cellsAdjustedSize(visCells, passToken, axisSizes, axis)
+        for x in xrange(self.nAdjustTries): # max of ten tries
+            adjSizes = self.cellsAdjustedSize(cells, passToken, axisSizes)
             idxAdj = (adjSizes != 0).any(-1)
             if not idxAdj.any():
                 break
@@ -81,60 +87,78 @@ class AxisLayout(object):
 
             axisSizes += weights*availSize/weightSum
 
-        fpos, fsize = self.cellsLayoutIn(visCells, passToken, axisSizes, axis, box)
+        return axisSizes
 
-        return box.fromPosSize(fpos, fsize)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def cellsVisible(self, cells, passToken):
-        isItemVisible = self.isItemVisible
-        return [c for c in cells if isItemVisible(c)]
-    def isItemVisible(self, item):
-        return item.visible
-
-    def cellsStats(self, cells, passToken):
+    def cellsStats(self, cells):
+        axis = self.axis
         minSizes = []
         weights = []
         for c in cells:
-            weights.append(c.weight)
-            minSizes.append(c.minSize)
+            weights.append(c.weight * axis)
+            minSizes.append(c.minSize * axis)
         return (vstack(weights), vstack(minSizes))
 
-    def cellsAdjustedSize(self, cells, passToken, axisSizes, axis):
+    def cellsAdjustedSize(self, cells, passToken, axisSizes):
         adjSizes = []
         for c, asize in zip(cells, axisSizes):
-            adjSizes.append(asize - c.adjustAxisSize(asize.copy(), axis))
+            adjSizes.append(asize - c.adjustAxisSize(asize.copy(), passToken))
         return vstack(adjSizes)
 
-    def cellsLayoutIn(self, cells, passToken, axisSizes, axis, box):
-        nonAxisSize = (1-axis)*box.size
-        pos = box.pos.copy()
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def layoutCellsIn(self, cells, passToken, axisSizes, box):
+        axis = self.axis
+        outsideBorders = self.outsideBorders
+        nonAxisSize = (1-axis)*(box.size - outsideBorders)
+        pos = box.pos + outsideBorders
+        axisBorders = axis*self.insideBorders
 
         # let each cell know it's new pos and size
         for idx, c in enumerate(cells):
-            c.layoutIn(pos, axisSizes[idx] + nonAxisSize)
-            pos += axisSizes[idx]
+            c.layoutIn(pos, axisSizes[idx] + nonAxisSize, passToken)
+            pos += axisSizes[idx] + axisBorders
 
-        return box.pos, (axisSizes.sum(0) + nonAxisSize)
+        lPos = box.pos
+        # track size of all cells, and add the non-axis size to fill out our total size
+        lSize = (axisSizes.sum(0) + nonAxisSize)
+        # now account for the borders
+        lSize += outsideBorders + axis*outsideBorders + (len(cells)-1)*axisBorders
+        return lPos, lSize
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HLayout(AxisLayout):
-    axis = numpy.array([1,0,0], 'b')
+    axis = [1,0,0]
 class VLayout(AxisLayout):
-    axis = numpy.array([0,1,0], 'b')
+    axis = [0,1,0]
 class DLayout(AxisLayout):
-    axis = numpy.array([0,0,1], 'b')
+    axis = [0,0,1]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if __name__=='__main__':
+    from uiLayoutCells import *
     cells = [
-        Cell(0, (100, 100, 0)),
-        Cell(1, (100, 100, 0)),# (200,200,0)),
-        Cell(.5, (100, 100, 0)),
+        Cell(0, 100),
+        MaxSizeCell(1, 100, 300),
+        Cell(1, 100),
         ]
 
     vl = VLayout()
-    print vl.layout(cells, Rect.fromPosSize((200,200), (800, 800)))
+    vl.insideBorders.set(10)
+    vl.outsideBorders.set((50, 50, 0))
+
+    box = Rect.fromPosSize((0,0), (1000, 1000))
+    for p in xrange(3):
+        lb = vl.layout(cells, box)
+        print
+        print 'box:', box
+        print '  layout:', lb
+        for i, c in enumerate(cells):
+            print '    cell %s:' % i, c.box
+        print
 
