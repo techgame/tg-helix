@@ -26,16 +26,18 @@ class Cell(ObservableObjectWithProp):
     minSize = Vector.property((0,0,0), dtype='3f')
 
     def __init__(self, weight=0, min=None):
+        self.box = Rect()
         self.weight.set(weight)
 
         if min is not None:
             self.minSize.set(min)
 
-    def adjustAxisSize(self, axisSize, axis, passToken=0):
+    def adjustAxisSize(self, axisSize, axis, passToken=0, isTrial=False):
         return axisSize
 
     def layoutIn(self, pos, size, passToken=0):
-        self.box = Rect.fromPosSize(ceil(pos), floor(size))
+        #self.box = Rect.fromPosSize(ceil(pos), floor(size))
+        self.box = (ceil(pos), floor(size))
 
 class MaxSizeCell(Cell):
     maxSize = Vector.property((0,0,0), dtype='3f')
@@ -45,7 +47,7 @@ class MaxSizeCell(Cell):
         if max is not None:
             self.maxSize.set(max)
 
-    def adjustAxisSize(self, axisSize, axis, passToken=0):
+    def adjustAxisSize(self, axisSize, axis, passToken=0, isTrial=False):
         maxSize = self.maxSize
         idx = (maxSize > 0) & (maxSize < axisSize)
         axisSize[idx] = maxSize[idx]

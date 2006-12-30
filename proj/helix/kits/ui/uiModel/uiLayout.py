@@ -6,6 +6,8 @@
 ##~ found in the LICENSE file included with this distribution.    ##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
+#FIXME: Apparently Rects are very time expensive, which is a big speed problem
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,7 +23,11 @@ from numpy import vstack, zeros_like
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class LayoutBase(ObservableObjectWithProp):
-    def layout(self, cells, box):
+    _nAdjustTries = 3
+    outside = Vector.property([0,0,0], dtype='3b')
+    inside = Vector.property([0,0,0], dtype='3b')
+
+    def layout(self, cells, box, isTrial=False):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,35 +49,41 @@ class LayoutBase(ObservableObjectWithProp):
 
 class AxisLayout(LayoutBase):
     axis = Vector.property([0,0,0], dtype='3b')
-    outsideBorders = Vector.property([0,0,0], dtype='3b')
-    insideBorders = Vector.property([0,0,0], dtype='3b')
 
-    nAdjustTries = 3
-    _passToken = 0
-    def layout(self, cells, box, trial=False):
+    def layout(self, cells, box, isTrial=False):
+        if not cells:
+            #return box.fromPosSize(box.pos, 0)
+            return box.pos, box.size*0 
+
         passToken = self.nextPassToken()
 
         # determin hidden
         visCells = self.cellsVisible(cells)
-        axisSizes = self.axisSizesFor(visCells, passToken, box)
-        fpos, fsize = self.layoutCellsIn(visCells, passToken, axisSizes, box)
+        axisSizes = self.axisSizesFor(visCells, passToken, box, isTrial)
+        lpos, lsize = self.layoutCellsIn(visCells, passToken, axisSizes, box, isTrial)
 
-        return box.fromPosSize(fpos, fsize)
+        #return box.fromPosSize(lpos, lsize)
+        return lpos, lsize
 
-    def axisSizesFor(self, cells, passToken, box):
+    def axisSizesFor(self, cells, passToken, box, isTrial=False):
         # determin minsize
         axis = self.axis
         weights, minSizes = self.cellsStats(cells)
 
-        borders = axis*(2*self.outsideBorders + (len(cells)-1)*self.insideBorders)
+        borders = axis*(2*self.outside + (len(cells)-1)*self.inside)
         availSize = axis*box.size - borders - minSizes.sum(0)
 
         weightSum = weights.sum()
         axisSizes = minSizes + weights*availSize/weightSum
 
+        #axisSizes = self.axisSizeAdjust(cells, passToken, box, weights, axisSizes, isTrial)
+        return axisSizes
+
+    def axisSizeAdjust(self, cells, passToken, box, weights, axisSizes, isTrial=False):
+        weightSum = weights.sum()
         # allow cells to adjust for maxsize, rounding, etc
-        for x in xrange(self.nAdjustTries): # max of ten tries
-            adjSizes = self.cellsAdjustedSize(cells, passToken, axisSizes)
+        for x in xrange(self._nAdjustTries):
+            adjSizes = self.cellsAdjustedSize(cells, passToken, axisSizes, isTrial)
             idxAdj = (adjSizes != 0).any(-1)
             if not idxAdj.any():
                 break
@@ -91,6 +103,29 @@ class AxisLayout(LayoutBase):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def layoutCellsIn(self, cells, passToken, axisSizes, box, isTrial=False):
+        axis = self.axis
+        outside = self.outside
+        nonAxisSize = (1-axis)*(box.size - outside)
+        pos = box.pos + outside
+        axisBorders = axis*self.inside
+
+        if isTrial:
+            pos += axisSizes.sum(0) + (len(axisSizes)-1)*axisBorders
+
+        else:
+            # let each cell know it's new pos and size
+            for idx, c in enumerate(cells):
+                c.layoutIn(pos, axisSizes[idx] + nonAxisSize, passToken)
+                pos += axisSizes[idx] + axisBorders
+            pos -= axisBorders
+
+        lPos = box.pos
+        lSize = pos + axis*outside + nonAxisSize
+        return lPos, lSize
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     def cellsStats(self, cells):
         axis = self.axis
         minSizes = []
@@ -100,32 +135,12 @@ class AxisLayout(LayoutBase):
             minSizes.append(c.minSize * axis)
         return (vstack(weights), vstack(minSizes))
 
-    def cellsAdjustedSize(self, cells, passToken, axisSizes):
+    def cellsAdjustedSize(self, cells, passToken, axisSizes, isTrial=False):
         adjSizes = []
-        for c, asize in zip(cells, axisSizes):
-            adjSizes.append(asize - c.adjustAxisSize(asize.copy(), passToken))
-        return vstack(adjSizes)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def layoutCellsIn(self, cells, passToken, axisSizes, box):
         axis = self.axis
-        outsideBorders = self.outsideBorders
-        nonAxisSize = (1-axis)*(box.size - outsideBorders)
-        pos = box.pos + outsideBorders
-        axisBorders = axis*self.insideBorders
-
-        # let each cell know it's new pos and size
-        for idx, c in enumerate(cells):
-            c.layoutIn(pos, axisSizes[idx] + nonAxisSize, passToken)
-            pos += axisSizes[idx] + axisBorders
-
-        lPos = box.pos
-        # track size of all cells, and add the non-axis size to fill out our total size
-        lSize = (axisSizes.sum(0) + nonAxisSize)
-        # now account for the borders
-        lSize += outsideBorders + axis*outsideBorders + (len(cells)-1)*axisBorders
-        return lPos, lSize
+        for c, asize in zip(cells, axisSizes):
+            adjSizes.append(asize - c.adjustAxisSize(asize.copy(), axis, passToken, isTrial))
+        return vstack(adjSizes)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -149,16 +164,40 @@ if __name__=='__main__':
         ]
 
     vl = VLayout()
-    vl.insideBorders.set(10)
-    vl.outsideBorders.set((50, 50, 0))
+    vl.inside.set(10)
+    vl.outside.set((50, 50, 0))
 
     box = Rect.fromPosSize((0,0), (1000, 1000))
-    for p in xrange(3):
-        lb = vl.layout(cells, box)
-        print
-        print 'box:', box
-        print '  layout:', lb
-        for i, c in enumerate(cells):
-            print '    cell %s:' % i, c.box
-        print
+    if 0:
+        for p in xrange(4):
+            if p:
+                box.size[:2] = 1000 + (p>>1)*200
+            lb = vl.layout(cells, box, not p&1)
+            print
+            print 'box:', box
+            print '  layout:', lb
+            for i, c in enumerate(cells):
+                print '    cell %s:' % i, c.box
+            print
+
+    import time
+
+    n = 100
+    box.size *= 5
+    cells *= 10
+    cn = max(1, len(cells)*n)
+
+    if 1:
+        s = time.time()
+        for p in xrange(n):
+            vl.layout(cells, box, False)
+        dt = time.time() - s
+        print dt, dt/cn, cn/dt
+
+    if 1:
+        s = time.time()
+        for p in xrange(n):
+            vl.layout(cells, box, True)
+        dt = time.time() - s
+        print dt, dt/cn, cn/dt
 
