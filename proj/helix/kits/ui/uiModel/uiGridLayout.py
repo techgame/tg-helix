@@ -38,8 +38,13 @@ class GridLayout(LayoutBase):
         rowSizes, colSizes = self.rowColSizesFor(cells, box, isTrial)
 
         iCells = iter(visCells)
-        for (cellPos, cellSize), c in izip(self.iterCellBoxes(visCells, box, rowSizes, colSizes, isTrial), iCells):
+        iCellBoxes = self.iterCellBoxes(visCells, box, rowSizes, colSizes, isTrial)
+
+        # let cells lay themselves out in their boxes
+        for (cellPos, cellSize), c in izip(iCellBoxes, iCells):
             c.layoutIn(cellPos, cellSize)
+
+        # hide cells that have no box
         for c in iCells:
             c.layoutHide()
 
@@ -54,13 +59,18 @@ class GridLayout(LayoutBase):
 
         posRow = posStart.copy()
         for row in rowSizes:
+            # adv down by row
             posRow -= row
 
             posCol = posRow.copy()
             for col in colSizes:
+                # yield cell box
                 yield posCol.copy(), row + col
+
+                # adv right by col + inside border
                 posCol += col + advCol
 
+            # adv down by inside border
             posRow -= advRow
 
     def rowColSizesFor(self, cells, box, isTrial=False):
@@ -74,7 +84,9 @@ class GridLayout(LayoutBase):
         availSize = box.size - borders 
         cellSize = (availSize / (nCols, nRows, 1)).reshape((1,3))
 
+        # repeat rowSize nRows times
         rowSizes = (cellSize*vaxis).repeat(nRows, 0)
+        # repeat colSize nCols times
         colSizes = (cellSize*haxis).repeat(nCols, 0)
         return rowSizes, colSizes
 
@@ -106,17 +118,27 @@ class FlexGridLayout(GridLayout):
         # subtract the already allocated minsize
         availSize -= rowMinSizes.sum(0) + colMinSizes.sum(0)
 
-        if availSize.any():
-            rowWeightSum = rowWeights.sum()
-            if (rowWeightSum > 0) and (availSize*vaxis).any():
-                # distribute weights across rows
-                rowAdj = availSize*rowWeights/rowWeightSum
+        if (availSize > 0).any():
+            if (availSize*vaxis > 0).any():
+                rowWeightSum = rowWeights.sum()
+                if (rowWeightSum > 0):
+                    # distribute weights across rows
+                    rowAdj = availSize*rowWeights/rowWeightSum
+                else:
+                    # distribute evenly across rows
+                    rowAdj = vaxis*availSize/nRows
+
                 rowSizes += rowAdj
 
-            colWeightSum = colWeights.sum()
-            if (colWeightSum > 0) and (availSize*haxis).any():
-                # distribute weights across columns
-                colAdj = availSize*colWeights/colWeightSum
+            if (availSize*haxis > 0).any():
+                colWeightSum = colWeights.sum()
+                if (colWeightSum > 0):
+                    # distribute weights across columns
+                    colAdj = availSize*colWeights/colWeightSum
+                else:
+                    # distribute evenly across columns
+                    colAdj = haxis*availSize/nCols
+
                 colSizes += colAdj
 
         return rowSizes, colSizes
@@ -128,6 +150,7 @@ class FlexGridLayout(GridLayout):
         minSizes = zeros((nRows, nCols, 3), 'f')
         weights = zeros((nRows, nCols, 3), 'f')
 
+        # grab cell info into minSize and weights arrays
         idxWalk = ndindex(weights.shape[:-1])
         for c, idx in izip(cells, idxWalk):
             minSizes[idx] = c.minSize
@@ -141,15 +164,20 @@ class FlexGridLayout(GridLayout):
 
 if __name__=='__main__':
     from uiLayoutCells import *
-    cells = [Cell((i%2, (i//4)%2), (100, 100)) for i in xrange(16)]
+    
+    if 1: gl = FlexGridLayout()
+    else: gl = GridLayout()
 
-    vl = FlexGridLayout()
-    vl.inside.set(10)
-    vl.outside.set((50, 50, 0))
+    if 1: cells = [Cell((i%2, (i//4)%2), (100, 100)) for i in xrange(16)]
+    else: cells = [Cell() for i in xrange(16)]
+
+    if 1:
+        gl.inside.set(10)
+        gl.outside.set((50, 50, 0))
 
     box = Rect.fromPosSize((0,0), (1000, 1000))
     if 1:
-        lb = vl.layout(cells, box)
+        lb = gl.layout(cells, box)
         print
         print 'box:', box
         print '  layout:', lb
