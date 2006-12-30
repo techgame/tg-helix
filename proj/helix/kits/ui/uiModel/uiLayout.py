@@ -12,6 +12,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from itertools import izip
+
 import numpy
 from numpy import vstack, zeros_like
 
@@ -46,13 +48,25 @@ class AxisLayout(LayoutBase):
         if not cells:
             return box.fromPosSize(box.pos, 0)
 
-        # determin hidden
+        # determin visible cells
         visCells = self.cellsVisible(cells)
 
+        # determin sizes for cells
         axisSizes = self.axisSizesFor(visCells, box, isTrial)
-        lpos, lsize = self.layoutCellsIn(visCells, axisSizes, box, isTrial)
 
-        return box.fromPosSize(lpos, lsize)
+        if not isTrial:
+            iCells = iter(visCells)
+            iCellBoxes = self.iterCellBoxes(visCells, box, axisSizes, isTrial)
+
+            # let cells lay themselves out in their boxes
+            for (cellPos, cellSize), c in izip(iCellBoxes, iCells):
+                c.layoutIn(cellPos, cellSize)
+
+            # hide cells that have no box
+            for c in iCells:
+                c.layoutHide()
+
+        return self.layoutBox(visCells, box, axisSizes, isTrial)
 
     def axisSizesFor(self, cells, box, isTrial=False):
         # determin minsize
@@ -109,26 +123,31 @@ class AxisLayout(LayoutBase):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def layoutCellsIn(self, cells, axisSizes, box, isTrial=False):
+    def iterCellBoxes(self, cells, box, axisSizes, isTrial=False):
         axis = self.axis
         outside = self.outside
         nonAxisSize = (1-axis)*(box.size - outside)
         pos = box.pos + outside
         axisBorders = axis*self.inside
 
-        if isTrial:
-            pos += axisSizes.sum(0) + (len(axisSizes)-1)*axisBorders
+        # let each cell know it's new pos and size
+        for asize in axisSizes:
+            yield pos.copy(), asize + nonAxisSize
 
-        else:
-            # let each cell know it's new pos and size
-            for idx, c in enumerate(cells):
-                c.layoutIn(pos.copy(), axisSizes[idx] + nonAxisSize)
-                pos += axisSizes[idx] + axisBorders
-            pos -= axisBorders
+            pos += asize + axisBorders
+        pos -= axisBorders
+
+    def layoutBox(self, visCells, box, axisSizes, isTrial=False):
+        axis = self.axis
 
         lPos = box.pos
-        lSize = pos + axis*outside + nonAxisSize
-        return lPos, lSize
+        # non-axis size
+        lSize = (1-axis)*box.size
+        # plus borders along axis
+        lSize += axis*(2*self.outside + (len(axisSizes)-1)*self.inside)
+        # plus axis size
+        lSize += axisSizes.sum(0)
+        return box.fromPosSize(lPos, lSize)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -164,9 +183,9 @@ class DLayout(AxisLayout):
 if __name__=='__main__':
     from uiLayoutCells import *
     cells = [
-        Cell(0, 400),
-        MaxSizeCell(1, 400, 300),
-        Cell(1, 400),
+        Cell(0, 200),
+        MaxSizeCell(1, 200, 300),
+        Cell(1, 200),
         ]
 
     vl = VLayout()
@@ -175,10 +194,8 @@ if __name__=='__main__':
 
     box = Rect.fromPosSize((0,0), (1000, 1000))
     if 1:
-        for p in xrange(4):
-            if p:
-                box.size[:2] = 1000 + (p>>1)*200
-            lb = vl.layout(cells, box, not p&1)
+        for p in xrange(2):
+            lb = vl.layout(cells, box, not p%2)
             print
             print 'box:', box
             print '  layout:', lb

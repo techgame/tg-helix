@@ -11,6 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from itertools import izip
+
 import numpy
 from numpy import zeros, ndindex, outer
 
@@ -22,34 +23,49 @@ from uiLayout import LayoutBase
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class GridLayout(LayoutBase):
-    gridCells = (3, 4)
+    nRows = nCols = None
 
     _haxis = numpy.array([1,0,0], 'b')
     _vaxis = numpy.array([0,1,0], 'b')
     _daxis = numpy.array([0,0,1], 'b')
 
+    def __init__(self, nRows=2, nCols=2):
+        self.nRows = nRows
+        self.nCols = nCols
+
     def layout(self, cells, box, isTrial=False):
         if not cells:
             return box.fromPosSize(box.pos, 0)
 
+        # determin visible cells
         visCells = self.cellsVisible(cells)
 
         # figure out what our row and column sizes should be from the cells
-        rowSizes, colSizes = self.rowColSizesFor(cells, box, isTrial)
+        rowSizes, colSizes = self.rowColSizesFor(visCells, box, isTrial)
 
-        iCells = iter(visCells)
-        iCellBoxes = self.iterCellBoxes(visCells, box, rowSizes, colSizes, isTrial)
+        if not isTrial:
+            iCells = iter(visCells)
+            iCellBoxes = self.iterCellBoxes(visCells, box, rowSizes, colSizes, isTrial)
 
-        # let cells lay themselves out in their boxes
-        for (cellPos, cellSize), c in izip(iCellBoxes, iCells):
-            c.layoutIn(cellPos, cellSize)
+            # let cells lay themselves out in their boxes
+            for (cellPos, cellSize), c in izip(iCellBoxes, iCells):
+                c.layoutIn(cellPos, cellSize)
 
-        # hide cells that have no box
-        for c in iCells:
-            c.layoutHide()
+            # hide cells that have no box
+            for c in iCells:
+                c.layoutHide()
 
-        return box.copy()
+        return self.layoutBox(visCells, box, rowSizes, colSizes, isTrial)
         
+    def layoutBox(self, visCells, box, rowSizes, colSizes, isTrial=False):
+        nRows = self.nRows; nCols = self.nCols
+        lPos = box.pos
+        # row and col sizes
+        lSize = rowSizes.sum(0) + colSizes.sum(0)
+        # plus borders along axis
+        lSize += 2*self.outside + (nCols-1, nRows-1, 0)*self.inside
+        return box.fromPosSize(lPos, lSize)
+
     def iterCellBoxes(self, cells, box, rowSizes, colSizes, isTrial=False):
         posStart = box.pos + box.size*self._vaxis
         # come right and down by the outside border
@@ -75,7 +91,7 @@ class GridLayout(LayoutBase):
 
     def rowColSizesFor(self, cells, box, isTrial=False):
         vaxis = self._vaxis; haxis = self._haxis
-        nRows, nCols = self.gridCells
+        nRows = self.nRows; nCols = self.nCols
 
         # figure out how much room the borders take
         borders = 2*self.outside + (nCols-1, nRows-1, 0)*self.inside
@@ -95,7 +111,7 @@ class GridLayout(LayoutBase):
 class FlexGridLayout(GridLayout):
     def rowColSizesFor(self, cells, box, isTrial=False):
         vaxis = self._vaxis; haxis = self._haxis
-        nRows, nCols = self.gridCells
+        nRows = self.nRows; nCols = self.nCols
 
         # determin weights and sizes for rows and columns
         weights, minSizes = self.cellsStats(cells)
@@ -144,9 +160,7 @@ class FlexGridLayout(GridLayout):
         return rowSizes, colSizes
 
     def cellsStats(self, cells):
-        gridCells = self.gridCells
-
-        nRows, nCols = gridCells[:2]
+        nRows = self.nRows; nCols = self.nCols
         minSizes = zeros((nRows, nCols, 3), 'f')
         weights = zeros((nRows, nCols, 3), 'f')
 
@@ -165,11 +179,14 @@ class FlexGridLayout(GridLayout):
 if __name__=='__main__':
     from uiLayoutCells import *
     
-    if 1: gl = FlexGridLayout()
-    else: gl = GridLayout()
+    nRows = 2
+    nCols = 4
 
-    if 1: cells = [Cell((i%2, (i//4)%2), (100, 100)) for i in xrange(16)]
-    else: cells = [Cell() for i in xrange(16)]
+    if 1: gl = FlexGridLayout(nRows, nCols)
+    else: gl = GridLayout(nRows, nCols)
+
+    if 1: cells = [Cell((i%2, (i//4)%2), (100, 100)) for i in xrange(nRows*nCols)]
+    else: cells = [Cell() for i in xrange(nRows*nCols)]
 
     if 1:
         gl.inside.set(10)
@@ -177,11 +194,12 @@ if __name__=='__main__':
 
     box = Rect.fromPosSize((0,0), (1000, 1000))
     if 1:
-        lb = gl.layout(cells, box)
-        print
-        print 'box:', box
-        print '  layout:', lb
-        for i, c in enumerate(cells):
-            print '    cell %s:' % i, c.box
-        print
+        for p in xrange(2):
+            lb = gl.layout(cells, box, not p%2)
+            print
+            print 'box:', box
+            print '  layout:', lb
+            for i, c in enumerate(cells):
+                print '    cell %s:' % i, c.box
+            print
 
