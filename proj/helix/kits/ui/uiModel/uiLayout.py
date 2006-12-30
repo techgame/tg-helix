@@ -32,14 +32,6 @@ class LayoutBase(ObservableObjectWithProp):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    _passToken = 0
-    def nextPassToken(self):
-        passToken = self._passToken + 1
-        self._passToken = passToken
-        return (self, passToken)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     def cellsVisible(self, cells):
         return [c for c in cells if c.visible]
 
@@ -54,16 +46,15 @@ class AxisLayout(LayoutBase):
         if not cells:
             return box.fromPosSize(box.pos, 0)
 
-        passToken = self.nextPassToken()
-
         # determin hidden
         visCells = self.cellsVisible(cells)
-        axisSizes = self.axisSizesFor(visCells, passToken, box, isTrial)
-        lpos, lsize = self.layoutCellsIn(visCells, passToken, axisSizes, box, isTrial)
+
+        axisSizes = self.axisSizesFor(visCells, box, isTrial)
+        lpos, lsize = self.layoutCellsIn(visCells, axisSizes, box, isTrial)
 
         return box.fromPosSize(lpos, lsize)
 
-    def axisSizesFor(self, cells, passToken, box, isTrial=False):
+    def axisSizesFor(self, cells, box, isTrial=False):
         # determin minsize
         axis = self.axis
         weights, minSizes = self.cellsStats(cells)
@@ -79,18 +70,19 @@ class AxisLayout(LayoutBase):
         # if we have any space left over, distribute to weighted items
         if (availSize >= 0).all():
             weightSum = weights.sum()
-            axisSizes += weights*availSize/weightSum
+            if weightSum > 0:
+                axisSizes += weights*availSize/weightSum
 
         # allow the cells to negotiate space and adjust to it
-        axisSizes = self.axisSizeAdjust(cells, passToken, box, weights, axisSizes, isTrial)
+        axisSizes = self.axisSizeAdjust(cells, box, weights, axisSizes, isTrial)
         return axisSizes
 
-    def axisSizeAdjust(self, cells, passToken, box, weights, axisSizes, isTrial=False):
+    def axisSizeAdjust(self, cells, box, weights, axisSizes, isTrial=False):
         weightSum = weights.sum()
 
         for x in xrange(self._nAdjustTries):
             # allow cells to adjust for maxsize, rounding, etc
-            adjSizes = self.cellsAdjustedSize(cells, passToken, axisSizes, isTrial)
+            adjSizes = self.cellsAdjustedSize(cells, axisSizes, isTrial)
             idxAdj = (adjSizes != 0).any(-1)
             if not idxAdj.any():
                 # if none changed, we are done
@@ -106,18 +98,18 @@ class AxisLayout(LayoutBase):
             weightSum -= weights[idxAdj].sum()
             weights[idxAdj] = 0
 
-            if weightSum <= 0:
+            if weightSum > 0:
+                # distributed the available size to the remaining weighted items
+                axisSizes += weights*availSize/weightSum
+            else:
                 # if there are no more items to reweight, then we are done
                 break
-
-            # distributed the available size to the remaining weighted items
-            axisSizes += weights*availSize/weightSum
 
         return axisSizes
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def layoutCellsIn(self, cells, passToken, axisSizes, box, isTrial=False):
+    def layoutCellsIn(self, cells, axisSizes, box, isTrial=False):
         axis = self.axis
         outside = self.outside
         nonAxisSize = (1-axis)*(box.size - outside)
@@ -130,7 +122,7 @@ class AxisLayout(LayoutBase):
         else:
             # let each cell know it's new pos and size
             for idx, c in enumerate(cells):
-                c.layoutIn(pos.copy(), axisSizes[idx] + nonAxisSize, passToken)
+                c.layoutIn(pos.copy(), axisSizes[idx] + nonAxisSize)
                 pos += axisSizes[idx] + axisBorders
             pos -= axisBorders
 
@@ -149,11 +141,11 @@ class AxisLayout(LayoutBase):
             minSizes.append(c.minSize * axis)
         return (vstack(weights), vstack(minSizes))
 
-    def cellsAdjustedSize(self, cells, passToken, axisSizes, isTrial=False):
+    def cellsAdjustedSize(self, cells, axisSizes, isTrial=False):
         adjSizes = []
         axis = self.axis
         for c, asize in zip(cells, axisSizes):
-            adjSizes.append(asize - c.adjustAxisSize(asize.copy(), axis, passToken, isTrial))
+            adjSizes.append(asize - c.adjustAxisSize(asize.copy(), axis, isTrial))
         return vstack(adjSizes)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

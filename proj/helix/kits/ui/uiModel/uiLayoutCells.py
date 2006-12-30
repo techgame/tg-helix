@@ -32,10 +32,10 @@ class Cell(ObservableObjectWithProp):
         if min is not None:
             self.minSize.set(min)
 
-    def adjustAxisSize(self, axisSize, axis, passToken=0, isTrial=False):
+    def adjustAxisSize(self, axisSize, axis, isTrial=False):
         return axisSize
 
-    def layoutIn(self, pos, size, passToken=0):
+    def layoutIn(self, pos, size):
         self.box = Rect.fromPosSize(ceil(pos), floor(size))
 
     def layoutHide(self):
@@ -49,7 +49,7 @@ class MaxSizeCell(Cell):
         if max is not None:
             self.maxSize.set(max)
 
-    def adjustAxisSize(self, axisSize, axis, passToken=0, isTrial=False):
+    def adjustAxisSize(self, axisSize, axis, isTrial=False):
         maxSize = self.maxSize
         idx = (maxSize > 0) & (maxSize < axisSize)
         axisSize[idx] = maxSize[idx]
