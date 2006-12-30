@@ -12,11 +12,11 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableObjectWithProp
-from TG.openGL.data import Rect, Vector
-
 import numpy
 from numpy import vstack, zeros_like
+
+from TG.observing import ObservableObjectWithProp
+from TG.openGL.data import Rect, Vector
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Layouts
@@ -52,8 +52,7 @@ class AxisLayout(LayoutBase):
 
     def layout(self, cells, box, isTrial=False):
         if not cells:
-            #return box.fromPosSize(box.pos, 0)
-            return box.pos, box.size*0 
+            return box.fromPosSize(box.pos, 0)
 
         passToken = self.nextPassToken()
 
@@ -62,41 +61,56 @@ class AxisLayout(LayoutBase):
         axisSizes = self.axisSizesFor(visCells, passToken, box, isTrial)
         lpos, lsize = self.layoutCellsIn(visCells, passToken, axisSizes, box, isTrial)
 
-        #return box.fromPosSize(lpos, lsize)
-        return lpos, lsize
+        return box.fromPosSize(lpos, lsize)
 
     def axisSizesFor(self, cells, passToken, box, isTrial=False):
         # determin minsize
         axis = self.axis
         weights, minSizes = self.cellsStats(cells)
 
+        # calculate the total border size
         borders = axis*(2*self.outside + (len(cells)-1)*self.inside)
-        availSize = axis*box.size - borders - minSizes.sum(0)
+        availSize = axis*box.size - borders
 
-        weightSum = weights.sum()
-        axisSizes = minSizes + weights*availSize/weightSum
+        # now remove all the minSize items
+        axisSizes = minSizes.copy()
+        availSize -= axisSizes.sum(0)
 
-        #axisSizes = self.axisSizeAdjust(cells, passToken, box, weights, axisSizes, isTrial)
+        # if we have any space left over, distribute to weighted items
+        if (availSize >= 0).all():
+            weightSum = weights.sum()
+            axisSizes += weights*availSize/weightSum
+
+        # allow the cells to negotiate space and adjust to it
+        axisSizes = self.axisSizeAdjust(cells, passToken, box, weights, axisSizes, isTrial)
         return axisSizes
 
     def axisSizeAdjust(self, cells, passToken, box, weights, axisSizes, isTrial=False):
         weightSum = weights.sum()
-        # allow cells to adjust for maxsize, rounding, etc
+
         for x in xrange(self._nAdjustTries):
+            # allow cells to adjust for maxsize, rounding, etc
             adjSizes = self.cellsAdjustedSize(cells, passToken, axisSizes, isTrial)
             idxAdj = (adjSizes != 0).any(-1)
             if not idxAdj.any():
+                # if none changed, we are done
                 break
 
+            # adjust as requested
             axisSizes -= adjSizes
+
+            # repartition our adjSize to new weighted ones
             availSize = adjSizes.sum(0)
 
+            # remove those who changed the size from the weights
             weightSum -= weights[idxAdj].sum()
             weights[idxAdj] = 0
 
             if weightSum <= 0:
+                # if there are no more items to reweight, then we are done
                 break
 
+            # distributed the available size to the remaining weighted items
             axisSizes += weights*availSize/weightSum
 
         return axisSizes
@@ -116,7 +130,7 @@ class AxisLayout(LayoutBase):
         else:
             # let each cell know it's new pos and size
             for idx, c in enumerate(cells):
-                c.layoutIn(pos, axisSizes[idx] + nonAxisSize, passToken)
+                c.layoutIn(pos.copy(), axisSizes[idx] + nonAxisSize, passToken)
                 pos += axisSizes[idx] + axisBorders
             pos -= axisBorders
 
@@ -158,9 +172,9 @@ class DLayout(AxisLayout):
 if __name__=='__main__':
     from uiLayoutCells import *
     cells = [
-        Cell(0, 100),
-        MaxSizeCell(1, 100, 300),
-        Cell(1, 100),
+        Cell(0, 400),
+        MaxSizeCell(1, 400, 300),
+        Cell(1, 400),
         ]
 
     vl = VLayout()
@@ -168,7 +182,7 @@ if __name__=='__main__':
     vl.outside.set((50, 50, 0))
 
     box = Rect.fromPosSize((0,0), (1000, 1000))
-    if 0:
+    if 1:
         for p in xrange(4):
             if p:
                 box.size[:2] = 1000 + (p>>1)*200
@@ -180,24 +194,26 @@ if __name__=='__main__':
                 print '    cell %s:' % i, c.box
             print
 
-    import time
+    # timing analysis
+    if 0:
+        import time
 
-    n = 100
-    box.size *= 5
-    cells *= 10
-    cn = max(1, len(cells)*n)
+        n = 100
+        box.size *= 5
+        cells *= 10
+        cn = max(1, len(cells)*n)
 
-    if 1:
-        s = time.time()
-        for p in xrange(n):
-            vl.layout(cells, box, False)
-        dt = time.time() - s
-        print dt, dt/cn, cn/dt
+        if 1:
+            s = time.time()
+            for p in xrange(n):
+                vl.layout(cells, box, False)
+            dt = time.time() - s
+            print dt, dt/cn, cn/dt
 
-    if 1:
-        s = time.time()
-        for p in xrange(n):
-            vl.layout(cells, box, True)
-        dt = time.time() - s
-        print dt, dt/cn, cn/dt
+        if 1:
+            s = time.time()
+            for p in xrange(n):
+                vl.layout(cells, box, True)
+            dt = time.time() - s
+            print dt, dt/cn, cn/dt
 

@@ -10,11 +10,11 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableObjectWithProp
-from TG.openGL.data import Rect, Vector
-
 import numpy
 from numpy import floor, ceil
+
+from TG.observing import ObservableObjectWithProp
+from TG.openGL.data import Rect, Vector
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -36,8 +36,10 @@ class Cell(ObservableObjectWithProp):
         return axisSize
 
     def layoutIn(self, pos, size, passToken=0):
-        #self.box = Rect.fromPosSize(ceil(pos), floor(size))
-        self.box = (ceil(pos), floor(size))
+        self.box = Rect.fromPosSize(ceil(pos), floor(size))
+
+    def layoutHide(self):
+        self.box = None
 
 class MaxSizeCell(Cell):
     maxSize = Vector.property((0,0,0), dtype='3f')
