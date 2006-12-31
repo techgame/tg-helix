@@ -15,7 +15,7 @@
 from itertools import izip
 
 import numpy
-from numpy import vstack, zeros_like
+from numpy import empty_like, empty, ndindex
 
 from TG.observing import ObservableObjectWithProp
 from TG.openGL.data import Rect, Vector
@@ -26,8 +26,8 @@ from TG.openGL.data import Rect, Vector
 
 class LayoutBase(ObservableObjectWithProp):
     _nAdjustTries = 3
-    outside = Vector.property([0,0,0], dtype='3b')
-    inside = Vector.property([0,0,0], dtype='3b')
+    outside = Vector.property([0,0], '2f')
+    inside = Vector.property([0,0], '2f')
 
     def layout(self, cells, box, isTrial=False):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
@@ -42,11 +42,11 @@ class LayoutBase(ObservableObjectWithProp):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class AxisLayout(LayoutBase):
-    axis = Vector.property([0,0,0], dtype='3b')
+    axis = Vector.property([0,0], '2b')
 
     def layout(self, cells, box, isTrial=False):
         if not cells:
-            return box.fromPosSize(box.pos, 0)
+            return Rect((box.pos, box.size*0))
 
         # determin visible cells
         visCells = self.cellsVisible(cells)
@@ -147,34 +147,33 @@ class AxisLayout(LayoutBase):
         lSize += axis*(2*self.outside + (len(axisSizes)-1)*self.inside)
         # plus axis size
         lSize += axisSizes.sum(0)
-        return box.fromPosSize(lPos, lSize)
+        return Rect((lPos, lSize))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def cellsStats(self, cells):
         axis = self.axis
-        minSizes = []
-        weights = []
-        for c in cells:
-            weights.append(c.weight * axis)
-            minSizes.append(c.minSize * axis)
-        return (vstack(weights), vstack(minSizes))
+        minSizes = empty((len(cells), 2), 'f')
+        weights = empty((len(cells), 2), 'f')
+        idxWalk = ndindex(weights.shape[:-1])
+        for c, idx in izip(cells, idxWalk):
+            weights[idx] = axis*(c.weight or 0)
+            minSizes[idx] = axis*(c.minSize or 0)
+        return (weights, minSizes)
 
     def cellsAdjustedSize(self, cells, axisSizes, isTrial=False):
-        adjSizes = []
+        adjSizes = empty_like(axisSizes)
         axis = self.axis
-        for c, asize in zip(cells, axisSizes):
-            adjSizes.append(asize - c.adjustAxisSize(asize.copy(), axis, isTrial))
-        return vstack(adjSizes)
+        for c, axSize, adSize in zip(cells, axisSizes, adjSizes):
+            adSize[:] = axSize - c.adjustAxisSize(axSize.copy(), axis, isTrial)
+        return adjSizes
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HLayout(AxisLayout):
-    axis = [1,0,0]
+    axis = Vector.property([1,0], '2b')
 class VLayout(AxisLayout):
-    axis = [0,1,0]
-class DLayout(AxisLayout):
-    axis = [0,0,1]
+    axis = Vector.property([0,1], '2b')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 
@@ -193,7 +192,7 @@ if __name__=='__main__':
     vl.outside.set((50, 50, 0))
 
     box = Rect.fromPosSize((0,0), (1000, 1000))
-    if 1:
+    if 0:
         for p in xrange(2):
             lb = vl.layout(cells, box, not p%2)
             print
@@ -204,7 +203,7 @@ if __name__=='__main__':
             print
 
     # timing analysis
-    if 0:
+    if 1:
         import time
 
         n = 100

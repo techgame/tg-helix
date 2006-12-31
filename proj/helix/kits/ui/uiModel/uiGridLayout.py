@@ -13,7 +13,7 @@
 from itertools import izip
 
 import numpy
-from numpy import zeros, ndindex, outer
+from numpy import empty, ndindex
 
 from TG.openGL.data import Rect, Vector
 from uiLayout import LayoutBase
@@ -25,9 +25,8 @@ from uiLayout import LayoutBase
 class GridLayout(LayoutBase):
     nRows = nCols = None
 
-    _haxis = numpy.array([1,0,0], 'b')
-    _vaxis = numpy.array([0,1,0], 'b')
-    _daxis = numpy.array([0,0,1], 'b')
+    _haxis = numpy.array([1,0], 'b')
+    _vaxis = numpy.array([0,1], 'b')
 
     def __init__(self, nRows=2, nCols=2):
         self.nRows = nRows
@@ -63,13 +62,13 @@ class GridLayout(LayoutBase):
         # row and col sizes
         lSize = rowSizes.sum(0) + colSizes.sum(0)
         # plus borders along axis
-        lSize += 2*self.outside + (nCols-1, nRows-1, 0)*self.inside
+        lSize += 2*self.outside + (nCols-1, nRows-1)*self.inside
         return box.fromPosSize(lPos, lSize)
 
     def iterCellBoxes(self, cells, box, rowSizes, colSizes, isTrial=False):
         posStart = box.pos + box.size*self._vaxis
         # come right and down by the outside border
-        posStart += self.outside*(1,-1,0) 
+        posStart += self.outside*(1,-1) 
         advCol = self._haxis*self.inside
         advRow = self._vaxis*self.inside
 
@@ -94,11 +93,11 @@ class GridLayout(LayoutBase):
         nRows = self.nRows; nCols = self.nCols
 
         # figure out how much room the borders take
-        borders = 2*self.outside + (nCols-1, nRows-1, 0)*self.inside
+        borders = 2*self.outside + (nCols-1, nRows-1)*self.inside
 
         # figure out what our starting size minus borders is
         availSize = box.size - borders 
-        cellSize = (availSize / (nCols, nRows, 1)).reshape((1,3))
+        cellSize = (availSize / (nCols, nRows)).reshape((1,2))
 
         # repeat rowSize nRows times
         rowSizes = (cellSize*vaxis).repeat(nRows, 0)
@@ -126,7 +125,7 @@ class FlexGridLayout(GridLayout):
         colSizes = colMinSizes.copy()
 
         # figure out how much room the borders take
-        borders = 2*self.outside + (nCols-1, nRows-1, 0)*self.inside
+        borders = 2*self.outside + (nCols-1, nRows-1)*self.inside
 
         # figure out what our starting size minus borders is
         availSize = box.size - borders 
@@ -161,14 +160,14 @@ class FlexGridLayout(GridLayout):
 
     def cellsStats(self, cells):
         nRows = self.nRows; nCols = self.nCols
-        minSizes = zeros((nRows, nCols, 3), 'f')
-        weights = zeros((nRows, nCols, 3), 'f')
+        minSizes = empty((nRows, nCols, 2), 'f')
+        weights = empty((nRows, nCols, 2), 'f')
 
         # grab cell info into minSize and weights arrays
         idxWalk = ndindex(weights.shape[:-1])
         for c, idx in izip(cells, idxWalk):
-            minSizes[idx] = c.minSize
-            weights[idx] = c.weight
+            minSizes[idx] = (c.minSize or 0)
+            weights[idx] = (c.weight or 0)
 
         return weights, minSizes
 

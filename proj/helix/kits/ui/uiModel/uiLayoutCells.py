@@ -22,32 +22,36 @@ from TG.openGL.data import Rect, Vector
 
 class Cell(ObservableObjectWithProp):
     visible = True
-    weight = Vector.property((0,0,0), dtype='3b')
-    minSize = Vector.property((0,0,0), dtype='3f')
-    box = None
+    weight = Vector.property([0,0], '2f')
+    minSize = Vector.property([0,0], '2f')
+    box = Rect.property()
 
     def __init__(self, weight=0, min=None):
-        self.weight.set(weight)
+        self.weight[:] = weight
 
         if min is not None:
-            self.minSize.set(min)
+            self.minSize[:] = min
 
     def adjustAxisSize(self, axisSize, axis, isTrial=False):
         return axisSize
 
     def layoutIn(self, pos, size):
-        self.box = Rect.fromPosSize(ceil(pos), floor(size))
+        box = self.box
+        ceil(pos, box.pos)
+        floor(size, box.size)
 
     def layoutHide(self):
-        self.box = None
+        del self.box
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MaxSizeCell(Cell):
-    maxSize = Vector.property((0,0,0), dtype='3f')
+    maxSize = Vector.property([0,0], '2f')
 
     def __init__(self, weight=0, min=None, max=None):
         Cell.__init__(self, weight, min)
         if max is not None:
-            self.maxSize.set(max)
+            self.maxSize[:] = max
 
     def adjustAxisSize(self, axisSize, axis, isTrial=False):
         maxSize = self.maxSize
