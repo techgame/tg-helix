@@ -51,7 +51,7 @@ class UIFontView(UIView):
 class UITextView(UIView):
     viewForKeys = ['UIText']
 
-    partsByName = ['color', 'font', 'wrapMode', 'text', 'box']
+    partsByName = ['color', 'font', 'wrapMode', 'text']
 
     TextDisplayFactory = None #TextBufferedDisplay
     WrapModeMap = textWrapping.wrapModeMap.copy()
@@ -76,8 +76,6 @@ class UITextView(UIView):
                 self.font = self.viewFactory(uiText.font)
             elif pname == 'wrapMode':
                 self.wrapper = self.WrapModeMap[uiText.wrapMode]
-            elif pname == 'box':
-                uiText.box._pub_.add(self.updateBox)
         self.enqueue(self.updateText, uiText)
 
     def updateBox(self, box, boxName):

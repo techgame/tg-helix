@@ -53,11 +53,10 @@ class UIImageView(UIWidgetView):
 
     partsByName = ['color', 'box']
 
-    imageTex = ImageTexture.property()
-
     def init(self, uiImage):
         UIWidgetView.init(self, uiImage)
 
+        self.imageTex = ImageTexture()
         self.imageTex.loadImage(uiImage.image)
         self.texCoords = self.imageTex.texCoordsForImage()
         self.texCoordsView = self.viewFactory(self.texCoords)
@@ -87,8 +86,6 @@ class UIButtonView(UIWidgetView):
     def init(self, uiButton):
         UIWidgetView.init(self, uiButton)
         self.uiButton = uiButton
-        uiButton._pub_.add(self.updateBox, 'box')
-        uiButton.box._pub_.add(self.updateBox)
         self.onUpdateBox()
 
     def updateBox(self, box, attr=None):

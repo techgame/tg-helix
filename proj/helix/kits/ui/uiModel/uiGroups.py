@@ -67,12 +67,6 @@ class UIGrid(UIComposite):
         if kwattr:
             self.set(kwattr)
 
-        self._pub_.add(self._onGridUpdate, 'box')
-        self.box._pub_.add(self._onGridUpdate)
-
-    def _onGridUpdate(self, item, attr):
-        self.layout()
-
     def layout(self):
         border = self.border
         gridCells = self.gridCells

@@ -58,11 +58,10 @@ class UIOrthoViewportView(UIViewportView):
 
     def renderProjection(self, replaceProjection=True):
         box = self.viewport.box
-        x, y, z = box.pos[:3]
-        w, h, d = box.size[:3]
-        if z == d == 0:
-            z = -10
-            d =  20
+        x, y = box.pos[:2]
+        w, h = box.size[:2]
+        z = -10
+        d =  20
 
         gl.glMatrixMode(gl.GL_PROJECTION)
         if replaceProjection:

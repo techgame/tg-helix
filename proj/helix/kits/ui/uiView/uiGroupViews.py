@@ -34,12 +34,6 @@ class UIListView(UIView):
         viewable._pub_.add(self.onUpdateViews, 'items')
         viewable.items._pub_.add(self.onUpdateViews)
 
-        viewable.box._pub_.add(self.onUpdateBox)
-        viewable._pub_.add(self.onUpdateBox, 'box')
-        viewable._pub_.add(self.onUpdateBox, 'translate')
-        viewable._pub_.add(self.onUpdateBox, 'scale')
-        viewable._pub_.add(self.onUpdateBox, 'boxScale')
-
         self.updateViews()
         self.updateBox()
 

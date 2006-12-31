@@ -7,6 +7,7 @@ Icon?
 \.DS_Store
 *.pyc
 *.pyo
+*.bpl
 *~
 .*.swp
 .*.swo
