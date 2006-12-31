@@ -28,7 +28,7 @@ class LayoutBase(ObservableObjectWithProp):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def cellsVisible(self, cells):
-        return [c for c in cells if c.visible]
+        return [c for c in cells if getattr(c, 'visible', 1)]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Simplest of all layouts... just tell each cell to "deal with it"
@@ -42,11 +42,9 @@ class AbsLayout(LayoutBase):
         visCells = self.cellsVisible(cells)
 
         if not isTrial:
-            pos = box.pos
-            size = box.size
-
+            pos = box.pos; size = box.size
             for c in cells:
-                c.layoutIn(pos.copy(), size.copy())
+                c.layoutIn(pos. size)
 
         return box.copy()
 

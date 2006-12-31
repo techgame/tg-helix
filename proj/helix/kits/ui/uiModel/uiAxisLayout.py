@@ -42,8 +42,8 @@ class AxisLayout(LayoutBase):
             iCellBoxes = self.iterCellBoxes(visCells, box, axisSizes, isTrial)
 
             # let cells lay themselves out in their boxes
-            for (cellPos, cellSize), c in izip(iCellBoxes, iCells):
-                c.layoutIn(cellPos, cellSize)
+            for (cpos, csize), c in izip(iCellBoxes, iCells):
+                c.layoutIn(cpos, csize)
 
             # hide cells that have no box
             for c in iCells:
@@ -116,7 +116,7 @@ class AxisLayout(LayoutBase):
 
         # let each cell know it's new pos and size
         for asize in axisSizes:
-            yield pos.copy(), asize + nonAxisSize
+            yield pos, asize + nonAxisSize
 
             pos += asize + axisBorders
         pos -= axisBorders
@@ -142,8 +142,8 @@ class AxisLayout(LayoutBase):
         # grab cell info into minSize and weights arrays
         idxWalk = ndindex(weights.shape[:-1])
         for c, idx in izip(cells, idxWalk):
-            weights[idx] = (c.weight or 0)
-            minSizes[idx] = (c.minSize or 0)
+            weights[idx] = (getattr(c, 'weight', 0) or 0)
+            minSizes[idx] = (getattr(c, 'minSize', 0) or 0)
 
         return (weights, minSizes)
 
@@ -151,7 +151,7 @@ class AxisLayout(LayoutBase):
         adjSizes = empty_like(axisSizes)
         axis = self.axis
         for c, axSize, adSize in zip(cells, axisSizes, adjSizes):
-            adSize[:] = axSize - c.adjustAxisSize(axSize.copy(), axis, isTrial)
+            adSize[:] = axSize - c.adjustAxisSize(axSize, axis, isTrial)
         return adjSizes
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

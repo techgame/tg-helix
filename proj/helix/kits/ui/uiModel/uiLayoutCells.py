@@ -13,39 +13,44 @@
 import numpy
 from numpy import floor, ceil
 
-from TG.observing import ObservableObjectWithProp
 from TG.openGL.data import Rect, Vector
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Cell(ObservableObjectWithProp):
+class BasicCell(object):
     visible = True
+    box = Rect.property()
+
+    def adjustAxisSize(self, axisSize, axis, isTrial=False):
+        # axisSize must not be modified... use copies!
+        return axisSize
+
+    def layoutIn(self, pos, size):
+        # pos and size must not modified... use copies!
+        box = self.box
+        ceil(pos, box.pos)
+        floor(size, box.size)
+
+        self.onLayout(self, box)
+
+    def layoutHide(self):
+        self.box = None
+
+    def onLayout(self, cell, box): pass
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class Cell(BasicCell):
     weight = Vector.property([0,0], '2f')
     minSize = Vector.property([0,0], '2f')
-    box = Rect.property()
 
     def __init__(self, weight=0, min=None):
         self.weight[:] = weight
 
         if min is not None:
             self.minSize[:] = min
-
-    def adjustAxisSize(self, axisSize, axis, isTrial=False):
-        return axisSize
-
-    def layoutIn(self, pos, size):
-        box = self.box
-        ceil(pos, box.pos)
-        floor(size, box.size)
-        self.onLayout(self, box)
-
-    def layoutHide(self):
-        self.box = None
-
-    def onLayout(self, cell, box):
-        pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -60,6 +65,8 @@ class MaxSizeCell(Cell):
     def adjustAxisSize(self, axisSize, axis, isTrial=False):
         maxSize = self.maxSize
         idx = (maxSize > 0) & (maxSize < axisSize)
-        axisSize[idx] = maxSize[idx]
+        if idx.any():
+            axisSize = axisSize.copy()
+            axisSize[idx] = maxSize
         return axisSize
 

@@ -47,8 +47,8 @@ class GridLayout(LayoutBase):
             iCellBoxes = self.iterCellBoxes(visCells, box, rowSizes, colSizes, isTrial)
 
             # let cells lay themselves out in their boxes
-            for (cellPos, cellSize), c in izip(iCellBoxes, iCells):
-                c.layoutIn(cellPos, cellSize)
+            for (cpos, csize), c in izip(iCellBoxes, iCells):
+                c.layoutIn(cpos, csize)
 
             # hide cells that have no box
             for c in iCells:
@@ -81,7 +81,7 @@ class GridLayout(LayoutBase):
             posCol[:] = posRow
             for col in colSizes:
                 # yield cell box
-                yield posCol.copy(), row + col
+                yield posCol, row + col
 
                 # adv right by col + inside border
                 posCol += col + advCol
@@ -166,8 +166,8 @@ class FlexGridLayout(GridLayout):
         # grab cell info into minSize and weights arrays
         idxWalk = ndindex(weights.shape[:-1])
         for c, idx in izip(cells, idxWalk):
-            minSizes[idx] = (c.minSize or 0)
-            weights[idx] = (c.weight or 0)
+            weights[idx] = (getattr(c, 'weight', 0) or 0)
+            minSizes[idx] = (getattr(c, 'minSize', 0) or 0)
 
         return weights, minSizes
 
@@ -214,7 +214,7 @@ if __name__=='__main__':
 
         nRows, nCols = 10, 8
         excess = 0
-        if 1: gl = FlexGridLayout(nRows, nCols)
+        if 0: gl = FlexGridLayout(nRows, nCols)
         else: gl = GridLayout(nRows, nCols)
 
         if 1: cells = [Cell((i%2, (i//4)%2), (100, 100)) for i in xrange(nRows*nCols+excess)]
