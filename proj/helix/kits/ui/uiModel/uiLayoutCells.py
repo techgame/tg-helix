@@ -39,9 +39,13 @@ class Cell(ObservableObjectWithProp):
         box = self.box
         ceil(pos, box.pos)
         floor(size, box.size)
+        self.onLayout(self, box)
 
     def layoutHide(self):
-        del self.box
+        self.box = None
+
+    def onLayout(self, cell, box):
+        pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

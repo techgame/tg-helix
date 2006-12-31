@@ -13,7 +13,7 @@
 from itertools import izip
 
 import numpy
-from numpy import empty, ndindex
+from numpy import empty_like, empty, ndindex
 
 from TG.openGL.data import Rect, Vector
 from uiLayout import LayoutBase
@@ -72,12 +72,13 @@ class GridLayout(LayoutBase):
         advCol = self._haxis*self.inside
         advRow = self._vaxis*self.inside
 
-        posRow = posStart.copy()
+        posRow = posStart
+        posCol = empty_like(posRow)
         for row in rowSizes:
             # adv down by row
             posRow -= row
 
-            posCol = posRow.copy()
+            posCol[:] = posRow
             for col in colSizes:
                 # yield cell box
                 yield posCol.copy(), row + col
@@ -97,12 +98,14 @@ class GridLayout(LayoutBase):
 
         # figure out what our starting size minus borders is
         availSize = box.size - borders 
-        cellSize = (availSize / (nCols, nRows)).reshape((1,2))
+        cellSize = (availSize / (nCols, nRows))
 
         # repeat rowSize nRows times
-        rowSizes = (cellSize*vaxis).repeat(nRows, 0)
+        rowSizes = empty((nRows, 2), 'f')
+        rowSizes[:] = (cellSize*vaxis)
         # repeat colSize nCols times
-        colSizes = (cellSize*haxis).repeat(nCols, 0)
+        colSizes = empty((nCols, 2), 'f')
+        colSizes[:] = (cellSize*haxis)
         return rowSizes, colSizes
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,14 +118,11 @@ class FlexGridLayout(GridLayout):
         # determin weights and sizes for rows and columns
         weights, minSizes = self.cellsStats(cells)
 
-        rowWeights = (vaxis*weights).max(1)
-        rowMinSizes = (vaxis*minSizes).max(1)
+        rowWeights = vaxis*weights.max(1)
+        rowSizes = vaxis*minSizes.max(1)
 
-        colWeights = (haxis*weights).max(0)
-        colMinSizes = (haxis*minSizes).max(0)
-
-        rowSizes = rowMinSizes.copy()
-        colSizes = colMinSizes.copy()
+        colWeights = haxis*weights.max(0)
+        colSizes = haxis*minSizes.max(0)
 
         # figure out how much room the borders take
         borders = 2*self.outside + (nCols-1, nRows-1)*self.inside
@@ -131,7 +131,7 @@ class FlexGridLayout(GridLayout):
         availSize = box.size - borders 
 
         # subtract the already allocated minsize
-        availSize -= rowMinSizes.sum(0) + colMinSizes.sum(0)
+        availSize -= rowSizes.sum(0) + colSizes.sum(0)
 
         if (availSize > 0).any():
             if (availSize*vaxis > 0).any():
@@ -178,27 +178,62 @@ class FlexGridLayout(GridLayout):
 if __name__=='__main__':
     from uiLayoutCells import *
     
-    nRows = 2
-    nCols = 4
-
-    if 1: gl = FlexGridLayout(nRows, nCols)
-    else: gl = GridLayout(nRows, nCols)
-
-    if 1: cells = [Cell((i%2, (i//4)%2), (100, 100)) for i in xrange(nRows*nCols)]
-    else: cells = [Cell() for i in xrange(nRows*nCols)]
-
     if 1:
-        gl.inside.set(10)
-        gl.outside.set((50, 50, 0))
+        nRows = 2
+        nCols = 4
+        excess = 4
 
-    box = Rect.fromPosSize((0,0), (1000, 1000))
+        box = Rect.fromPosSize((0,0), (1000, 1000))
+
+        if 1: gl = FlexGridLayout(nRows, nCols)
+        else: gl = GridLayout(nRows, nCols)
+
+        if 1: cells = [Cell((i%2, (i//4)%2), (100, 100)) for i in xrange(nRows*nCols+excess)]
+        else: cells = [Cell() for i in xrange(nRows*nCols+excess)]
+
+        if 1:
+            gl.inside.set(10)
+            gl.outside.set((50, 50, 0))
+
+        if 1:
+            for p in xrange(2):
+                lb = gl.layout(cells, box, not p%2)
+                print
+                print 'box:', box
+                print '  layout:', lb
+                for i, c in enumerate(cells):
+                    print '    cell %s:' % i, c.box
+                print
+
+    # timing analysis
     if 1:
-        for p in xrange(2):
-            lb = gl.layout(cells, box, not p%2)
-            print
-            print 'box:', box
-            print '  layout:', lb
-            for i, c in enumerate(cells):
-                print '    cell %s:' % i, c.box
-            print
+        import time
+
+        box = Rect.fromPosSize((0,0), (1000, 1000))
+        box.size *= (5, 2)
+
+        nRows, nCols = 10, 8
+        excess = 0
+        if 1: gl = FlexGridLayout(nRows, nCols)
+        else: gl = GridLayout(nRows, nCols)
+
+        if 1: cells = [Cell((i%2, (i//4)%2), (100, 100)) for i in xrange(nRows*nCols+excess)]
+        else: cells = [Cell() for i in xrange(nRows*nCols+excess)]
+
+        n = 100
+        cn = max(1, len(cells)*n)
+
+        if 1:
+            s = time.time()
+            for p in xrange(n):
+                gl.layout(cells, box, False)
+            dt = time.time() - s
+            print '%r time: %5s cn/s: %5s pass/s: %5s' % ((n, nRows, nCols, cn), dt, cn/dt, n/dt)
+
+        if 1:
+            s = time.time()
+            for p in xrange(n):
+                gl.layout(cells, box, True)
+            dt = time.time() - s
+            print '%r time: %5s cn/s: %5s pass/s: %5s' % ((n, nRows, nCols, cn), dt, cn/dt, n/dt)
 

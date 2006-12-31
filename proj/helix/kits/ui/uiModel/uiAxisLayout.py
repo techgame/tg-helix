@@ -54,14 +54,15 @@ class AxisLayout(LayoutBase):
     def axisSizesFor(self, cells, box, isTrial=False):
         # determin minsize
         axis = self.axis
-        weights, minSizes = self.cellsStats(cells)
+        weights, axisSizes = self.cellsStats(cells)
+        weights *= axis
+        axisSizes *= axis
 
         # calculate the total border size
         borders = axis*(2*self.outside + (len(cells)-1)*self.inside)
         availSize = axis*box.size - borders
 
         # now remove all the minSize items
-        axisSizes = minSizes.copy()
         availSize -= axisSizes.sum(0)
 
         # if we have any space left over, distribute to weighted items
@@ -135,13 +136,15 @@ class AxisLayout(LayoutBase):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def cellsStats(self, cells):
-        axis = self.axis
         minSizes = empty((len(cells), 2), 'f')
         weights = empty((len(cells), 2), 'f')
+
+        # grab cell info into minSize and weights arrays
         idxWalk = ndindex(weights.shape[:-1])
         for c, idx in izip(cells, idxWalk):
-            weights[idx] = axis*(c.weight or 0)
-            minSizes[idx] = axis*(c.minSize or 0)
+            weights[idx] = (c.weight or 0)
+            minSizes[idx] = (c.minSize or 0)
+
         return (weights, minSizes)
 
     def cellsAdjustedSize(self, cells, axisSizes, isTrial=False):
@@ -186,7 +189,7 @@ if __name__=='__main__':
             print
 
     # timing analysis
-    if 0:
+    if 1:
         import time
 
         n = 100
@@ -199,12 +202,12 @@ if __name__=='__main__':
             for p in xrange(n):
                 vl.layout(cells, box, False)
             dt = time.time() - s
-            print dt, dt/cn, cn/dt
+            print '%r time: %5s cn/s: %5s pass/s: %5s' % ((n,cn), dt, cn/dt, n/dt)
 
         if 1:
             s = time.time()
             for p in xrange(n):
                 vl.layout(cells, box, True)
             dt = time.time() - s
-            print dt, dt/cn, cn/dt
+            print '%r time: %5s cn/s: %5s pass/s: %5s' % ((n,cn), dt, cn/dt, n/dt)
 
