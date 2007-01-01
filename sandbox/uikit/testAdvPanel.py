@@ -22,43 +22,55 @@ from TG.helix.kits.ui import uiView
 
 class SandboxStage(uiModel.UIStage):
     def load(self):
-        vp = self.add(uiModel.UIOrthoViewport())
+        layout = self.layout
+
+        self.add(uiModel.UIOrthoViewport())
         self.add(uiModel.UIBlend())
 
         panel = self.add(uiModel.UIPanel())
 
-        @vp.box._pub_.add
-        def onVPChange(vpbox, key):
-            panel.box.setRect(vpbox, 1.5, .5)
-            panel.color = '#88f' if vpbox.aspect>panel.box.aspect else '#8f8'
+        panel.layout = layout.add('group')
+
+        @layout.evtAdd
+        def onlayout(cell, lbox):
+            panel.box.setRect(lbox, 1.5, .5)
+            panel._kvnotify_("set", "box")
+            panel.color = '#88f' if lbox.aspect>panel.box.aspect else '#8f8'
+            panel._kvnotify_("set", "color")
+
+            panel.layout.layoutIn(panel.box)
 
         panel2 = self.add(uiModel.UIPanel())
         panel2.color = '#faa4'
 
-        @panel.box._pub_.add
-        def obc(bbox, key):
-            panel2.box.setRect(bbox, .5, 1)
+        @panel.layout.evtAdd
+        def onlayout(cell, lbox):
+            panel2.box.setRect(lbox, .5, 1)
+            panel2._kvnotify_("set", "box")
 
         panel3 = self.add(uiModel.UIPanel())
         panel3.color = '#aff4'
 
-        @panel.box._pub_.add
-        def obc(bbox, key):
-            panel3.box.setRect(bbox, .5, 0)
+        @panel.layout.evtAdd
+        def onlayout(cell, lbox):
+            panel3.box.setRect(lbox, .5, 0)
+            panel3._kvnotify_("set", "box")
 
         panel4 = self.add(uiModel.UIPanel())
         panel4.color = '#44f4'
 
-        @panel.box._pub_.add
-        def obc(bbox, key):
-            panel4.box.setRect(bbox, 2., 1)
+        @panel.layout.evtAdd
+        def onlayout(cell, lbox):
+            panel4.box.setRect(lbox, 2., 1)
+            panel4._kvnotify_("set", "box")
 
         panel5 = self.add(uiModel.UIPanel())
         panel5.color = '#f444'
 
-        @panel.box._pub_.add
-        def obc(bbox, key):
-            panel5.box.setRect(bbox, 2., 0)
+        @panel.layout.evtAdd
+        def onlayout(cell, lbox):
+            panel5.box.setRect(lbox, 2., 0)
+            panel5._kvnotify_("set", "box")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

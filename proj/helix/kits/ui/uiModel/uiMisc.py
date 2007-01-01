@@ -13,7 +13,7 @@
 from .uiBase import UIItem, UIItemWithBox, glData, numpy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Viewport settings
+#~ Viewports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIViewport(UIItemWithBox):
@@ -22,17 +22,19 @@ class UIViewport(UIItemWithBox):
     box = glData.Recti.property()
 
     def onViewResize(self, viewSize):
-        self.box.size.set(viewSize)
+        self.box.size = viewSize
 
 class UIOrthoViewport(UIViewport):
     viewVisitKeys = ["UIOrthoViewport"]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Blending
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIBlend(UIItem):
     viewVisitKeys = ["UIBlend"]
-    flyweights = {
-        }
+    flyweights = {}
+
     def __new__(klass, mode=None):
         self = klass.flyweights.get(mode, None)
         if self is None:

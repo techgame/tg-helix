@@ -22,22 +22,24 @@ from TG.helix.kits.ui import uiView
 
 class SandboxStage(uiModel.UIStage):
     def load(self):
-        vp = self.add(uiModel.UIOrthoViewport())
+        layout = self.layout
+
+        self.add(uiModel.UIOrthoViewport())
         self.add(uiModel.UIBlend())
 
         panel = self.add(uiModel.UIPanel())
-
-        @vp.box._pub_.add
-        def onVPChange(vpbox, attr):
-            panel.box.setRect(vpbox, 1.5, .5)
-            panel.color = '#44f' if vpbox.aspect>panel.box.aspect else '#8f8'
-
         blendPanel = self.add(uiModel.UIPanel())
         blendPanel.set(color='#f00b')
 
-        @panel.box._pub_.add
-        def obc(bbox, attr):
-            blendPanel.box.setRect(bbox, 1, .5)
+        @layout.evtAdd
+        def onlayout(cell, lbox):
+            panel.box.setRect(lbox, 1.5, .5)
+            panel._kvnotify_("set", "box")
+            panel.color = '#44f' if lbox.aspect>panel.box.aspect else '#8f8'
+            panel._kvnotify_("set", "color")
+
+            blendPanel.box.setRect(panel.box, 1, .5)
+            blendPanel._kvnotify_("set", "box")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

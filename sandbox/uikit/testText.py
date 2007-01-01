@@ -22,15 +22,17 @@ from TG.helix.kits.ui import uiView
 
 class SandboxStage(uiModel.UIStage):
     def load(self):
-        viewport = uiModel.UIOrthoViewport()
+        self.add(uiModel.UIOrthoViewport())
         self.add(uiModel.UIBlend())
-
-        self.add(viewport)
 
         font = uiModel.UIFont('/Library/Fonts/Arial', 64)
         text = uiModel.UIText('TG.helix.kits.ui', font, align=.5, color='#f')
-        text.box = viewport.box
         self.add(text)
+
+        @self.layout.evtAdd
+        def onlayout(cell, lbox):
+            text.box = lbox
+            text._kvnotify_('set', 'box')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

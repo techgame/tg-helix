@@ -28,10 +28,13 @@ class SandboxStage(uiModel.UIStage):
         tgLogoImg = self.add(uiModel.UIImage('media/tg-logo.png'))
         starImg = self.add(uiModel.UIImage('media/starShape.png'))
 
-        @vp.box._pub_.add
-        def onVPChange(vpbox, attr):
-            starImg.box.setRect(vpbox, starImg.box.aspect, .5)
-            tgLogoImg.box.alignIn(.5, vpbox)
+        @self.stageLayout.evtAdd
+        def onlayout(cell, lbox):
+            starImg.box.setRect(lbox, starImg.box.aspect, .5)
+            starImg._kvnotify_("set", "box")
+
+            tgLogoImg.box.alignIn(.5, lbox)
+            tgLogoImg._kvnotify_("set", "box")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

@@ -15,7 +15,7 @@ from TG.openGL.raw import gl
 from .uiBaseViews import UIView
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Definitions 
+#~ Viewports
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIViewportView(UIView):
@@ -69,6 +69,8 @@ class UIOrthoViewportView(UIViewportView):
         gl.glOrtho(x, x+w, y, y+h, z, z+d)
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Blends
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIBlendViews(UIView):

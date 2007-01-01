@@ -52,9 +52,9 @@ class UIScene(UISceneEventsMixin, HelixScene):
         self.views = self.viewListFor(stage.items)
 
     def resize(self, size):
-        self.render()
+        size = Vector(size, 'f')
+        self.stage.resizeStage(size)
 
-        size = Vector(size+(0.,))
         for view in self.views:
             view.resize(size)
         return True
@@ -74,6 +74,8 @@ class UIScene(UISceneEventsMixin, HelixScene):
         self.glClearBuffers()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Base View for the UI Framework
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class UIView(HelixView):
     viewForKeys = []
@@ -89,6 +91,8 @@ class UIView(HelixView):
         if view is None:
             view = klass(viewable)
             setattr(viewable, '__uiview', view)
+        else:
+            view.updateFromViewable(viewable)
         return view
 
     def init(self, viewable):
@@ -97,6 +101,9 @@ class UIView(HelixView):
         self._queueActions = []
 
     def _onViewableChange(self, viewable, attr):
+        pass
+
+    def updateFromViewable(self, viewable):
         pass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

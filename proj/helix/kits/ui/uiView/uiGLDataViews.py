@@ -33,6 +33,9 @@ class ColorView(GLDataView):
         GLDataView.init(self, None)
         self.updateColor(color)
 
+    def updateFromViewable(self, color):
+        self.updateColor(color)
+
     def updateColor(self, color):
         self.color = color
         if color:
@@ -86,11 +89,13 @@ class GeometryView(GLDataView):
 
 class BoxView(GeometryView):
     viewForKeys = [glData.Rect]
-    vertexScale = glData.VertexArray([[0., 0., 1.], [1., 0., 0.], [1., 1., 0.], [0., 1., 1.]], '3f')
+    vertexScale = glData.VertexArray([[0., 0.], [1., 0.], [1., 1.], [0., 1.]], '2f')
 
     def init(self, aBox):
         GeometryView.init(self, None)
-        aBox._pub_.add(self._onBoxChange)
+        self.enqueue(self.updateBox, aBox)
+
+    def updateFromViewable(self, aBox):
         self.enqueue(self.updateBox, aBox)
 
     def updateBox(self, aBox):

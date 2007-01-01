@@ -12,7 +12,10 @@
 
 import numpy
 from TG.openGL import data as glData
+from TG.openGL.data import Rect
 from TG.helix.framework.stage import HelixStage, HelixActor
+
+from uiLayouts import RootLayoutGroup
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ UI Basics
@@ -21,10 +24,19 @@ from TG.helix.framework.stage import HelixStage, HelixActor
 class UIStage(HelixStage):
     viewVisitKeys = ["UIStage"]
 
+    box = glData.Rectf.property()
+
+    StageLayoutGroupFactory = RootLayoutGroup
     def loadForScene(self, scene):
+        self.layout = self.StageLayoutGroupFactory()
         self.load()
+
     def load(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+
+    def resizeStage(self, size):
+        self.box.size = size
+        self.layout(self.box)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -57,7 +57,7 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
 
         <layout>
             <opengl-canvas>
-                ctx.model.setupCanavs(elem, obj)
+                ctx.model.setupCanvas(elem, obj)
             </opengl-canvas>
         </layout>
         ctx.model.setupFrame(obj)
@@ -82,7 +82,7 @@ class BasicRenderSkinModel(wxSkinModel):
         self.stage = stage
         self.viewFactory = viewFactory
 
-    def setupCanavs(self, canvasElem, canvasObj):
+    def setupCanvas(self, canvasElem, canvasObj):
         self.evtSources = [
             wxGLViewportEventSource(canvasObj),
             wxGLMouseEventSource(canvasObj),
