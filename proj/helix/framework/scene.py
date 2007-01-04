@@ -40,14 +40,6 @@ class HelixScene(HelixView):
     def shutdown(self):
         return True
 
-    def refreshInitial(self, size):
-        self.resize(size)
-        return self.refresh()
-    def resize(self, size):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-    def refresh(self):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def setupEvtSources(self, evtSources=[]):

@@ -102,10 +102,7 @@ class BasicRenderSkinModel(wxSkinModel):
     def findStageScene(self, stage=None):
         if stage is None:
             stage = self.stage
-        scene = self.viewFactory(stage)
-        if not scene.isHelixScene():
-            raise RuntimeError("View returned for stage is not a Helix Scene")
-        return scene
+        return self.viewFactory(stage)
 
     def setupScene(self):
         vpEvtSrc = self.evtSources[0]
