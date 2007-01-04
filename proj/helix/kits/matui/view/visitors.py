@@ -10,12 +10,18 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.helix.framework.visitor import IHelixVisitor
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Base Matui Visitor
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiVisitor(object):
+class MatuiVisitor(IHelixVisitor):
     pass
+
+class MatuiNodeVisitor(object):
+    def visitNode(self, node): 
+        pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Resize Visitor

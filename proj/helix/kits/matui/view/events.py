@@ -28,17 +28,14 @@ class MatuiEventRoot(EventRoot):
 
         self += MatuiViewportEventHandler(scene)
         self += MatuiInputEventHandler(scene)
-        self += MatuiTimingEventHandler(scene)
+        #self += MatuiTimingEventHandler(scene)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiViewportEventHandler(GLViewportEventHandler):
     eventKinds = ['viewport']
     scene = None
-
     def __init__(self, scene):
-        if not scene.isHelixScene():
-            raise ValueError("Viewport Event Handler requires a helix scene to work with")
         self.scene = scene
 
     def resize(self, glview, viewportSize):
@@ -60,7 +57,7 @@ class MatuiViewportEventHandler(GLViewportEventHandler):
 
 class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
     eventKinds = ['mouse', 'keyboard']
-
+    scene = None
     def __init__(self, scene):
         self.scene = scene
 
@@ -84,7 +81,7 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
 
 class MatuiTimingEventHandler(IdleEventHandler, TimerEventHandler):
     eventKinds = ['idle', 'timer']
-
+    scene = None
     def __init__(self, scene):
         self.scene = scene
 

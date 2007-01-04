@@ -50,7 +50,7 @@ class MatuiNode(object):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def accept(self, visitor):
-        return visitor.visitMatuiNode(self)
+        return visitor.visitNode(self)
 
     def update(self, info={}, **kwinfo):
         if info: self.info.update(info)
