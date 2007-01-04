@@ -76,8 +76,6 @@ class BasicRenderSkinModel(wxSkinModel):
     clientSize = (800, 800)
     minSize = (200, 200)
 
-    setupSceneAfter = False
-
     def setupStage(self, stage, viewFactory):
         self.stage = stage
         self.viewFactory = viewFactory
@@ -91,11 +89,7 @@ class BasicRenderSkinModel(wxSkinModel):
             wxGLIdleEventSource(canvasObj),
             ]
 
-        assert self.stage is not None
-        if self.setupSceneAfter:
-            wx.CallAfter(self.setupScene)
-        else:
-            self.setupScene()
+        self.setupScene()
 
     def setupFrame(self, frame):
         if self.frameTitle:
@@ -119,7 +113,4 @@ class BasicRenderSkinModel(wxSkinModel):
 
         self.scene = self.findStageScene(self.stage)
         self.scene.setup(evtSources=self.evtSources, model=self)
-
-        if self.setupSceneAfter:
-            vpEvtSrc.sendInitial()
 
