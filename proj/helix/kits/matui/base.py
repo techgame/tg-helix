@@ -13,24 +13,30 @@
 import numpy
 from TG.openGL import data as glData
 from TG.openGL.data import Rect
-from TG.helix.framework.stage import HelixStage, HelixActor
+
+from TG.helix.framework.stage import HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiStage(HelixStage):
+class MatuiStage(HelixActor):
     viewVisitKeys = ["MatuiStage"]
 
+    box = Rect.property()
     minSize = None
     maxSize = None
-    box = Rect.property()
-
-    def loadForScene(self, scene):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
     def isMatuiNode(self): return False
     def isMatuiActor(self): return False
+
+    def isHelixStage(self):
+        return True
+    def accept(self, visitor):
+        return visitor.visitStage(self)
+
+    def loadForScene(self, scene):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
