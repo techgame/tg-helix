@@ -120,7 +120,7 @@ class HelixVisitTypesBuilder(ObservableTypeParticipant):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixVisitTypeMixin(object):
+class HelixViewVisitTypeMixin(object):
     _visitTypes_builder_ = HelixVisitTypesBuilder()
 
     viewVisitKeys = []

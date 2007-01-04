@@ -12,7 +12,7 @@
 
 from TG.observing import Observable, ObservableTypeParticipant, ObservableList
 
-from .viewFactory import HelixVisitTypeMixin
+from .viewFactory import HelixViewVisitTypeMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -22,15 +22,10 @@ class HelixActorList(ObservableList):
     def add(self, actor):
         self.append(actor)
         return actor
-    def accept(self, visitor):
-        self.acceptOnItems(visitor)
-    def acceptOnItems(self, visitor):
-        for actor in self:
-            actor.accept(visitor)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixActor(Observable, HelixVisitTypeMixin):
+class HelixActor(Observable, HelixViewVisitTypeMixin):
     """Base class for all helix actors"""
 
     ActorList = HelixActorList
@@ -39,6 +34,4 @@ class HelixActor(Observable, HelixVisitTypeMixin):
         return True
     def accept(self, visitor):
         return visitor.visitActor(self)
-    def acceptOnItems(self, visitor):
-        return visitor.visitActorItems(self)
     

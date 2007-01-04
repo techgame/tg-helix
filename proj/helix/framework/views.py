@@ -21,11 +21,6 @@ class HelixViewList(ObservableList):
     def add(self, view):
         self.append(view)
         return view
-    def accept(self, visitor):
-        self.acceptOnItems(visitor)
-    def acceptOnItems(self, visitor):
-        for view in self:
-            view.accept(visitor)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -36,8 +31,6 @@ class HelixView(ObservableObject, HelixViewFactoryMixin):
         return True
     def accept(self, visitor):
         return visitor.visitView(self)
-    def acceptOnItems(self, visitor):
-        return visitor.visitViewItems(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
