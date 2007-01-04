@@ -34,7 +34,7 @@ class UIStage(HelixStage):
     def load(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
-    def resizeStage(self, size):
+    def onResize(self, size):
         self.box.size = size
         self.layout(self.box)
 

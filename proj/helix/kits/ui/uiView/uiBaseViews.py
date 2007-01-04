@@ -53,7 +53,7 @@ class UIScene(UISceneEventsMixin, HelixScene):
 
     def resize(self, size):
         size = Vector(size, 'f')
-        self.stage.resizeStage(size)
+        self.stage.onResize(size)
 
         for view in self.views:
             view.resize(size)

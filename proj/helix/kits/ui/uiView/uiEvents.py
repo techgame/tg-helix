@@ -59,6 +59,38 @@ class KMEventHandler(MouseEventHandler, KeyboardEventHandler, IdleEventHandler, 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class UIViewportEventHandler(GLViewportEventHandler):
+    eventKinds = ['viewport']
+    scene = None
+
+    def __init__(self, scene):
+        if not scene.isHelixScene():
+            raise ValueError("Viewport Event Handler requires a helix scene to work with")
+        self.scene = scene
+
+    def initial(self, glview, viewportSize):
+        glview.setViewCurrent()
+        if self.scene.refreshInitial(viewportSize):
+            glview.viewSwapBuffers()
+        return True
+
+    def resize(self, glview, viewportSize):
+        glview.setViewCurrent()
+        if self.scene.resize(viewportSize):
+            glview.viewSwapBuffers()
+        return True
+
+    def erase(self, glview):
+        return True
+
+    def paint(self, glview):
+        glview.setViewCurrent()
+        if self.scene.refresh():
+            glview.viewSwapBuffers()
+        return True
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class UINameSelector(NameSelector):
     def __init__(self, info, pos, *args, **kw):
         self.info = info
@@ -86,7 +118,7 @@ class UISceneEventsMixin(object):
         evtRoot = self.evtRoot
         evtRoot += evtSources
 
-        evtRoot += GLViewportEventHandler(self)
+        evtRoot += UIViewportEventHandler(self)
         evtRoot += KMEventHandler(self)
 
     def pick(self, pos, info):
