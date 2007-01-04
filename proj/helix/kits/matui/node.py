@@ -18,34 +18,35 @@ class MatuiNode(object):
     actor = None
     parent = None
     
-    def __init__(self, actor=None):
+    def __init__(self, actor=None, **kwinfo):
         self.info = {}
 
         self.children = []
         if actor is not None:
-            self.actor = actor
+            self.setActor(actor)
 
-        self.update(actor, info, **kwinfo)
+        self.update(kwinfo)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
     def newNodeForActor(klass, actor):
         return klass(actor)
 
-    @classmethod
-    def itemAsNode(klass, item):
+    def itemAsNode(self, item):
         isMatuiNode = getattr(item, 'isMatuiNode', lambda: False)
         if isMatuiNode():
             return item
         isMatuiActor = getattr(item, 'isMatuiActor', lambda: False)
         if isMatuiActor():
-            return klass.newNodeForActor(item)
+            return item.asNodeForHost(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def isMatuiNode(self):
-        return True
-    def isMatuiActor(self):
-        return False
+    def isMatuiNode(self): return True
+    def isMatuiActor(self): return False
+    def isMatuiCell(self): return False
+    def isMatuiLayout(self): return False
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -55,6 +56,17 @@ class MatuiNode(object):
     def update(self, info={}, **kwinfo):
         if info: self.info.update(info)
         if kwinfo: self.info.update(kwinfo)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    _actor = None
+    def getActor(self):
+        return self._actor
+    def setActor(self, actor):
+        self._actor = actor
+        if actor is not None:
+            actor.onNodeSetActor(self)
+    actor = property(getActor, setActor)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node and Node Tree  iteration
@@ -85,25 +97,25 @@ class MatuiNode(object):
     def iterChanged(self):
         if not self.treeChanged:
             return iter([])
-        return n for n in self.children if n.treeChanged
+        return (n for n in self.children if n.treeChanged)
 
     def iterTree(self):
-        return (n, n.iterTree()) for n in self.children
+        return ((n, n.iterTree()) for n in self.children)
     def iterChangedTree(self, clear=False):
         if not self.treeChanged:
             return iter([])
         if clear: self.treeChanged = False
-        return (n, n.iterChangedTree(clear)) for n in self.children if n.treeChanged
+        return ((n, n.iterChangedTree(clear)) for n in self.children if n.treeChanged)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node collection protocol
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __iadd__(self, other):
-        self.add(other):
+        self.add(other)
         return self
     def __isub__(self, other):
-        self.remove(other):
+        self.remove(other)
         return self
 
     def insert(self, idx, item):

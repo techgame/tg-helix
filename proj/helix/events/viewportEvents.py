@@ -22,24 +22,28 @@ class GLViewportEventSource(GLEventSource):
 
     def sendSize(self, size):
         for eh in self.iterHandlers():
-            if eh.resize(self, size):
-                return True
+            r = eh.resize(self, size)
+            if r is not None:
+                return r
 
     def sendErase(self):
         for eh in self.iterHandlers():
-            if eh.erase(self):
-                return True
+            r = eh.erase(self)
+            if r is not None:
+                return r
 
     def sendPaint(self):
         for eh in self.iterHandlers():
-            if eh.paint(self):
-                return True
+            r = eh.paint(self)
+            if r is not None:
+                return r
 
     def sendInitial(self):
         size = self.getViewSize()
         for eh in self.iterHandlers():
-            if eh.initial(self, size):
-                return True
+            r = eh.initial(self, size)
+            if r is not None:
+                return r
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

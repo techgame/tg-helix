@@ -40,7 +40,8 @@ class MatuiViewportEventHandler(GLViewportEventHandler):
 
     def resize(self, glview, viewportSize):
         glview.setViewCurrent()
-        if self.scene.resize(viewportSize):
+        print 'resize event'
+        if False and self.scene.resize(viewportSize):
             glview.viewSwapBuffers()
         return True
 
@@ -49,7 +50,8 @@ class MatuiViewportEventHandler(GLViewportEventHandler):
 
     def paint(self, glview):
         glview.setViewCurrent()
-        if self.scene.refresh():
+        print 'paint event'
+        if False and self.scene.refresh():
             glview.viewSwapBuffers()
         return True
 
@@ -67,7 +69,8 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
             print
             print 'Key Event:'
             pprint.pprint(info)
-        return True
+            return True
+        else: return False
 
     def mouse(self, glview, info):
         glview.setViewCurrent()
@@ -75,7 +78,8 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
             print
             print 'Mouse Event:'
             pprint.pprint(info)
-        return True
+            return True
+        else: return False
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

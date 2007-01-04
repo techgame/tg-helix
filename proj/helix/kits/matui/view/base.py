@@ -10,7 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.framework.views import HelixView, HelixViewFactory
+from TG.helix.framework.views import HelixView
+from TG.helix.framework.viewFactory import HelixViewFactory
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

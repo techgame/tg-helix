@@ -22,8 +22,9 @@ class GLMouseEventSource(GLEventSource):
 
     def sendMouse(self, info):
         for eh in self.iterHandlers():
-            if eh.mouse(self, info):
-                return True
+            r = eh.mouse(self, info)
+            if r is not None:
+                return r
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

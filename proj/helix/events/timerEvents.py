@@ -22,8 +22,9 @@ class GLTimerEventSource(GLEventSource):
 
     def sendTimer(self, info):
         for eh in self.iterHandlers():
-            if eh.timer(self, info):
-                return True
+            r = eh.timer(self, info)
+            if r is not None:
+                return r
 
 class TimerEventHandler(EventHandler):
     eventKinds = ['timer']
@@ -38,8 +39,9 @@ class GLIdleEventSource(GLEventSource):
 
     def sendIdle(self, info):
         for eh in self.iterHandlers():
-            if eh.idle(self, info):
-                return True
+            r = eh.idle(self, info)
+            if r is not None:
+                return r
 
 class IdleEventHandler(EventHandler):
     eventKinds = ['idle']

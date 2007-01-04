@@ -22,8 +22,9 @@ class GLKeyboardEventSource(GLEventSource):
 
     def sendKey(self, info):
         for eh in self.iterHandlers():
-            if eh.key(self, info):
-                return True
+            r = eh.key(self, info)
+            if r is not None:
+                return r
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

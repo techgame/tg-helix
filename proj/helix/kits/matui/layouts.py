@@ -44,10 +44,13 @@ strategyFactoryMap = {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiLayoutCell(LayoutCell):
-    def isMatuiActor(self): 
-        return False
-    def isMatuiCell(self): 
-        return True
+    def __init__(self, strategy=None, cells=None):
+        super(MatuiLayoutCell, self).__init__(strategy, cells)
+
+    def isMatuiNode(self): return False
+    def isMatuiActor(self): return False
+    def isMatuiCell(self): return True
+    def isMatuiLayout(self): return True
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -69,8 +72,16 @@ class MatuiLayoutCell(LayoutCell):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    @classmethod
     def new(klass, *args, **kw):
         return klass(*args, **kw)
+
+    @classmethod
+    def newLayoutForActor(klass, actor, *args, **kw):
+        self = klass.new(*args, **kw)
+        return self
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def addNewLayout(self, *args, **kw):
         layoutCell = self.new(*args, **kw)
@@ -91,6 +102,11 @@ MatuiLayout = MatuiLayoutCell
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiCell(BasicCell):
+    def isMatuiNode(self): return False
+    def isMatuiActor(self): return False
+    def isMatuiCell(self): return True
+    def isMatuiLayout(self): return False
+
     onlayout = None
     def onevt(self, evtfn):
         """Event decorator"""
@@ -120,11 +136,6 @@ class MatuiActorCell(MatuiCell):
     def __init__(self, actor, weight=0):
         if weight:
             self.weight = weight
-
-    def isMatuiActor(self): 
-        return False
-    def isMatuiCell(self): 
-        return True
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
