@@ -15,7 +15,7 @@ from TG.openGL.data import Rect
 from TG.helix.framework.stage import HelixActor
 
 from .node import MatuiNode
-from .layouts import MatuiLayout
+from .layouts import MatuiLayout, MatuiActorCell
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -33,8 +33,10 @@ class MatuiActor(HelixActor):
     def isMatuiCell(self): return False
     def isMatuiLayout(self): return False
 
-    def onCellLayout(self, cell, cbox):
-        self.box.copyFrom(cbox)
+    def __repr__(self):
+        pos = '%s %s' % tuple(self.box.pos.astype(int))
+        size = '%s %s' % tuple(self.box.size.astype(int))
+        return '<%s r:[%s %s]>' % (self.__class__.__name__, pos, size)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -63,6 +65,15 @@ class MatuiActor(HelixActor):
     def newLayout(self, *args, **kw):
         layout = self.LayoutFactory(self, *args, **kw)
         return layout
+
+    CellFactory = MatuiActorCell
+    def newCell(self, *args, **kw):
+        return self.CellFactory(self, *args, **kw)
+    def asCellForHost(self, hostLayout):
+        return self.newCell()
+
+    def onCellLayout(self, cell, cbox):
+        self.box.copyFrom(cbox)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -43,13 +43,24 @@ strategyFactoryMap = {
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiLayoutCell(LayoutCell):
-    def __init__(self, strategy=None, cells=None):
-        super(MatuiLayoutCell, self).__init__(strategy, cells)
-
+class MatuiCellMixin(object):
     def isMatuiNode(self): return False
     def isMatuiActor(self): return False
     def isMatuiCell(self): return True
+    def isMatuiLayout(self): return False
+
+    onlayout = None
+    def onevt(self, evtfn):
+        """Event decorator"""
+        self.onlayout = evtfn
+        return self #evtfn
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatuiLayoutCell(LayoutCell, MatuiCellMixin):
+    def __init__(self, strategy=None, cells=None):
+        super(MatuiLayoutCell, self).__init__(strategy, cells)
+
     def isMatuiLayout(self): return True
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,6 +94,16 @@ class MatuiLayoutCell(LayoutCell):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def itemAsCell(self, item):
+        isMatuiCell = getattr(item, 'isMatuiCell', lambda: False)
+        if isMatuiCell():
+            return item
+        isMatuiActor = getattr(item, 'isMatuiActor', lambda: False)
+        if isMatuiActor():
+            return item.asCellForHost(self)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     def addNewLayout(self, *args, **kw):
         layoutCell = self.new(*args, **kw)
         return self.addCell(layoutCell)
@@ -90,9 +111,57 @@ class MatuiLayoutCell(LayoutCell):
     def addNewCell(self, item, *args, **kw):
         if cell is None:
             cell = self.newCell()
-        if not cell.isMatuiCell():
-            raise ValueError("Expected a matui cell or layout cell")
+
+        return self.addCell(cell)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Layout collection protocol
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def __iadd__(self, other):
+        self.add(other)
+        return self
+    def __isub__(self, other):
+        self.remove(other)
+        return self
+
+    def insert(self, idx, item):
+        cell = self.itemAsCell(item)
+        if cell is None:
+            for each in item:
+                self.insert(idx, each)
+                idx += 1 # advance the index as we add items
+            return self
+
+        return self.insertCell(idx, cell)
+
+    def add(self, item):
+        cell = self.itemAsCell(item)
+        if cell is None:
+            for each in item:
+                self.add(each)
+            return self
+
+        return self.addCell(cell)
+
+    def remove(self, item):
+        isMatuiCell = getattr(item, 'isMatuiCell', lambda: False)
+        if isMatuiCell():
+            return self.removeCell(item)
+
+        for each in item:
+            self.remove(each)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def addCell(self, cell):
         self.cells.append(cell)
+        return cell
+    def insertCell(self, idx, cell):
+        self.cells.insert(idx, cell)
+        return cell
+    def removeCell(self, cell):
+        self.cells.remove(cell)
         return cell
 
 MatuiLayout = MatuiLayoutCell
@@ -101,18 +170,7 @@ MatuiLayout = MatuiLayoutCell
 #~ Specific cells
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiCell(BasicCell):
-    def isMatuiNode(self): return False
-    def isMatuiActor(self): return False
-    def isMatuiCell(self): return True
-    def isMatuiLayout(self): return False
-
-    onlayout = None
-    def onevt(self, evtfn):
-        """Event decorator"""
-        self.onlayout = evtfn
-        return self #evtfn
-
+class MatuiCell(BasicCell, MatuiCellMixin):
     def __call__(self, *args, **kw):
         return self.onlayout(self, self.box, *args, **kw)
 

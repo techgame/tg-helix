@@ -14,6 +14,27 @@
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def printNodeTree(treeEntry, indent=0):
+    node, children = treeEntry
+    if not indent:
+        print
+        title = "Node Tree for: %r" % (node,)
+        print title
+        print "=" * len(title)
+
+    print '%s- %r' % (' '*indent*2, node)
+
+    indent += 1
+    for ce in children:
+        printNodeTree(ce, indent)
+    indent -= 1
+
+    if not indent:
+        print
+        print
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class MatuiNode(object):
     actor = None
     parent = None
@@ -26,6 +47,17 @@ class MatuiNode(object):
             self.setActor(actor)
 
         self.update(kwinfo)
+
+    def __repr__(self):
+        if self.actor is not None:
+            return 'Node|%d|: %r' % (len(self), self.actor,)
+        elif self.info is not None:
+            return 'Node|%d|: {%r}' % (len(self), ', '.join(self.info.keys()),)
+        else: return 'Node|%d|' % (len(self), )
+
+    printNodeTree = staticmethod(printNodeTree)
+    def debugTree(self):
+        self.printNodeTree(self.tree())
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -96,16 +128,17 @@ class MatuiNode(object):
         return iter(self.children)
     def iterChanged(self):
         if not self.treeChanged:
-            return iter([])
+            return self, iter([])
+
         return (n for n in self.children if n.treeChanged)
 
-    def iterTree(self):
-        return ((n, n.iterTree()) for n in self.children)
-    def iterChangedTree(self, clear=False):
-        if not self.treeChanged:
-            return iter([])
-        if clear: self.treeChanged = False
-        return ((n, n.iterChangedTree(clear)) for n in self.children if n.treeChanged)
+    def tree(self, onlyChanged=False):
+        if not onlyChanged:
+            return self, (n.tree(onlyChanged) for n in self.children)
+        elif self.treeChanged:
+            return self, (n.tree(onlyChanged) for n in self.children if n.treeChanged)
+        else: 
+            return self, iter([])
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node collection protocol
@@ -164,27 +197,32 @@ class MatuiNode(object):
 
         for node in nodeList:
             node.onRemoveFromParent(self)
+        self.onTreeChange()
 
     # workhorses
 
     def insertNode(self, node, idx):
         if node.onAddToParent(self):
             self.children.insert(idx, node)
-            node.parent = self
             self.onTreeChange()
             return node
     def addNode(self, node):
         if node.onAddToParent(self):
             self.children.append(node)
-            node.parent = self
             self.onTreeChange()
             return node
     def removeNode(self, node):
         if node.onRemoveFromParent(self):
             self.children.remove(node)
-            del node.parent
             self.onTreeChange()
             return node
+
+    def extendNodes(self, nodes):
+        if nodes:
+            for node in nodes:
+                if node.onAddToParent(self):
+                    self.children.append(node)
+            self.onTreeChange()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -194,12 +232,17 @@ class MatuiNode(object):
             return False
         if oldParent is not None:
             oldParent.removeNode(self)
+
+        self.onTreeChange()
+        self.parent = parent
         return True
         
     def onRemoveFromParent(self, parent):
         if parent is not self.parent:
             raise ValueError("Attempted to remove node from node that is not its parent")
             return False
+        del self.parent
+        self.onTreeChange()
         return True
 
     treeChanged = False
