@@ -43,7 +43,7 @@ class EventSource(object):
         self._root = root
     root = property(getRoot, setRoot)
 
-    def acceptVisitor(self, visitor):
+    def accept(self, visitor):
         return visitor.visitEventSource(self, [self.kind])
 
 class GLEventSource(EventSource):
@@ -92,9 +92,9 @@ class EventRoot(ObservableObjectWithProp):
         return self
 
     def visit(self, item):
-        acceptVisitor = getattr(item, 'acceptVisitor', None)
-        if acceptVisitor is not None:
-            return acceptVisitor(self)
+        accept = getattr(item, 'accept', None)
+        if accept is not None:
+            return accept(self)
 
         else: return self.visitGroup(item)
 

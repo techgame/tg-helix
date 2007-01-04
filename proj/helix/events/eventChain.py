@@ -20,7 +20,7 @@ class EventHandler(object):
     """
     eventKinds = []
 
-    def acceptVisitor(self, visitor):
+    def accept(self, visitor):
         return visitor.visitEventHandler(self, self.eventKinds)
 
     _root = None
