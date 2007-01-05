@@ -1,0 +1,40 @@
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+##~ Copyright (C) 2002-2006  TechGame Networks, LLC.              ##
+##~                                                               ##
+##~ This library is free software; you can redistribute it        ##
+##~ and/or modify it under the terms of the BSD style License as  ##
+##~ found in the LICENSE file included with this distribution.    ##
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Definitions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatuiResourceUnit(object):
+    def isResource(self): return True
+    def isResourceMaterial(self): return False
+
+    def isResourceMesh(self): return False
+
+    def isResourceTexture(self): return False
+    def isResourceFont(self): return False
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatuiMaterialUnit(MatuiResourceUnit):
+    def isResourceMaterial(self): 
+        return True
+
+class MatuiMeshUnit(MatuiResourceUnit):
+    def isResourceMesh(self): 
+        return True
+
+class MatuiTextureUnit(MatuiResourceUnit):
+    texture = None
+    def isResourceTexture(self): 
+        return True
+
+class MatuiFontUnit(MatuiTextureUnit):
+    def isResourceFont(self): 
+        return True
+
