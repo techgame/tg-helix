@@ -37,11 +37,12 @@ def printNodeTree(treeEntry, indent=0):
 
 class MatuiNode(object):
     actor = None
-    parent = None
+    parents = None
     
     def __init__(self, actor=None, **kwinfo):
         self.info = {}
 
+        self.parents = []
         self.children = []
         if actor is not None:
             self.setActor(actor)
@@ -50,10 +51,12 @@ class MatuiNode(object):
 
     def __repr__(self):
         if self.actor is not None:
-            return 'Node|%d|: %r' % (len(self), self.actor,)
+            if self.children:
+                return 'Node|%d|: %r' % (len(self.children), self.actor,)
+            else: return 'Node: %r' % (self.actor,)
         elif self.info is not None:
-            return 'Node|%d|: {%r}' % (len(self), ', '.join(self.info.keys()),)
-        else: return 'Node|%d|' % (len(self), )
+            return 'Node|%d|: {%r}' % (len(self.children), ', '.join(self.info.keys()),)
+        else: return 'Node|%d|' % (len(self.children), )
 
     printNodeTree = staticmethod(printNodeTree)
     def debugTree(self):
@@ -119,8 +122,6 @@ class MatuiNode(object):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def __len__(self):
-        return len(self.children)
     def __iter__(self):
         return iter(self.children)
 
@@ -191,14 +192,6 @@ class MatuiNode(object):
         idx = self.children.index(nidx) + 1
         return self.insertNode(idx, node)
 
-    def clearNodes(self):
-        nodeList = self.children[:]
-        del self.children[:]
-
-        for node in nodeList:
-            node.onRemoveFromParent(self)
-        self.onTreeChange()
-
     # workhorses
 
     def insertNode(self, node, idx):
@@ -213,52 +206,44 @@ class MatuiNode(object):
             return node
     def removeNode(self, node):
         if node.onRemoveFromParent(self):
-            self.children.remove(node)
+            while node in self.children:
+                self.children.remove(node)
             self.onTreeChange()
             return node
-
     def extendNodes(self, nodes):
         if nodes:
             for node in nodes:
                 if node.onAddToParent(self):
                     self.children.append(node)
             self.onTreeChange()
+    def clearNodes(self):
+        nodeList = self.children[:]
+        del self.children[:]
+
+        for node in nodeList:
+            node.onRemoveFromParent(self)
+        self.onTreeChange()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def onAddToParent(self, parent):
-        oldParent = self.parent
-        if oldParent is parent:
-            return False
-        if oldParent is not None:
-            oldParent.removeNode(self)
-
-        self.onTreeChange()
-        self.parent = parent
+        if parent not in self.parents:
+            self.parents.append(parent)
         return True
         
     def onRemoveFromParent(self, parent):
-        if parent is not self.parent:
-            raise ValueError("Attempted to remove node from node that is not its parent")
-            return False
-        del self.parent
-        self.onTreeChange()
+        while parent in self.parents:
+            self.parents.remove(parent)
         return True
 
     treeChanged = False
-    def onTreeChange(self, notifyTree=True):
+    def onTreeChange(self):
         if self.treeChanged:
             # we are already changed
-            return True
+            return
 
         self.treeChanged = True
 
-        if notifyTree:
-            l = self.parent
-            while l:
-                if l.onTreeChange(False):
-                    # this parent is changed, all its parents are changed
-                    break
-                l = l.parent
-            return True
+        for p in self.parents:
+            p.onTreeChange()
 
