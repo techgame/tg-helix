@@ -41,7 +41,7 @@ class MatuiViewportEventHandler(GLViewportEventHandler):
     def resize(self, glview, viewportSize):
         glview.setViewCurrent()
         layoutMgr = self.managers['layout']
-        layoutMgr(viewportSize)
+        layoutMgr.layout(viewportSize)
         return True
 
     def erase(self, glview):
@@ -51,7 +51,7 @@ class MatuiViewportEventHandler(GLViewportEventHandler):
         glview.setViewCurrent()
         renderMgr = self.managers['render']
         glview.frameStart()
-        if renderMgr():
+        if renderMgr.render():
             glview.frameEnd()
             glview.viewSwapBuffers()
             return True
@@ -80,7 +80,7 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
             print
             print 'Mouse Event:'
             pprint.pprint(info)
-            selection = selectMgr(info['pos'])
+            selection = selectMgr.select(info['pos'])
             if selection:
                 pprint.pprint(selection)
 
@@ -99,13 +99,17 @@ class MatuiTimingEventHandler(IdleEventHandler, TimerEventHandler):
         glview.setViewCurrent()
         return False
 
-    def timer(self, glview, info):
-        glview.setViewCurrent()
-        renderMgr = self.managers['render']
-        glview.frameStart()
-        if renderMgr():
-            glview.frameEnd()
-            glview.viewSwapBuffers()
+    if 1:
+        def timer(self, glview, info):
+            glview.setViewCurrent()
+            renderMgr = self.managers['render']
+            glview.frameStart()
+            if renderMgr.render():
+                glview.frameEnd()
+                glview.viewSwapBuffers()
+                return True
             return True
-        return True
+    else:
+        def timer(self, glview, info):
+            return False
 

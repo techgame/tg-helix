@@ -121,8 +121,8 @@ class MatuiNode(object):
 
     def root(self):
         root = self
-        while root.parent is not None:
-            root = root.parent
+        while root.parents:
+            root = root.parents[0]
         return root
     def linage(self):
         return list(self.iterLinage())
@@ -130,7 +130,7 @@ class MatuiNode(object):
         each = self
         while each is not None:
             yield each
-            each = each.parent
+            each = each.parents[0]
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -147,19 +147,26 @@ class MatuiNode(object):
 
     def iterTree(self):
         stack = [(None, iter([self]))]
+
         while stack:
-            tnode, ttree = stack[-1]
+            ttree = stack[-1][1]
+
             for cnode in ttree:
                 if cnode.children:
-                    if not (yield +1, cnode):
+                    if (yield +1, cnode):
+                        yield 'no-push'
+                    else:
                         stack.append((cnode, iter(cnode.children)))
                         break
                 else: 
-                    (yield 0, cnode)
+                    if (yield 0, cnode):
+                        yield 'no-op'
 
             else:
-                (yield -1, tnode)
-                stack.pop()
+                cnode = stack.pop()[0]
+                if (yield -1, cnode):
+                    yield 'no-op'
+                
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node collection protocol

@@ -88,3 +88,6 @@ class MatuiStage(MatuiActor):
     def loadForScene(self, scene):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
+    def onSceneSetup(self, scene):
+        pass
+

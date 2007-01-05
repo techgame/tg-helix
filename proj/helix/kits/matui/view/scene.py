@@ -11,7 +11,10 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from pprint import pprint
+from functools import partial
+
 from TG.openGL.data import Rect
+from TG.openGL.raw import gl
 
 from .base import MatuiView
 from .events import MatuiEventRoot
@@ -36,6 +39,7 @@ class MatuiScene(MatuiView):
     stage = None
     def init(self, stage):
         self.stage = stage
+        self.box = stage.box
         stage.loadForScene(self)
 
     def update(self, stage):
@@ -48,6 +52,8 @@ class MatuiScene(MatuiView):
         self.setupManagers(self.managers)
 
         self.setupEvtSources(evtSources)
+
+        self.stage.onSceneSetup(self)
         return True
 
     def shutdown(self):
@@ -79,12 +85,15 @@ class LayoutManager(SceneManagerBase):
     strategy = AbsLayoutStrategy()
     box = Rect.property()
 
-    def __call__(self, viewportSize):
+    def layout(self, viewportSize):
         cells = self.sgLayoutCells()
 
-        box = self.box
+        box = self.scene.box
         box.size = viewportSize
         self.strategy(cells, box)
+
+        #if 0:
+        #    self.scene.stage.node.debugTree()
 
     cells = None
     treeVersion = None
@@ -109,18 +118,22 @@ class LayoutManager(SceneManagerBase):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class RenderManager(SceneManagerBase):
-    def __call__(self):
+    def render(self):
         renderList = self.sgRenderList()
-        if 0:
-            print
-            print "Render each:"
-            for r in renderList:
-                print '  ', r
-            print
-        else:
-            for r in renderList:
-                pass
+        #if 0:
+        #    print
+        #    print "Render each:"
+        #    self.glClearBuffers()
+        #    for r in renderList:
+        #        print '  ', r
+        #    print
+        #    return True
+        self.glClearBuffers()
+        for r in renderList:
+            pass
         return True
+
+    glClearBuffers = staticmethod(partial(gl.glClear, gl.GL_COLOR_BUFFER_BIT|gl.GL_DEPTH_BUFFER_BIT))
 
     renderList = None
     treeVersion = None
@@ -146,17 +159,18 @@ class RenderManager(SceneManagerBase):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SelectionManager(SceneManagerBase):
-    def __call__(self, pos):
+    def select(self, pos):
         selectionList = self.sgSelectionList()
-        if 0:
-            print
-            print "Selectables:", pos
-            for r in selectionList:
-                print '  ', r
-            print
-        else:
-            for r in selectionList:
-                pass
+        #if 0:
+        #    print
+        #    print "Selectables:", pos
+        #    for r in selectionList:
+        #        print '  ', r
+        #    print
+        #    return
+
+        for r in selectionList:
+            pass
 
     selectionList = None
     treeVersion = None
