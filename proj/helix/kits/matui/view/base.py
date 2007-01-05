@@ -38,8 +38,12 @@ class MatuiView(HelixView):
         view.update(viewable)
         return view
 
+    def __repr__(self):
+        return '%s: %r' % (self.__class__.__name__, self.actor)
+
+    actor = None
     def init(self, actor):
-        pass
+        self.actor = actor
 
     def update(self, actor):
         pass

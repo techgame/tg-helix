@@ -14,8 +14,7 @@ from TG.openGL.data import Rect
 
 from TG.helix.framework.stage import HelixActor
 
-from .node import MatuiNode
-from .layouts import MatuiLayout, MatuiActorCell
+from .import node, layouts
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -36,11 +35,11 @@ class MatuiActor(HelixActor):
     def __repr__(self):
         pos = '%s %s' % tuple(self.box.pos.astype(int))
         size = '%s %s' % tuple(self.box.size.astype(int))
-        return '<%s r:[%s %s]>' % (self.__class__.__name__, pos, size)
+        return '<%s [%s %s]>' % (self.__class__.__name__, pos, size)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    NodeFactory = MatuiNode.newNodeForActor
+    NodeFactory = node.MatuiNode.newNodeForActor
     def newNode(self, **kwinfo):
         node = self.NodeFactory(self)
         if kwinfo: 
@@ -61,12 +60,12 @@ class MatuiActor(HelixActor):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    LayoutFactory = MatuiLayout.newLayoutForActor
+    LayoutFactory = layouts.MatuiLayout.newLayoutForActor
     def newLayout(self, *args, **kw):
         layout = self.LayoutFactory(self, *args, **kw)
         return layout
 
-    CellFactory = MatuiActorCell
+    CellFactory = layouts.MatuiActorCell
     def newCell(self, *args, **kw):
         return self.CellFactory(self, *args, **kw)
     def asCellForHost(self, hostLayout):
@@ -79,6 +78,7 @@ class MatuiActor(HelixActor):
 
 class MatuiStage(MatuiActor):
     viewVisitKeys = ["MatuiStage"]
+    NodeFactory = node.MatuiRootNode.newNodeForActor
 
     def isHelixStage(self):
         return True

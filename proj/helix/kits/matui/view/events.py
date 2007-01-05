@@ -28,21 +28,20 @@ class MatuiEventRoot(EventRoot):
 
         self += MatuiViewportEventHandler(scene)
         self += MatuiInputEventHandler(scene)
-        #self += MatuiTimingEventHandler(scene)
+        self += MatuiTimingEventHandler(scene)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiViewportEventHandler(GLViewportEventHandler):
     eventKinds = ['viewport']
-    scene = None
     def __init__(self, scene):
         self.scene = scene
+        self.managers = scene.managers
 
     def resize(self, glview, viewportSize):
         glview.setViewCurrent()
-        print 'resize event'
-        if False and self.scene.resize(viewportSize):
-            glview.viewSwapBuffers()
+        layoutMgr = self.managers['layout']
+        layoutMgr(viewportSize)
         return True
 
     def erase(self, glview):
@@ -50,18 +49,20 @@ class MatuiViewportEventHandler(GLViewportEventHandler):
 
     def paint(self, glview):
         glview.setViewCurrent()
-        print 'paint event'
-        if False and self.scene.refresh():
+        renderMgr = self.managers['render']
+        glview.frameStart()
+        if renderMgr():
+            glview.frameEnd()
             glview.viewSwapBuffers()
-        return True
+            return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
     eventKinds = ['mouse', 'keyboard']
-    scene = None
     def __init__(self, scene):
         self.scene = scene
+        self.managers = scene.managers
 
     def key(self, glview, info):
         glview.setViewCurrent()
@@ -75,9 +76,14 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
     def mouse(self, glview, info):
         glview.setViewCurrent()
         if info['etype'] in ('up', 'down', 'dclick'):
+            selectMgr = self.managers['select']
             print
             print 'Mouse Event:'
             pprint.pprint(info)
+            selection = selectMgr(info['pos'])
+            if selection:
+                pprint.pprint(selection)
+
             return True
         else: return False
 
@@ -85,9 +91,9 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
 
 class MatuiTimingEventHandler(IdleEventHandler, TimerEventHandler):
     eventKinds = ['idle', 'timer']
-    scene = None
     def __init__(self, scene):
         self.scene = scene
+        self.managers = scene.managers
 
     def idle(self, glview, info):
         glview.setViewCurrent()
@@ -95,5 +101,11 @@ class MatuiTimingEventHandler(IdleEventHandler, TimerEventHandler):
 
     def timer(self, glview, info):
         glview.setViewCurrent()
+        renderMgr = self.managers['render']
+        glview.frameStart()
+        if renderMgr():
+            glview.frameEnd()
+            glview.viewSwapBuffers()
+            return True
         return True
 

@@ -60,7 +60,19 @@ class MatuiNode(object):
 
     printNodeTree = staticmethod(printNodeTree)
     def debugTree(self):
-        self.printNodeTree(self.tree())
+        print
+        title = "Node Tree for: %r" % (self,)
+        print title
+        print "=" * len(title)
+
+        indent = 0
+        for op, node in self.iterTree(): 
+            if op >= 0:
+                print '%s- %r' % (2*indent*' ', node)
+            indent += op
+
+        print
+        print
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -133,13 +145,21 @@ class MatuiNode(object):
 
         return (n for n in self.children if n.treeChanged)
 
-    def tree(self, onlyChanged=False):
-        if not onlyChanged:
-            return self, (n.tree(onlyChanged) for n in self.children)
-        elif self.treeChanged:
-            return self, (n.tree(onlyChanged) for n in self.children if n.treeChanged)
-        else: 
-            return self, iter([])
+    def iterTree(self):
+        stack = [(None, iter([self]))]
+        while stack:
+            tnode, ttree = stack[-1]
+            for cnode in ttree:
+                if cnode.children:
+                    if not (yield +1, cnode):
+                        stack.append((cnode, iter(cnode.children)))
+                        break
+                else: 
+                    (yield 0, cnode)
+
+            else:
+                (yield -1, tnode)
+                stack.pop()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node collection protocol
@@ -246,4 +266,20 @@ class MatuiNode(object):
 
         for p in self.parents:
             p.onTreeChange()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatuiRootNode(MatuiNode):
+    treeVersion = 0
+    def onTreeChange(self):
+        if self.treeChanged:
+            return
+
+        self.treeVersion += 1
+
+        if self.parents:
+            # root nodes don't generally have parents, but just in case someone
+            # wants to hijack it... ;)
+            for p in self.parents:
+                p.onTreeChange()
 

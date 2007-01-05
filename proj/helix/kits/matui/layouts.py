@@ -55,6 +55,9 @@ class MatuiCellMixin(object):
         self.onlayout = evtfn
         return self #evtfn
 
+    def __repr__(self):
+        return '%s' % (self.__class__.__name__, )
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiLayoutCell(LayoutCell, MatuiCellMixin):
@@ -63,9 +66,12 @@ class MatuiLayoutCell(LayoutCell, MatuiCellMixin):
 
     def isMatuiLayout(self): return True
 
+    def __repr__(self):
+        return '%s|%s|' % (self.__class__.__name__, len(self.cells))
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    _strategy = None
+    _strategy = AbsLayoutStrategy()
     def getStrategy(self):
         return self._strategy
     def setStrategy(self, strategy, *args, **kw):
@@ -192,6 +198,8 @@ class MatuiActorCell(MatuiCell):
     maxSize = None
 
     def __init__(self, actor, weight=0):
+        if actor is not None:
+            self.actor = actor
         if weight:
             self.weight = weight
 
