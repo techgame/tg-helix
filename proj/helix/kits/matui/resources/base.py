@@ -31,9 +31,9 @@ class MatuiResourceSlot(object):
         del self.res[self.key]
 
     _loader = MatuiResourceLoader()
-    def getLoader(self):
+    def loader(self):
         return self._loader.forSlot(self)
-    load = property(getLoader)
+    load = property(loader)
     
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -51,5 +51,5 @@ class MatuiResources(dict):
             return self._loader
 
         return self.slot(key).loader()
-    load = property(getLoader)
+    load = property(loader)
 

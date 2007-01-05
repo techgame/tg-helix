@@ -12,7 +12,7 @@
 
 from TG.openGL.text.freetypeFontLoader import FreetypeFontLoader
 
-from .unit import MatuiTextureUnit
+from .units import MatuiFontUnit
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Font

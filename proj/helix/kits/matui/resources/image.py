@@ -12,9 +12,9 @@
 
 import PIL.Image
 
-from TG.openGL.data import ImageTexture
+from TG.openGL.data.image import ImageTexture
 
-from .unit import MatuiTextureUnit
+from .units import MatuiTextureUnit
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -48,5 +48,5 @@ class MatuiImageTexture(MatuiTextureUnit):
         for idx in xrange(len(bands)-1):
             premult = a.chop_multiply(imageData.getband(idx))
             imageData.putband(premult, idx)
-Image = MatuiImage
+Image = MatuiImageTexture
 

@@ -14,7 +14,8 @@ from TG.openGL.data import Rect
 
 from TG.helix.framework.stage import HelixActor
 
-from .import node, layouts
+from . import node, layouts
+from .resources import MatuiResources
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -22,6 +23,8 @@ from .import node, layouts
 
 class MatuiActor(HelixActor):
     viewVisitKeys = ['MatuiActor']
+
+    res = MatuiResources()
 
     box = Rect.property()
     minSize = None
@@ -31,6 +34,9 @@ class MatuiActor(HelixActor):
     def isMatuiActor(self): return True
     def isMatuiCell(self): return False
     def isMatuiLayout(self): return False
+
+    def __init__(self):
+        self.res = self.res.copy()
 
     def __repr__(self):
         pos = '%s %s' % tuple(self.box.pos.astype(int))
