@@ -88,8 +88,6 @@ class MatuiActor(HelixActor):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     resources = MatuiResources()
-    resources.slot('mat_render').nullMaterial()
-    resources.slot('mat_select').nullMaterial()
 
     def initResources(self):
         resources = self.resources.forActor(self)
@@ -115,4 +113,9 @@ class MatuiStage(MatuiActor):
 
     def onSceneSetup(self, scene):
         pass
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    resources = MatuiResources()
+    resources.slot().stageMaterialGroup()
 

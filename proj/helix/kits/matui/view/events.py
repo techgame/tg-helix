@@ -39,7 +39,7 @@ class MatuiViewportEventHandler(GLViewportEventHandler):
 
     def resize(self, glview, viewportSize):
         glview.setViewCurrent()
-        return self.scene.performLayout(glview, viewportSize)
+        return self.scene.performResize(glview, viewportSize)
 
     def erase(self, glview):
         return True
