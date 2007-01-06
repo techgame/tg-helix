@@ -10,22 +10,27 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from . import material
-from . import mesh
-from . import image
-from . import font
+from .material import MaterialLoaderMixin
+from .mesh import MeshLoaderMixin
+from .image import ImageLoaderMixin
+from .font import FontLoaderMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiResourceLoader(object):
-    slot = None
+class MatuiResourceLoader(
+        MaterialLoaderMixin,
+        MeshLoaderMixin,
+        ImageLoaderMixin,
+        FontLoaderMixin,
+        ):
 
     def __init__(self, master=None):
         if master is not None:
             self.__dict__.update(master.__dict__)
 
+    slot = None
     def forSlot(self, slot):
         result = self.__class__(self)
         result.slot = slot
@@ -34,7 +39,7 @@ class MatuiResourceLoader(object):
     def asResult(self, result):
         slot = self.slot
         if slot is not None:
-            slot.set(result)
+            slot.loadResource(result)
         return result
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,18 +54,4 @@ class MatuiResourceLoader(object):
 
     def color(self, *args, **kw):
         pass
-
-    def boxmesh(self, *args, **kw):
-        r = mesh.BoxMesh(*args, **kw)
-        return self.asResult(r)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def nullMaterial(self):
-        r = material.NullMaterial()
-        return self.asResult(r)
-
-    def debugMaterial(self, *args, **kw):
-        r = material.DebugMaterial(*args, **kw)
-        return self.asResult(r)
 

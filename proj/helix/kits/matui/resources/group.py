@@ -17,23 +17,22 @@ from .loader import MatuiResourceLoader
 #~ Resource Unit Definition
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+factory = MatuiResourceLoader()
 class MatuiResourceSlot(object):
-    def __init__(self, res, key):
+    def __init__(self, res, key=None):
         self.res = res
         self.key = key
 
-    def get(self, *args):
-        if args:
-            return self.res.get(self.key, *args)
-        else: return self.res[self.key]
-    def set(self, value):
-        self.res[self.key] = value
-    def delete(self, value):
-        del self.res[self.key]
+    def loadResource(self, value):
+        key = self.key
+        if key is None:
+            self.res.update(value)
+        else:
+            self.res[key] = value
 
-    _loader = MatuiResourceLoader()
+    factory = factory
     def loader(self):
-        return self._loader.forSlot(self)
+        return self.factory.forSlot(self)
     load = property(loader)
     
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,39 +65,16 @@ class MatuiResources(MatuiGroupUnit, dict):
         return result
     def forActor(self, actor):
         return self.copy()
-    def forView(self, view):
-        return self
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    factory = factory
     def __enter__(self):
-        return (self.obj, self.load)
+        return (MatuiResourceObject(self), self.factory)
     def __exit__(self, exc_value=None, exc_type=None, exc_tb=None):
         pass
 
     ResourceSlot = MatuiResourceSlot
-    def slot(self, key):
+    def slot(self, key=None):
         return self.ResourceSlot(self, key).loader()
-
-    _loader = MatuiResourceLoader()
-    def loader(self, key=None):
-        if key is not None:
-            return self.slot(key)
-        else: return self._loader
-    load = property(loader)
-
-    @property
-    def obj(self):
-        return MatuiResourceObject(self)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def loadGroup(self, groupName):
-        grp = self.load.group(groupName, self)
-        return grp.loadOnto(self)
-    def addToLoader(self, groupName):
-        self.load.addGroup(groupName, self)
-    def addToGroup(self, group):
-        group.update(self)
-        return self
 

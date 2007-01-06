@@ -17,7 +17,16 @@ from TG.openGL.data import Rect
 from .units import MatuiMeshUnit
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Data Resources
+#~ Loader Mixin
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MeshLoaderMixin(object):
+    def boxmesh(self, *args, **kw):
+        r = BoxMesh(*args, **kw)
+        return self.asResult(r)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Mesh Resources
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiBoxMesh(MatuiMeshUnit):
