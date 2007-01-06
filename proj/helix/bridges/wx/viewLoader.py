@@ -39,5 +39,5 @@ class wxHelixSceneHostViewLoader(object):
             wxIdleEventSource(glviewhost),
             ]
 
-SceneHostViewLoader = viewLoader.wxHelixSceneHostViewLoader
+SceneHostViewLoader = wxHelixSceneHostViewLoader
 
