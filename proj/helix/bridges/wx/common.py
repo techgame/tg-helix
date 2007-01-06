@@ -71,7 +71,7 @@ class wxEventSourceMixin(object):
         self.timingLog.append(renderEnd - renderStart)
 
         timeDelta = renderEnd - self._lastUpdate
-        if timeDelta >= 1 and len(self.timingLog):
+        if timeDelta >= 1 and len(self.timingLog)>=self._historyKeep:
             newEntries = (len(self.timingLog) - self._historyLen - 1)
             fpsRefresh = newEntries / timeDelta
             fpsRender = len(self.timingLog) / sum(self.timingLog, 0.0)

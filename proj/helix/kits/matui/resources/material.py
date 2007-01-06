@@ -54,5 +54,18 @@ class DebugMaterial(MatuiMaterial):
         print '%s(%s):' % (self.__class__.__name__, self.name)
         print '  - %r' % (actor,)
         print '  - res: %s' % (', '.join(res.keys()),)
-MaterialLoaderMixin._addLoader_(DebugMaterial)
+MaterialLoaderMixin._addLoader_(DebugMaterial, 'debugMaterial')
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ResizeLayoutMaterial(MatuiMaterial):
+    cullStack = False
+    def __init__(self, cullStack=False):
+        self.cullStack = cullStack
+
+    def bind(self, actor, res, mgr):
+        return [self.partial(self.perform, actor, res, mgr)]
+    def perform(self, actor, res, mgr):
+        res['layout'].layoutInBox(mgr.stage.box)
+MaterialLoaderMixin._addLoader_(ResizeLayoutMaterial, 'resizeLayoutMaterial')
 

@@ -48,10 +48,9 @@ class StageRenderMaterial(MatuiMaterial):
 class StageResizeMaterial(MatuiMaterial):
     gl = gl
 
-    cullStack = True
     def bind(self, stage, res, mgr):
-        return [self.partial(self.perform, stage, mgr)]
-    def perform(self, stage, mgr):
+        return [self.partial(self.perform, stage, res, mgr)]
+    def perform(self, stage, res, mgr):
         gl = self.gl
         w, h = mgr.viewportSize
         stage.box.size[:2] = (w, h)

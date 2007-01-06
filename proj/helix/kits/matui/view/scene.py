@@ -62,7 +62,6 @@ class MatuiScene(base.MatuiView):
             render=sceneManagers.RenderManager(self),
             resize=sceneManagers.ViewportResizeManager(self),
             select=sceneManagers.SelectManager(self),
-            layout=sceneManagers.LayoutManager(self),
             )
         self._animate = managers['render'].render
 
@@ -72,10 +71,7 @@ class MatuiScene(base.MatuiView):
 
     def performResize(self, hostView, viewportSize):
         resizeMgr = self.managers['resize']
-        resizeMgr.resize(hostView, viewportSize)
-
-        layoutMgr = self.managers['layout']
-        return layoutMgr.layout(hostView)
+        return resizeMgr.resize(hostView, viewportSize)
 
     def performRender(self, hostView):
         renderMgr = self.managers['render']
@@ -87,5 +83,5 @@ class MatuiScene(base.MatuiView):
 
     def performAnimation(self, hostView, info):
         if 1:
-            self.performRender(hostView)
+            return self.performRender(hostView)
 

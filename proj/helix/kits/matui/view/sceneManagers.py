@@ -13,6 +13,7 @@
 class SceneGraphPassManager(object):
     def __init__(self, scene):
         self.scene = scene
+        self.stage = scene.stage
         self.root = scene.stage.node
 
     _passResult = None
@@ -30,38 +31,6 @@ class SceneGraphPassManager(object):
     def _sgGeneratePass(self, root):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class LayoutManager(SceneGraphPassManager):
-    def layout(self, hostView):
-        hostView.setViewCurrent()
-
-        box = self.scene.stage.box
-        sgpass = self.sgPass()
-        for layout in sgpass:
-            layout(box)
-
-        return True
-
-    resourceSelector = 'layout'
-    def _sgGeneratePass(self, root):
-        resourceSelector = self.resourceSelector
-
-        layouts = []
-        itree = root.iterTree()
-        for op, node in itree:
-            if op < 0: continue
-
-            actor = node.actor; resources = actor.resources
-            cellLayout = resources.get(resourceSelector, None)
-            if cellLayout is not None:
-                layouts.append(cellLayout)
-                itree.send(True)
-
-        return layouts
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Various Scene Graph Render Managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SceneGraphRenderPassManager(SceneGraphPassManager):
@@ -84,7 +53,7 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
                 passResult += material.bind(actor, resources, self)
                 passStack[-1] += material.bindUnwind(actor, resources, self)
 
-                if not op or material.cullStack:
+                if op and material.cullStack:
                     itree.send(True)
                     passResult.extend(reversed(passStack.pop()))
 
