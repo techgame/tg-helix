@@ -71,10 +71,8 @@ class LayoutManager(SceneGraphPassManager):
 
 class SceneGraphRenderPassManager(SceneGraphPassManager):
     resourceSelector = None 
-    resourceFirstOnly = False
     def _sgGeneratePass(self, root):
         resourceSelector = self.resourceSelector
-        resourceFirstOnly = self.resourceFirstOnly
         passResult = []
         passStack = []
         itree = root.iterTree()
@@ -91,7 +89,7 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
                 passResult += material.bind(actor, resources, self)
                 passStack[-1] += material.bindUnwind(actor, resources, self)
 
-                if op and resourceFirstOnly:
+                if not op or material.cullStack:
                     itree.send(True)
                     passResult.extend(reversed(passStack.pop()))
 
@@ -103,7 +101,6 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
 
 class ViewportResizeManager(SceneGraphRenderPassManager):
     resourceSelector = 'resize'
-    resourceFirstOnly = True
 
     def resize(self, glview, viewportSize):
         self.viewportSize = viewportSize

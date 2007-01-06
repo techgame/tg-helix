@@ -27,6 +27,7 @@ class MaterialLoaderMixin(MatuiLoaderMixin):
 class MatuiMaterial(MatuiMaterialUnit):
     partial = staticmethod(partial)
 
+    cullStack = False
     def bind(self, actor, res, mgr):
         # Return a list of 0-parameter callables that only require mgr parameter
         return [self.partial(self.perform, actor, res, mgr)]
