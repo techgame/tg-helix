@@ -10,8 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.framework.stage import HelixActor
-
+from TG.observing import ObservableObject
 from . import node, layouts
 from .resources import MatuiResources
 
@@ -19,16 +18,13 @@ from .resources import MatuiResources
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiActor(HelixActor):
-    viewVisitKeys = ['MatuiActor']
-
+class MatuiActor(ObservableObject):
     def isMatuiNode(self): return False
     def isMatuiActor(self): return True
     def isMatuiCell(self): return False
     def isMatuiLayout(self): return False
 
     def __init__(self):
-        HelixActor.__init__(self)
         self.initResources()
 
     def __repr__(self):
@@ -94,16 +90,10 @@ class MatuiActor(HelixActor):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiStage(MatuiActor):
-    viewVisitKeys = ["MatuiStage"]
     NodeFactory = node.MatuiRootNode.newNodeForActor
 
-    def isHelixStage(self):
-        return True
-    def accept(self, visitor):
-        return visitor.visitStage(self)
-
     def loadForScene(self, scene):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        pass
 
     def onSceneSetup(self, scene):
         pass

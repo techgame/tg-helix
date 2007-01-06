@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from . import base
+from TG.observing import ObservableObject
 from . import events
 from . import sceneManagers
 
@@ -18,18 +18,14 @@ from . import sceneManagers
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiScene(base.MatuiView):
-    viewForKeys = ['MatuiStage']
-
+class MatuiScene(ObservableObject):
     def __repr__(self):
         return '%s: %r' % (self.__class__.__name__, self.stage)
 
-    def isHelixScene(self):
-        return True
-    def accept(self, visitor):
-        return visitor.visitScene(self)
-
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def __init__(self, stage):
+        self.init(stage)
 
     stage = None
     def init(self, stage):

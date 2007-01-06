@@ -6,6 +6,5 @@
 ##~ found in the LICENSE file included with this distribution.    ##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
-from .base import matuiViewFactory, MatuiView
 from .scene import MatuiScene
 
