@@ -10,14 +10,13 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .eventSource import GLEventSource
-from .eventChain import EventHandler
+from .eventSource import EventHandler, HostViewEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GLMouseEventSource(GLEventSource):
+class MouseEventSource(HostViewEventSource):
     kind = 'mouse'
 
     def sendMouse(self, info):
@@ -43,6 +42,6 @@ class MouseEventHandler(EventHandler):
         0x8: 'meta',
         }
 
-    def mouse(self, glview, info):
+    def mouse(self, hostview, info):
         pass
 

@@ -19,6 +19,24 @@ from TG.observing import ObservableObjectWithProp, ObservableDict, ObservableLis
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class EventHandler(object):
+    """Event handlers are part of the Chain of Responsibility pattern.  They
+    are links in that chain that may or may not handle the event.
+    """
+    eventKinds = []
+
+    def accept(self, visitor):
+        return visitor.visitEventHandler(self, self.eventKinds)
+
+    _root = None
+    def getRoot(self):
+        return self._root
+    def setRoot(self, root):
+        self._root = root
+    root = property(getRoot, setRoot)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class EventSource(object):
     """An event source demux captures events from the system and recategorizes
     them into event roots like mice, and keyboards.
@@ -46,7 +64,7 @@ class EventSource(object):
     def accept(self, visitor):
         return visitor.visitEventSource(self, [self.kind])
 
-class GLEventSource(EventSource):
+class HostViewEventSource(EventSource):
     if sys.platform.startswith('win'):
         # time.clock is the fastest updating query on unix heritage platforms
         newTimestamp = staticmethod(time.clock)

@@ -10,14 +10,13 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .eventSource import GLEventSource
-from .eventChain import EventHandler
+from .eventSource import EventHandler, HostViewEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GLViewportEventSource(GLEventSource):
+class ViewportEventSource(HostViewEventSource):
     kind = 'viewport'
 
     def sendSize(self, size):
@@ -47,15 +46,15 @@ class GLViewportEventSource(GLEventSource):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GLViewportEventHandler(EventHandler):
+class ViewportEventHandler(EventHandler):
     eventKinds = ['viewport']
 
-    def initial(self, glview, viewportSize):
+    def initial(self, hostview, viewportSize):
         pass
-    def resize(self, glview, viewportSize):
+    def resize(self, hostview, viewportSize):
         pass
-    def erase(self, glview):
+    def erase(self, hostview):
         pass
-    def paint(self, glview):
+    def paint(self, hostview):
         pass
 

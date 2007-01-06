@@ -11,15 +11,15 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .common import wx, wxEventSourceMixin
-from TG.helix.events.keyboardEvents import GLKeyboardEventSource
+from TG.helix.events.keyboardEvents import KeyboardEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxGLKeyboardEventSource(wxEventSourceMixin, GLKeyboardEventSource):
+class wxKeyboardEventSource(wxEventSourceMixin, KeyboardEventSource):
     def __init__(self, glCanvas):
-        GLKeyboardEventSource.__init__(self)
+        KeyboardEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_KEY_DOWN, self.onEvtKey)
         glCanvas.Bind(wx.EVT_KEY_UP, self.onEvtKey)

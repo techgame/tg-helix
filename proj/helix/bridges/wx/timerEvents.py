@@ -11,15 +11,15 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .common import wx, wxEventSourceMixin
-from TG.helix.events.timerEvents import GLTimerEventSource, GLIdleEventSource
+from TG.helix.events.timerEvents import TimerEventSource, IdleEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxGLTimerEventSource(wxEventSourceMixin, GLTimerEventSource):
+class wxTimerEventSource(wxEventSourceMixin, TimerEventSource):
     def __init__(self, glCanvas, frequency=60.):
-        GLTimerEventSource.__init__(self)
+        TimerEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         self._timer = wx.Timer()
         self._timer.Bind(wx.EVT_TIMER, self.onEvtTimer)
@@ -45,9 +45,9 @@ class wxGLTimerEventSource(wxEventSourceMixin, GLTimerEventSource):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxGLIdleEventSource(wxEventSourceMixin, GLIdleEventSource):
+class wxIdleEventSource(wxEventSourceMixin, IdleEventSource):
     def __init__(self, glCanvas, frequency=60.):
-        GLIdleEventSource.__init__(self)
+        IdleEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_IDLE, self.onEvtIdle)
 

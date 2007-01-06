@@ -13,10 +13,10 @@
 
 from TG.skinning.toolkits.wx import wx, wxSkinModel, XMLSkin
 
-from .viewportEvents import wxGLViewportEventSource
-from .keyboardEvents import wxGLKeyboardEventSource
-from .mouseEvents import wxGLMouseEventSource
-from .timerEvents import wxGLTimerEventSource, wxGLIdleEventSource
+from .viewportEvents import wxViewportEventSource
+from .keyboardEvents import wxKeyboardEventSource
+from .mouseEvents import wxMouseEventSource
+from .timerEvents import wxTimerEventSource, wxIdleEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Constants / Variables / Etc. 
@@ -82,11 +82,11 @@ class BasicRenderSkinModel(wxSkinModel):
 
     def setupCanvas(self, canvasElem, canvasObj):
         self.evtSources = [
-            wxGLViewportEventSource(canvasObj),
-            wxGLMouseEventSource(canvasObj),
-            wxGLKeyboardEventSource(canvasObj),
-            wxGLTimerEventSource(canvasObj),
-            wxGLIdleEventSource(canvasObj),
+            wxViewportEventSource(canvasObj),
+            wxMouseEventSource(canvasObj),
+            wxKeyboardEventSource(canvasObj),
+            wxTimerEventSource(canvasObj),
+            wxIdleEventSource(canvasObj),
             ]
 
         self.setupScene()

@@ -11,15 +11,15 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .common import wx, wxEventSourceMixin
-from TG.helix.events.viewportEvents import GLViewportEventSource
+from TG.helix.events.viewportEvents import ViewportEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxGLViewportEventSource(wxEventSourceMixin, GLViewportEventSource):
+class wxViewportEventSource(wxEventSourceMixin, ViewportEventSource):
     def __init__(self, glCanvas):
-        GLViewportEventSource.__init__(self)
+        ViewportEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_SIZE, self.onEvtSize)
         glCanvas.Bind(wx.EVT_ERASE_BACKGROUND, self.onEvtEraseBackground)

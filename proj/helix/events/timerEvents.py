@@ -10,14 +10,13 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .eventSource import GLEventSource
-from .eventChain import EventHandler
+from .eventSource import EventHandler, HostViewEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GLTimerEventSource(GLEventSource):
+class TimerEventSource(HostViewEventSource):
     kind = 'timer'
 
     def sendTimer(self, info):
@@ -29,12 +28,12 @@ class GLTimerEventSource(GLEventSource):
 class TimerEventHandler(EventHandler):
     eventKinds = ['timer']
 
-    def timer(self, glview, info):
+    def timer(self, hostview, info):
         pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GLIdleEventSource(GLEventSource):
+class IdleEventSource(HostViewEventSource):
     kind = 'idle'
 
     def sendIdle(self, info):
@@ -46,6 +45,6 @@ class GLIdleEventSource(GLEventSource):
 class IdleEventHandler(EventHandler):
     eventKinds = ['idle']
 
-    def idle(self, glview, info):
+    def idle(self, hostview, info):
         pass
 

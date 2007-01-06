@@ -11,13 +11,13 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .common import wx, wxEventSourceMixin
-from TG.helix.events.mouseEvents import GLMouseEventSource
+from TG.helix.events.mouseEvents import MouseEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxGLMouseEventSource(wxEventSourceMixin, GLMouseEventSource):
+class wxMouseEventSource(wxEventSourceMixin, MouseEventSource):
     buttonByBit = {
         0x1: 'left',
         0x2: 'right',
@@ -31,7 +31,7 @@ class wxGLMouseEventSource(wxEventSourceMixin, GLMouseEventSource):
         }
 
     def __init__(self, glCanvas):
-        GLMouseEventSource.__init__(self)
+        MouseEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_MOUSE_EVENTS, self.onEvtMouse)
 

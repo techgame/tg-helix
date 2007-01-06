@@ -10,14 +10,13 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .eventSource import GLEventSource
-from .eventChain import EventHandler
+from .eventSource import EventHandler, HostViewEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GLKeyboardEventSource(GLEventSource):
+class KeyboardEventSource(HostViewEventSource):
     kind = 'keyboard'
 
     def sendKey(self, info):
@@ -38,6 +37,6 @@ class KeyboardEventHandler(EventHandler):
         0x8: 'meta',
         }
 
-    def key(self, glview, info):
+    def key(self, hostview, info):
         pass
 
