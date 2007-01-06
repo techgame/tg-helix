@@ -12,6 +12,7 @@
 
 class MatuiResourceUnit(object):
     def isResource(self): return True
+    def isResourceGroup(self): return False
     def isResourceMaterial(self): return False
 
     def isResourceMesh(self): return False
@@ -20,6 +21,10 @@ class MatuiResourceUnit(object):
     def isResourceFont(self): return False
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatuiGroupUnit(MatuiResourceUnit):
+    def isResourceGroup(self): 
+        return True
 
 class MatuiMaterialUnit(MatuiResourceUnit):
     def isResourceMaterial(self): 

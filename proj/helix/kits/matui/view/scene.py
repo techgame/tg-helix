@@ -10,7 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from pprint import pprint
 from functools import partial
 
 from TG.openGL.data import Rect
@@ -43,7 +42,7 @@ class MatuiScene(MatuiView):
         stage.loadForScene(self)
 
     def update(self, stage):
-        pass
+        self.updateResources(stage.resources.forView(self))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -70,6 +69,30 @@ class MatuiScene(MatuiView):
             select=SelectionManager(self),
             )
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def performLayout(self, glview, size):
+        layoutMgr = self.managers['layout']
+        layoutMgr.layout(size)
+        return True
+
+    def performRender(self, glview):
+        glview.setViewCurrent()
+        renderMgr = self.managers['render']
+        glview.frameStart()
+        if renderMgr.render():
+            glview.frameEnd()
+            glview.viewSwapBuffers()
+            return True
+
+    def performSelect(self, glview, pos):
+        selectMgr = self.managers['select']
+        return selectMgr.select(pos)
+
+    def performAnimation(self, glview, info):
+        if 0:
+            self.performRender(glview)
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,15 +108,12 @@ class LayoutManager(SceneManagerBase):
     strategy = AbsLayoutStrategy()
     box = Rect.property()
 
-    def layout(self, viewportSize):
+    def layout(self, size):
         cells = self.sgLayoutCells()
 
         box = self.scene.box
-        box.size = viewportSize
+        box.size = size
         self.strategy(cells, box)
-
-        #if 0:
-        #    self.scene.stage.node.debugTree()
 
     cells = None
     treeVersion = None
@@ -120,17 +140,10 @@ class LayoutManager(SceneManagerBase):
 class RenderManager(SceneManagerBase):
     def render(self):
         renderList = self.sgRenderList()
-        #if 0:
-        #    print
-        #    print "Render each:"
-        #    self.glClearBuffers()
-        #    for r in renderList:
-        #        print '  ', r
-        #    print
-        #    return True
+
         self.glClearBuffers()
-        for r in renderList:
-            pass
+        for each in renderList:
+            each.sgRender(self)
         return True
 
     glClearBuffers = staticmethod(partial(gl.glClear, gl.GL_COLOR_BUFFER_BIT|gl.GL_DEPTH_BUFFER_BIT))
@@ -161,16 +174,8 @@ class RenderManager(SceneManagerBase):
 class SelectionManager(SceneManagerBase):
     def select(self, pos):
         selectionList = self.sgSelectionList()
-        #if 0:
-        #    print
-        #    print "Selectables:", pos
-        #    for r in selectionList:
-        #        print '  ', r
-        #    print
-        #    return
-
-        for r in selectionList:
-            pass
+        for each in selectionList:
+            each.sgSelect(self)
 
     selectionList = None
     treeVersion = None
@@ -179,13 +184,15 @@ class SelectionManager(SceneManagerBase):
         if self.treeVersion >= root.treeVersion:
             return self.selectionList
 
+        viewForActor = self.scene.viewFactory
+
         selectionList = []
         itree = root.iterTree()
         for op, node in itree:
             if op >= 0:
-                actor = node.actor
-                if actor is not None:
-                    selectionList.append(actor)
+                view = viewForActor(node.actor)
+                if view is not None:
+                    selectionList.append(view)
 
         self.treeVersion = root.treeVersion
         self.selectionList = selectionList

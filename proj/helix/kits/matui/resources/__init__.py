@@ -6,5 +6,5 @@
 ##~ found in the LICENSE file included with this distribution.    ##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
-from .base import MatuiResourceSlot, MatuiResources
+from .group import MatuiResourceSlot, MatuiResources
 

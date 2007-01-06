@@ -36,25 +36,16 @@ class MatuiViewportEventHandler(GLViewportEventHandler):
     eventKinds = ['viewport']
     def __init__(self, scene):
         self.scene = scene
-        self.managers = scene.managers
 
     def resize(self, glview, viewportSize):
         glview.setViewCurrent()
-        layoutMgr = self.managers['layout']
-        layoutMgr.layout(viewportSize)
-        return True
+        return self.scene.performLayout(glview, viewportSize)
 
     def erase(self, glview):
         return True
 
     def paint(self, glview):
-        glview.setViewCurrent()
-        renderMgr = self.managers['render']
-        glview.frameStart()
-        if renderMgr.render():
-            glview.frameEnd()
-            glview.viewSwapBuffers()
-            return True
+        return self.scene.performRender(glview)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -62,7 +53,6 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
     eventKinds = ['mouse', 'keyboard']
     def __init__(self, scene):
         self.scene = scene
-        self.managers = scene.managers
 
     def key(self, glview, info):
         glview.setViewCurrent()
@@ -75,14 +65,17 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
 
     def mouse(self, glview, info):
         glview.setViewCurrent()
-        if info['etype'] in ('up', 'down', 'dclick'):
-            selectMgr = self.managers['select']
+        etype = info['etype']
+        if etype in ('up', 'down', 'dclick'):
             print
             print 'Mouse Event:'
             pprint.pprint(info)
-            selection = selectMgr.select(info['pos'])
-            if selection:
-                pprint.pprint(selection)
+
+            if etype in ('down', 'dclick'):
+                selection = self.scene.performSelect(glview, info['pos'])
+
+                if selection:
+                    pprint.pprint(selection)
 
             return True
         else: return False
@@ -93,23 +86,11 @@ class MatuiTimingEventHandler(IdleEventHandler, TimerEventHandler):
     eventKinds = ['idle', 'timer']
     def __init__(self, scene):
         self.scene = scene
-        self.managers = scene.managers
 
     def idle(self, glview, info):
-        glview.setViewCurrent()
         return False
 
-    if 1:
-        def timer(self, glview, info):
-            glview.setViewCurrent()
-            renderMgr = self.managers['render']
-            glview.frameStart()
-            if renderMgr.render():
-                glview.frameEnd()
-                glview.viewSwapBuffers()
-                return True
-            return True
-    else:
-        def timer(self, glview, info):
-            return False
+    def timer(self, glview, info):
+        self.scene.performAnimation(glview, info)
+        return True
 

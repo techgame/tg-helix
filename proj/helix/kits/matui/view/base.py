@@ -46,5 +46,16 @@ class MatuiView(HelixView):
         self.actor = actor
 
     def update(self, actor):
-        pass
+        self.updateResources(actor.resources.forView(self))
+
+    def updateResources(self, resources):
+        render = resources.get('mat_render', None)
+        if render is None:
+            raise KeyError("%r cannot find a mat_render resource in %r" % (self, resources.keys()))
+        self.sgRender = render.bind(self, resources)
+
+        select = resources.get('mat_select', None)
+        if select is None:
+            raise KeyError("%r cannot find a mat_select resource in %r" % (self, resources.keys()))
+        self.sgSelect = select.bind(self, resources)
 

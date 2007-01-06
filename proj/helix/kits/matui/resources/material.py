@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from functools import partial
 from .units import MatuiMaterialUnit
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -17,6 +18,23 @@ from .units import MatuiMaterialUnit
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiMaterial(MatuiMaterialUnit):
-    pass
+    def __call__(self, view, res, sgmgr):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+
+    def bind(self, view, res):
+        return partial(self.__call__, view, res)
+
 Material = MatuiMaterial
+
+class NullMaterial(MatuiMaterial):
+    def __call__(self, view, res, sgmgr):
+        pass
+
+class DebugMaterial(MatuiMaterial):
+    def __init__(self, name):
+        self.name = name
+    def __call__(self, view, res, sgmgr):
+        print '%s(%s):' % (self.__class__.__name__, self.name)
+        print '  - %r' % (view,)
+        print '  - res: %s' % (', '.join(res.keys()),)
 

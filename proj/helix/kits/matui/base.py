@@ -24,8 +24,6 @@ from .resources import MatuiResources
 class MatuiActor(HelixActor):
     viewVisitKeys = ['MatuiActor']
 
-    res = MatuiResources()
-
     box = Rect.property()
     minSize = None
     maxSize = None
@@ -36,13 +34,16 @@ class MatuiActor(HelixActor):
     def isMatuiLayout(self): return False
 
     def __init__(self):
-        self.res = self.res.copy()
+        HelixActor.__init__(self)
+        self.initResources()
 
     def __repr__(self):
         pos = '%s %s' % tuple(self.box.pos.astype(int))
         size = '%s %s' % tuple(self.box.size.astype(int))
         return '<%s [%s %s]>' % (self.__class__.__name__, pos, size)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Actor Node protocol
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     NodeFactory = node.MatuiNode.newNodeForActor
@@ -65,6 +66,8 @@ class MatuiActor(HelixActor):
         self.node = node
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Cell and Layout protocol
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     LayoutFactory = layouts.MatuiLayout.newLayoutForActor
     def newLayout(self, *args, **kw):
@@ -79,6 +82,22 @@ class MatuiActor(HelixActor):
 
     def onCellLayout(self, cell, cbox):
         self.box.copyFrom(cbox)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Resource protocol
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    resources = MatuiResources()
+    resources.slot('mat_render').nullMaterial()
+    resources.slot('mat_select').nullMaterial()
+
+    def initResources(self):
+        resources = self.resources.forActor(self)
+        self.resources = resources
+        self.loadResources(resources)
+
+    def loadResources(self, resources):
+        pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
