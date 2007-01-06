@@ -14,13 +14,13 @@ import numpy
 from TG.openGL import data as glData
 from TG.openGL.data import Rect
 
-from .units import MatuiMeshUnit
+from .units import MatuiLoaderMixin, MatuiMeshUnit
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Loader Mixin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MeshLoaderMixin(object):
+class MeshLoaderMixin(MatuiLoaderMixin):
     def boxmesh(self, *args, **kw):
         r = BoxMesh(*args, **kw)
         return self.asResult(r)

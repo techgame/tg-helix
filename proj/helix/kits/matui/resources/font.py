@@ -12,13 +12,13 @@
 
 from TG.openGL.text.freetypeFontLoader import FreetypeFontLoader
 
-from .units import MatuiFontUnit
+from .units import MatuiLoaderMixin, MatuiFontUnit
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Loader mixin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class FontLoaderMixin(object):
+class FontLoaderMixin(MatuiLoaderMixin):
     pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

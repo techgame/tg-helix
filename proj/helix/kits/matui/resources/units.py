@@ -43,3 +43,20 @@ class MatuiFontUnit(MatuiTextureUnit):
     def isResourceFont(self): 
         return True
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Loader Mixin
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatuiLoaderMixin(object):
+    @classmethod
+    def _addLoader_(klass, loader, name=None):
+        if name is None: name = loader.__name__
+
+        def wrapMethod(self, *args, **kw):
+            r = loader(*args, **kw)
+            return self.asResult(r)
+        wrapMethod.__name__ = name
+
+        setattr(klass, name, wrapMethod)
+        return loader
+

@@ -36,19 +36,6 @@ class SceneGraphPassManager(object):
         return result
 
     def _sgGeneratePass(self, root):
-        addPassForNode = self._sgAddPassForNode
-
-        result = self._sgNewPassResult()
-        itree = root.iterTree()
-        for op, node in itree:
-            if op < 0: continue
-            if addPassForNode(node, result):
-                itree.send(True)
-        return result
-
-    def _sgNewPassResult(self):
-        return []
-    def _sgAddPassForNode(self, node, passResult):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,70 +52,120 @@ class LayoutManager(SceneGraphPassManager):
 
         return True
 
-    def _sgAddPassForNode(self, node, cells):
-        cellLayout = getattr(node.actor, 'layout', None)
-        if cellLayout is not None:
-            cells.append(cellLayout)
-            return True
+    def _sgGeneratePass(self, root):
+        cells = []
+        itree = root.iterTree()
+        for op, node in itree:
+            if op < 0: continue
+
+            cellLayout = getattr(node.actor, 'layout', None)
+            if cellLayout is not None:
+                cells.append(cellLayout)
+                itree.send(True)
+
+        return cells
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Various Scene Graph Render Managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ViewportResizeManager(SceneGraphPassManager):
+class SceneGraphRenderPassManager(SceneGraphPassManager):
+    resourceSelector = None 
+    resourceFirstOnly = False
+    def _sgGeneratePass(self, root):
+        resourceSelector = self.resourceSelector
+        resourceFirstOnly = self.resourceFirstOnly
+        passResult = []
+        passStack = []
+        itree = root.iterTree()
+        for op, node in itree:
+            if op < 0: 
+                passResult.extend(reversed(passStack.pop()))
+                continue
+            elif op > 0: 
+                passStack.append([])
+
+            actor = node.actor; resources = actor.resources
+            material = resources.get(resourceSelector, None)
+            if material is not None:
+                passResult += material.bind(actor, resources, self)
+                passStack[-1] += material.bindUnwind(actor, resources, self)
+
+                if op and resourceFirstOnly:
+                    itree.send(True)
+                    passResult.extend(reversed(passStack.pop()))
+
+        assert not passStack, passStack
+        return passResult
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ViewportResizeManager(SceneGraphRenderPassManager):
+    resourceSelector = 'resize'
+    resourceFirstOnly = True
+
     def resize(self, glview, viewportSize):
         self.viewportSize = viewportSize
 
         glview.setViewCurrent()
         sgpass = self.sgPass()
         for each in sgpass:
-            each(self)
+            each()
 
         return True
 
-    def _sgAddPassForNode(self, node, passResult):
-        actor = node.actor; resources = actor.resources
-        resize = resources.get('resize', None)
-        if resize is not None:
-            passResult.append(resize.bind(actor, resources))
-            return True
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class RenderManager(SceneGraphPassManager):
+class RenderManager(SceneGraphRenderPassManager):
+    resourceSelector = 'render'
+
     def render(self, glview):
         glview.setViewCurrent()
         glview.frameStart()
 
         sgpass = self.sgPass()
         for each in sgpass:
-            each(self)
+            each()
 
         glview.frameEnd()
         glview.viewSwapBuffers()
         return True
 
-    def _sgAddPassForNode(self, node, passResult):
-        actor = node.actor; resources = actor.resources
-        render = resources.get('render', None)
-        if render is not None:
-            passResult.append(render.bind(actor, resources))
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SelectManager(SceneGraphPassManager):
+class SelectManager(SceneGraphRenderPassManager):
+    resourceSelector = 'pick'
+
+    selectPos = (0,0)
+    selectSize = (0,0)
+
     def select(self, glview, pos):
         glview.setViewCurrent()
 
+        self.selectPos = pos
+        self.selection = []
+
         sgpass = self.sgPass()
         for each in sgpass:
-            each(self)
+            each()
 
-        return []
+        return self.selection
 
-    def _sgAddPassForNode(self, node, passResult):
-        actor = node.actor; resources = actor.resources
-        render = resources.get('pick', None)
-        if render is not None:
-            passResult.append(render.bind(actor, resources))
+    def startSelector(self, selector):
+        self.setItem = selector.setItem
+        self.pushItem = selector.pushItem
+        self.popItem = selector.popItem
+    def finishSelector(self, selector, selection):
+        self.selection += selection
+        del self.setItem
+        del self.pushItem
+        del self.popItem
+
+    def setItem(self, item):
+        raise NotImplementedError('Selector Responsibility: %r' % (self,))
+    def pushItem(self, item):
+        raise NotImplementedError('Selector Responsibility: %r' % (self,))
+    def popItem(self):
+        raise NotImplementedError('Selector Responsibility: %r' % (self,))
 

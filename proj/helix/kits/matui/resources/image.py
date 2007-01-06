@@ -14,13 +14,13 @@ import PIL.Image
 
 from TG.openGL.data.image import ImageTexture
 
-from .units import MatuiTextureUnit
+from .units import MatuiLoaderMixin, MatuiTextureUnit
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Loader mixin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ImageLoaderMixin(object):
+class ImageLoaderMixin(MatuiLoaderMixin):
     pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

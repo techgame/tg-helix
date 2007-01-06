@@ -11,6 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .material import MaterialLoaderMixin
+from .import stageMaterial 
 from .mesh import MeshLoaderMixin
 from .image import ImageLoaderMixin
 from .font import FontLoaderMixin

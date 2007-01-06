@@ -164,8 +164,9 @@ class MatuiNode(object):
 
             else:
                 cnode = stack.pop()[0]
-                if (yield -1, cnode):
-                    yield 'no-op'
+                if cnode is not None:
+                    if (yield -1, cnode):
+                        yield 'no-op'
                 
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
