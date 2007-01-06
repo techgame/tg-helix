@@ -10,8 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.openGL.data import Rect
-
 from TG.helix.framework.stage import HelixActor
 
 from . import node, layouts
@@ -23,10 +21,6 @@ from .resources import MatuiResources
 
 class MatuiActor(HelixActor):
     viewVisitKeys = ['MatuiActor']
-
-    box = Rect.property()
-    minSize = None
-    maxSize = None
 
     def isMatuiNode(self): return False
     def isMatuiActor(self): return True
@@ -81,7 +75,7 @@ class MatuiActor(HelixActor):
         return self.newCell()
 
     def onCellLayout(self, cell, cbox):
-        self.box.copyFrom(cbox)
+        pass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Resource protocol
@@ -118,4 +112,5 @@ class MatuiStage(MatuiActor):
 
     resources = MatuiResources()
     resources.slot().stageMaterialGroup()
+    box = None
 

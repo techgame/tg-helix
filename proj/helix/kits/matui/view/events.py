@@ -13,7 +13,7 @@
 import pprint
 
 from TG.helix.events.eventSource import EventRoot
-from TG.helix.events.viewportEvents import GLViewportEventHandler
+from TG.helix.events.viewportEvents import ViewportEventHandler
 from TG.helix.events.mouseEvents import MouseEventHandler
 from TG.helix.events.keyboardEvents import KeyboardEventHandler
 from TG.helix.events.timerEvents import IdleEventHandler, TimerEventHandler
@@ -32,20 +32,19 @@ class MatuiEventRoot(EventRoot):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiViewportEventHandler(GLViewportEventHandler):
+class MatuiViewportEventHandler(ViewportEventHandler):
     eventKinds = ['viewport']
     def __init__(self, scene):
         self.scene = scene
 
-    def resize(self, glview, viewportSize):
-        glview.setViewCurrent()
-        return self.scene.performResize(glview, viewportSize)
+    def resize(self, hostView, viewportSize):
+        return self.scene.performResize(hostView, viewportSize)
 
-    def erase(self, glview):
+    def erase(self, hostView):
         return True
 
-    def paint(self, glview):
-        return self.scene.performRender(glview)
+    def paint(self, hostView):
+        return self.scene.performRender(hostView)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -54,8 +53,8 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
     def __init__(self, scene):
         self.scene = scene
 
-    def key(self, glview, info):
-        glview.setViewCurrent()
+    def key(self, hostView, info):
+        hostView.setViewCurrent()
         if info['etype'] in ('char',):
             print
             print 'Key Event:'
@@ -63,8 +62,8 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
             return True
         else: return False
 
-    def mouse(self, glview, info):
-        glview.setViewCurrent()
+    def mouse(self, hostView, info):
+        hostView.setViewCurrent()
         etype = info['etype']
         if etype in ('up', 'down', 'dclick'):
             print
@@ -72,7 +71,7 @@ class MatuiInputEventHandler(MouseEventHandler, KeyboardEventHandler):
             pprint.pprint(info)
 
             if etype in ('down', 'dclick'):
-                selection = self.scene.performSelect(glview, info['pos'])
+                selection = self.scene.performSelect(hostView, info['pos'])
 
                 if selection:
                     pprint.pprint(selection)
@@ -87,10 +86,10 @@ class MatuiTimingEventHandler(IdleEventHandler, TimerEventHandler):
     def __init__(self, scene):
         self.scene = scene
 
-    def idle(self, glview, info):
+    def idle(self, hostView, info):
         return False
 
-    def timer(self, glview, info):
-        self.scene.performAnimation(glview, info)
+    def timer(self, hostView, info):
+        self.scene.performAnimation(hostView, info)
         return True
 

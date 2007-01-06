@@ -34,7 +34,6 @@ class MatuiScene(base.MatuiView):
     stage = None
     def init(self, stage):
         self.stage = stage
-        self.box = stage.box
         stage.loadForScene(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,22 +70,22 @@ class MatuiScene(base.MatuiView):
     #~ Perform Actions from scene event handlers
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def performResize(self, glview, viewportSize):
+    def performResize(self, hostView, viewportSize):
         resizeMgr = self.managers['resize']
-        resizeMgr.resize(glview, viewportSize)
+        resizeMgr.resize(hostView, viewportSize)
 
         layoutMgr = self.managers['layout']
-        return layoutMgr.layout(glview)
+        return layoutMgr.layout(hostView)
 
-    def performRender(self, glview):
+    def performRender(self, hostView):
         renderMgr = self.managers['render']
-        return renderMgr.render(glview)
+        return renderMgr.render(hostView)
 
-    def performSelect(self, glview, pos):
+    def performSelect(self, hostView, pos):
         selectMgr = self.managers['select']
-        return selectMgr.select(glview, pos)
+        return selectMgr.select(hostView, pos)
 
-    def performAnimation(self, glview, info):
+    def performAnimation(self, hostView, info):
         if 1:
-            self.performRender(glview)
+            self.performRender(hostView)
 

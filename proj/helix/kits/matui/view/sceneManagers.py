@@ -7,14 +7,6 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Imports 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-from TG.openGL.data import Rect
-
-from TG.openGL.layouts.absLayout import AbsLayoutStrategy
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -41,14 +33,13 @@ class SceneGraphPassManager(object):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class LayoutManager(SceneGraphPassManager):
-    strategy = AbsLayoutStrategy()
-    box = Rect.property()
+    def layout(self, hostView):
+        hostView.setViewCurrent()
 
-    def layout(self, glview):
-        glview.setViewCurrent()
-
-        cells = self.sgPass()
-        self.strategy(cells, self.scene.box)
+        box = self.scene.stage.box
+        sgpass = self.sgPass()
+        for layout in sgpass:
+            layout(box)
 
         return True
 
@@ -56,7 +47,7 @@ class LayoutManager(SceneGraphPassManager):
     def _sgGeneratePass(self, root):
         resourceSelector = self.resourceSelector
 
-        cells = []
+        layouts = []
         itree = root.iterTree()
         for op, node in itree:
             if op < 0: continue
@@ -64,10 +55,10 @@ class LayoutManager(SceneGraphPassManager):
             actor = node.actor; resources = actor.resources
             cellLayout = resources.get(resourceSelector, None)
             if cellLayout is not None:
-                cells.append(cellLayout)
+                layouts.append(cellLayout)
                 itree.send(True)
 
-        return cells
+        return layouts
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Various Scene Graph Render Managers
@@ -106,10 +97,10 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
 class ViewportResizeManager(SceneGraphRenderPassManager):
     resourceSelector = 'resize'
 
-    def resize(self, glview, viewportSize):
+    def resize(self, hostView, viewportSize):
         self.viewportSize = viewportSize
 
-        glview.setViewCurrent()
+        hostView.setViewCurrent()
         sgpass = self.sgPass()
         for each in sgpass:
             each()
@@ -121,16 +112,16 @@ class ViewportResizeManager(SceneGraphRenderPassManager):
 class RenderManager(SceneGraphRenderPassManager):
     resourceSelector = 'render'
 
-    def render(self, glview):
-        glview.setViewCurrent()
-        glview.frameStart()
+    def render(self, hostView):
+        hostView.setViewCurrent()
+        hostView.frameStart()
 
         sgpass = self.sgPass()
         for each in sgpass:
             each()
 
-        glview.frameEnd()
-        glview.viewSwapBuffers()
+        hostView.frameEnd()
+        hostView.viewSwapBuffers()
         return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,8 +132,8 @@ class SelectManager(SceneGraphRenderPassManager):
     selectPos = (0,0)
     selectSize = (0,0)
 
-    def select(self, glview, pos):
-        glview.setViewCurrent()
+    def select(self, hostView, pos):
+        hostView.setViewCurrent()
 
         self.selectPos = pos
         self.selection = []
