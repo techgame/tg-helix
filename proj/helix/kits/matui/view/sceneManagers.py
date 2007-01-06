@@ -52,13 +52,17 @@ class LayoutManager(SceneGraphPassManager):
 
         return True
 
+    resourceSelector = 'layout'
     def _sgGeneratePass(self, root):
+        resourceSelector = self.resourceSelector
+
         cells = []
         itree = root.iterTree()
         for op, node in itree:
             if op < 0: continue
 
-            cellLayout = getattr(node.actor, 'layout', None)
+            actor = node.actor; resources = actor.resources
+            cellLayout = resources.get(resourceSelector, None)
             if cellLayout is not None:
                 cells.append(cellLayout)
                 itree.send(True)
