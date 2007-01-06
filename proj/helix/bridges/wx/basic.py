@@ -12,11 +12,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.skinning.toolkits.wx import wx, wxSkinModel, XMLSkin
-
-from .viewportEvents import wxViewportEventSource
-from .keyboardEvents import wxKeyboardEventSource
-from .mouseEvents import wxMouseEventSource
-from .timerEvents import wxTimerEventSource, wxIdleEventSource
+from . import viewLoader
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Constants / Variables / Etc. 
@@ -76,20 +72,13 @@ class BasicRenderSkinModel(wxSkinModel):
     clientSize = (800, 800)
     minSize = (200, 200)
 
-    def setupStage(self, stage, viewFactory):
+    def setupStage(self, stage, sceneFactory):
         self.stage = stage
-        self.viewFactory = viewFactory
+        self.sceneFactory = sceneFactory
 
+    SceneHostViewLoader = viewLoader.SceneHostViewLoader
     def setupCanvas(self, canvasElem, canvasObj):
-        self.evtSources = [
-            wxViewportEventSource(canvasObj),
-            wxMouseEventSource(canvasObj),
-            wxKeyboardEventSource(canvasObj),
-            wxTimerEventSource(canvasObj),
-            wxIdleEventSource(canvasObj),
-            ]
-
-        self.setupScene()
+        self.scene = self.SceneHostViewLoader.load(canvasObj, self.stage, self.sceneFactory)
 
     def setupFrame(self, frame):
         if self.frameTitle:
@@ -98,16 +87,4 @@ class BasicRenderSkinModel(wxSkinModel):
             frame.SetClientSize(self.clientSize)
         if self.minSize:
             frame.SetMinSize(self.minSize)
-
-    def findStageScene(self, stage=None):
-        if stage is None:
-            stage = self.stage
-        return self.viewFactory(stage)
-
-    def setupScene(self):
-        vpEvtSrc = self.evtSources[0]
-        vpEvtSrc.setViewCurrent()
-
-        self.scene = self.findStageScene(self.stage)
-        self.scene.setup(evtSources=self.evtSources, model=self)
 
