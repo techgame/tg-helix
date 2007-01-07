@@ -90,6 +90,13 @@ MaterialLoaderMixin._addLoader_(ResizeLayoutMaterial, 'resizeLayoutMaterial')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class PickRenderer(MatuiMaterial):
+    def bind(self, actor, res, mgr):
+        return [self.partial(mgr.pushItem, actor)]
+    def bindUnwind(self, actor, res, mgr):
+        return [mgr.popItem]
+MaterialLoaderMixin._addLoader_(PickRenderer, 'pickRenderer')
+
 class ActorPickRenderer(MatuiMaterial):
     def bind(self, actor, res, mgr):
         result = res['render'].bind(actor, res, mgr)
@@ -97,7 +104,7 @@ class ActorPickRenderer(MatuiMaterial):
         return result
     def bindUnwind(self, actor, res, mgr):
         result = res['render'].bindUnwind(actor, res, mgr)
-        result.append(self.partial(mgr.popItem, actor))
+        result.append(mgr.popItem)
         return result
 MaterialLoaderMixin._addLoader_(ActorPickRenderer, 'actorPickRenderer')
 

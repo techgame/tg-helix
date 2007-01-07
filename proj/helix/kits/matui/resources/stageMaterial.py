@@ -87,7 +87,6 @@ class StagePickMaterial(MatuiMaterial):
     def performUnwind(self, actor, res, mgr):
         selector = self.selector
         selection = selector.finish()
-        selection.sort()
         selection = [s[-1] for s in selection]
 
         mgr.finishSelector(selector, selection)
