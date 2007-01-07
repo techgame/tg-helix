@@ -76,7 +76,3 @@ class MatuiScene(ObservableObject):
         selectMgr = self.managers['select']
         return selectMgr.select(hostView, pos)
 
-    def performAnimation(self, hostView, info):
-        if self.stage.onSceneAnimate(self, hostView, info):
-            return self.performRender(hostView)
-
