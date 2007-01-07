@@ -164,6 +164,7 @@ class RenderManager(SceneGraphRenderPassManager):
 class SelectManager(SceneGraphRenderPassManager):
     resourceSelector = 'pick'
 
+    debugView = False
     selectPos = (0,0)
     selectSize = (1,1)
 
@@ -176,6 +177,10 @@ class SelectManager(SceneGraphRenderPassManager):
         sgpass = self.sgPass()
         for each in sgpass:
             each()
+
+        if self.debugView:
+            hostView.viewSwapBuffers()
+            self.debugView = False
 
         return self.selection
 
