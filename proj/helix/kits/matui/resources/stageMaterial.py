@@ -41,7 +41,6 @@ class StageRenderMaterial(MatuiMaterial):
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glLoadIdentity()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -75,7 +74,10 @@ class StagePickMaterial(MatuiMaterial):
         gl = self.gl
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
-        selector.pickMatrix(stage.box, mgr.selectPos, mgr.selectSize)
+
+        vpbox = stage.box.astype(int).tolist()
+        selector.pickMatrix(mgr.selectPos, mgr.selectSize, vpbox)
+
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

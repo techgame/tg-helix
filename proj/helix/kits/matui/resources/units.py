@@ -7,10 +7,18 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Imports 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from functools import partial
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiResourceUnit(object):
+    partial = staticmethod(partial)
+
     def isResource(self): return True
     def isResourceGroup(self): return False
     def isResourceMaterial(self): return False
@@ -27,8 +35,27 @@ class MatuiGroupUnit(MatuiResourceUnit):
         return True
 
 class MatuiMaterialUnit(MatuiResourceUnit):
+    # Setting cullStack to a true value will prevent nexted
+    # materials from being rendered, and will proceed to the
+    # next peer# Setting cullStack to a true value will
+    # prevent nexted materials from being rendered, and will
+    # proceed to the next peer
+    cullStack = False 
+
     def isResourceMaterial(self): 
         return True
+
+    def bind(self, actor, res, mgr):
+        '''Returns a list of 0-parameter callables for a
+        render pass using this material.'''
+        return []
+
+    def bindUnwind(self, actor, res, mgr):
+        '''Returns a list of 0-parameter callables for a
+        render unwind pass using this material.  
+
+        Ex. pop stacks, compile results, etc.'''
+        return []
 
 class MatuiMeshUnit(MatuiResourceUnit):
     def isResourceMesh(self): 
