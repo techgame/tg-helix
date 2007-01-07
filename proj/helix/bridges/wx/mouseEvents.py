@@ -43,7 +43,7 @@ class wxMouseEventSource(wxEventSourceMixin, MouseEventSource):
         mouseState = wx.GetMouseState()
         info = self.newInfo(
                 etype=etype,
-                pos=(evt.X, eoHeight - evt.Y), # change to bottom left orientation
+                pos=(evt.GetX(), eoHeight - evt.GetY()), # change to bottom left orientation
                 buttons=((mouseState.LeftDown() and 0x1) | (mouseState.RightDown() and 0x2) | (mouseState.MiddleDown() and 0x4)),
                 modifiers=((evt.AltDown() and 0x1) | (evt.ControlDown() and 0x2) | (evt.ShiftDown() and 0x4) | (evt.MetaDown() and 0x8)),
                 buttonSource=srcBtn,
