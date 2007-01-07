@@ -98,6 +98,9 @@ class MatuiStage(MatuiActor):
     def onSceneSetup(self, scene):
         pass
 
+    def onSceneAnimate(self, scene, hostView, info):
+        pass
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     resources = MatuiResources()

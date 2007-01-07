@@ -59,7 +59,6 @@ class MatuiScene(ObservableObject):
             resize=sceneManagers.ViewportResizeManager(self),
             select=sceneManagers.SelectManager(self),
             )
-        self._animate = managers['render'].render
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Perform Actions from scene event handlers
@@ -78,6 +77,6 @@ class MatuiScene(ObservableObject):
         return selectMgr.select(hostView, pos)
 
     def performAnimation(self, hostView, info):
-        if 1:
+        if self.stage.onSceneAnimate(self, hostView, info):
             return self.performRender(hostView)
 

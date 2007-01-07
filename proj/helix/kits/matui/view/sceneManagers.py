@@ -38,26 +38,92 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
     def _sgGeneratePass(self, root):
         resourceSelector = self.resourceSelector
         passResult = []
-        passStack = []
+        passUnwindStack = []
         itree = root.iterTree()
         for op, node in itree:
             if op < 0: 
-                passResult.extend(reversed(passStack.pop()))
+                passResult.extend(passUnwindStack.pop())
                 continue
-            elif op > 0: 
-                passStack.append([])
 
             actor = node.actor; resources = actor.resources
             material = resources.get(resourceSelector, None)
             if material is not None:
-                passResult += material.bind(actor, resources, self)
-                passStack[-1] += material.bindUnwind(actor, resources, self)
+                wind = material.bind(actor, resources, self)
+                unwind = material.bindUnwind(actor, resources, self)
 
-                if op and material.cullStack:
-                    itree.send(True)
-                    passResult.extend(reversed(passStack.pop()))
+                if op:
+                    passResult.extend(wind)
+                    if material.cullStack:
+                        passResult.extend(unwind)
+                        itree.send(True)
+                    else:
+                        # push our unwind stack
+                        passUnwindStack.append(unwind)
 
-        assert not passStack, passStack
+                else: 
+                    passResult.extend(wind)
+                    passResult.extend(unwind)
+
+            elif op > 0: 
+                # push an empty unwind stack
+                passUnwindStack.append([])
+
+        assert not passUnwindStack, passUnwindStack
+        return passResult
+
+    def _sgGeneratePassDebug(self, root):
+        resourceSelector = self.resourceSelector
+        passResult = []
+        passResultPP = []
+
+        passUnwindStack = []
+        passUnwindStackPP = []
+        itree = root.iterTree()
+        for op, node in itree:
+            if op < 0: 
+                passResult.extend(passUnwindStack.pop())
+                passResultPP.append(passUnwindStackPP.pop())
+                continue
+
+            actor = node.actor; resources = actor.resources
+            material = resources.get(resourceSelector, None)
+            if material is not None:
+                wind = material.bind(actor, resources, self)
+                unwind = material.bindUnwind(actor, resources, self)
+
+                if op:
+                    passResult.extend(wind)
+                    passResultPP.append(('++', actor))
+
+                    if material.cullStack:
+                        passResult.extend(unwind)
+                        passResultPP.append(('--', actor))
+                        itree.send(True)
+                    else:
+                        # push our unwind stack
+                        passUnwindStack.append(unwind)
+                        passUnwindStackPP.append(('--', actor))
+
+                else:
+                    passResultPP.append(('+-', actor))
+                    passResult.extend(wind)
+                    passResult.extend(unwind)
+
+            elif op > 0: 
+                # push an empty unwind stack
+                passResultPP.append(('+0', actor))
+                passUnwindStack.append([])
+                passUnwindStackPP.append(('-0', actor))
+            else:
+                passResultPP.append(('=0', actor))
+
+        assert not passUnwindStack, passUnwindStack
+        assert not passUnwindStackPP, passUnwindStackPP
+        print
+        print 'sgGeneratePassDebug:', resourceSelector
+        for op, actor in passResultPP:
+            print '  ', op, actor
+        print 
         return passResult
 
 
@@ -99,7 +165,7 @@ class SelectManager(SceneGraphRenderPassManager):
     resourceSelector = 'pick'
 
     selectPos = (0,0)
-    selectSize = (0,0)
+    selectSize = (1,1)
 
     def select(self, hostView, pos):
         hostView.setViewCurrent()
@@ -114,19 +180,14 @@ class SelectManager(SceneGraphRenderPassManager):
         return self.selection
 
     def startSelector(self, selector):
-        self.setItem = selector.setItem
-        self.pushItem = selector.pushItem
-        self.popItem = selector.popItem
+        self.selector = selector
     def finishSelector(self, selector, selection):
+        del self.selector
         self.selection += selection
-        del self.setItem
-        del self.pushItem
-        del self.popItem
-
-    def setItem(self, item):
-        raise NotImplementedError('Selector Responsibility: %r' % (self,))
-    def pushItem(self, item):
-        raise NotImplementedError('Selector Responsibility: %r' % (self,))
-    def popItem(self):
-        raise NotImplementedError('Selector Responsibility: %r' % (self,))
+    def setItem(self, item=None): 
+        self.selector.setItem(item)
+    def pushItem(self, item=None): 
+        self.selector.pushItem(item)
+    def popItem(self, item=None): 
+        self.selector.popItem()
 
