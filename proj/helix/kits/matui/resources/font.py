@@ -25,11 +25,13 @@ class FontLoaderMixin(MatuiLoaderMixin):
 #~ Font
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiFont(MatuiFontUnit):
+class FreetypeFont(MatuiFontUnit):
     font = None
-    def loadFont(self, face, size, **kw):
-        loader = FreetypeFontLoader(face, size, **kw)
+    def __init__(self, face, size, **kw):
+        self.loader = FreetypeFontLoader(face, size, **kw)
+
+    def bind(self):
         self.font = loader.font
         self.texture = self.font.texture
-Font = MatuiFont
+FontLoaderMixin._addLoader_(FreetypeFont, 'freetypeFont')
 

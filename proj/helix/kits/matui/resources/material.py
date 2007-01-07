@@ -157,3 +157,33 @@ class BlendMaterial(MatuiMaterial):
         return [self.render]
 MaterialLoaderMixin._addLoader_(BlendMaterial, 'blendMaterial')
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatrixMaterial(MatuiMaterial):
+    pos = (0,0,0)
+    scale = (1,1,1)
+
+    def __init__(self, pos=None, scale=None):
+        if pos is not None:
+            self.setTranslate(pos)
+        if scale is not None:
+            self.setScale(scale)
+
+    def setTranslate(self, (x,y,z)):
+        self.pos = (x,y,z)
+    def setUniformScale(self, s):
+        self.setScale((s,s,s))
+    def setScale(self, (sx, sy, sz)):
+        self.scale = (sx,sy,sz)
+
+    def bind(self, actor, res, mgr):
+        return [self.render]
+    def render(self):
+        gl.glPushMatrix()
+        gl.glTranslatef(*self.pos)
+        gl.glScalef(*self.scale)
+
+    def bindUnwind(self, actor, res, mgr):
+        return [gl.glPopMatrix]
+MaterialLoaderMixin._addLoader_(MatrixMaterial, 'matrixMaterial')
+

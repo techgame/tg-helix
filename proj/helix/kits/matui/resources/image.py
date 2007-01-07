@@ -31,16 +31,20 @@ class MatuiImageTexture(MatuiTextureUnit):
     def isResourceImage(self): 
         return True
 
-    def loadTexture(self):
+    image = None
+
+    def __init__(self, image=None):
+        self.load(image)
+
+    def bind(self):
         self.texture = ImageTexture(self.image)
 
-    image = None
     openImage = staticmethod(PIL.Image.open)
-    def loadImage(self, image):
+    def load(self, image):
         if isinstance(image, basestring):
             image = self.openImage(image)
         self.image = image
-        return self
+        return image
 
     def premultiply(self):
         image = self.image
@@ -55,5 +59,5 @@ class MatuiImageTexture(MatuiTextureUnit):
         for idx in xrange(len(bands)-1):
             premult = a.chop_multiply(imageData.getband(idx))
             imageData.putband(premult, idx)
-Image = MatuiImageTexture
+ImageLoaderMixin._addLoader_(MatuiImageTexture, 'imageTexture')
 
