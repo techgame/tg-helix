@@ -37,7 +37,11 @@ class MatuiImageTexture(MatuiTextureUnit):
         self.load(image)
 
     def bind(self):
-        self.texture = ImageTexture(self.image)
+        texture = self.texture
+        if texture is None:
+            texture = ImageTexture(self.image)
+            self.texture = texture
+        return texture
 
     openImage = staticmethod(PIL.Image.open)
     def load(self, image):
