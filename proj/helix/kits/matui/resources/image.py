@@ -44,9 +44,11 @@ class MatuiImageTexture(MatuiTextureUnit):
         return texture
 
     openImage = staticmethod(PIL.Image.open)
-    def load(self, image):
+    def load(self, image, size=None):
         if isinstance(image, basestring):
             image = self.openImage(image)
+        if size is not None:
+            image = image.resize(size)
         self.image = image
         return image
 
