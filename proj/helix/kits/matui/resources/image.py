@@ -12,7 +12,7 @@
 
 import PIL.Image
 
-from TG.openGL.data.image import ImageTexture2d as ImageTexture
+from TG.openGL.data.image import ImageTextureRect as ImageTexture
 
 from .units import MatuiLoaderMixin, MatuiTextureUnit
 
