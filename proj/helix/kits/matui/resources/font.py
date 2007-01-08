@@ -10,6 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import string
+
 from TG.openGL.text.freetypeFontLoader import FreetypeFontLoader
 
 from .units import MatuiLoaderMixin, MatuiFontUnit
@@ -27,11 +29,13 @@ class FontLoaderMixin(MatuiLoaderMixin):
 
 class FreetypeFont(MatuiFontUnit):
     font = None
-    def __init__(self, face, size, **kw):
+    def __init__(self, face, size, charset=string.printable, **kw):
         self.loader = FreetypeFontLoader(face, size, **kw)
 
     def bind(self):
-        self.font = loader.font
-        self.texture = self.font.texture
+        if self.font is None:
+            self.font = self.loader.font
+            self.texture = self.font.texture
+        return self.font
 FontLoaderMixin._addLoader_(FreetypeFont, 'freetypeFont')
 

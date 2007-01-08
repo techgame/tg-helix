@@ -11,8 +11,10 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import numpy
+
 from TG.openGL import data as glData
 from TG.openGL.raw import gl
+from TG.openGL.data.bufferObjects import ArrayBuffer
 
 from .units import MatuiLoaderMixin, MatuiMeshUnit
 
@@ -88,4 +90,60 @@ class ImageTextureCoordMesh(GLArrayMeshUnit):
         self.texCoordsEnable()
         self.texCoordsPtr()
 MeshLoaderMixin._addLoader_(ImageTextureCoordMesh, 'imageTextureCoordMesh')
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ TextMesh
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class TextMesh(MatuiMeshUnit):
+    geometry = None
+    def update(self, geometry):
+        self.geometry = geometry
+
+        count = geometry.size
+        self.interleavedArray = self.partial(gl.glInterleavedArrays, geometry.glTypeId, 0, geometry.ctypes)
+        self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+
+    def render(self):
+        self.interleavedArray()
+        self.drawArray()
+
+    def interleavedArray(self): pass
+    def drawArray(self): pass
+MeshLoaderMixin._addLoader_(TextMesh, 'textMesh')
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class BufferedTextMesh(MatuiMeshUnit):
+    geometry = None
+    buffer = None
+    def update(self, geometry):
+        self.geometry = geometry
+
+        # push the data to the card
+        buff = self.buffer 
+        if buff is None:
+            buff = ArrayBuffer('dynamicDraw')
+            self.buffer = buff
+
+        buff.bind()
+        buff.sendData(geometry)
+        buff.unbind()
+
+        count = geometry.size
+        self.interleavedArray = self.partial(gl.glInterleavedArrays, geometry.glTypeId, 0, 0)
+        self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+
+    def render(self):
+        buff = self.buffer
+        buff.bind()
+
+        self.interleavedArray()
+        self.drawArray()
+
+        buff.unbind()
+
+    def interleavedArray(self): pass
+    def drawArray(self): pass
+MeshLoaderMixin._addLoader_(BufferedTextMesh, 'bufferedTextMesh')
 
