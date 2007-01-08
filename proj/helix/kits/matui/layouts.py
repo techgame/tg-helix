@@ -86,6 +86,7 @@ class MatuiLayoutCell(LayoutCell, MatuiCellMixin):
         strategyFactory = self.strategyFactoryMap[strategyKey]
         strategy = strategyFactory(*args, **kw)
         self.setStrategy(strategy)
+        return strategy
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -210,14 +211,14 @@ class MatuiActorCell(MatuiCell):
         return self._actor
     def setActor(self, actor):
         self._actor = actor
-        minSize = actor.minSize
+        minSize = getattr(actor, 'minSize', None)
         if minSize is not None:
             self.minSize = minSize
 
-        self.maxSize = actor.maxSize
+        self.maxSize = getattr(actor, 'maxSize', None)
         if self.maxSize is not None:
             self.adjustSize = adjustForMaxSize
 
-        self.onevt(actor.onCellLayout)
+        self.onevt(getattr(actor, 'onCellLayout', None))
     actor = property(getActor, setActor)
 
