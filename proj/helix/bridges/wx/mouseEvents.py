@@ -51,8 +51,8 @@ class wxMouseEventSource(wxEventSourceMixin, MouseEventSource):
 
         if etype == 'wheel':
             info.update(
-                wheel=evt.WheelRotation,
-                wheelLinesPer=evt.LinesPerAction,
+                wheel=evt.GetWheelRotation(),
+                wheelLinesPer=evt.GetLinesPerAction(),
                 wheelIsPage=evt.IsPageScroll())
 
         if not self.sendMouse(info):
