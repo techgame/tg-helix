@@ -65,5 +65,7 @@ class MatuiImageTexture(MatuiTextureUnit):
         for idx in xrange(len(bands)-1):
             premult = a.chop_multiply(imageData.getband(idx))
             imageData.putband(premult, idx)
+
+        return self
 ImageLoaderMixin._addLoader_(MatuiImageTexture, 'imageTexture')
 
