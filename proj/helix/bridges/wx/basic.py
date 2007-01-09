@@ -81,6 +81,7 @@ class BasicRenderSkinModel(wxSkinModel):
         self.scene = self.SceneHostViewLoader.load(canvasObj, self.stage, self.sceneFactory)
 
     def setupFrame(self, frame):
+        self.frame = frame
         if self.frameTitle:
             frame.SetTitle(self.frameTitle)
         if self.clientSize:
@@ -88,3 +89,5 @@ class BasicRenderSkinModel(wxSkinModel):
         if self.minSize:
             frame.SetMinSize(self.minSize)
 
+    def close(self):
+        self.frame.Close()
