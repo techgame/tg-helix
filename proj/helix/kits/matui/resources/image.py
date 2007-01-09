@@ -51,7 +51,6 @@ class MatuiImageTexture(MatuiTextureUnit):
         if size is not None:
             image = image.resize(size)
         self.image = image
-        self.premultiply(False)
         return image
 
     def premultiply(self, raiseOnInvalid=True):
