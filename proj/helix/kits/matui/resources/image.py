@@ -34,7 +34,8 @@ class MatuiImageTexture(MatuiTextureUnit):
     image = None
 
     def __init__(self, image=None):
-        self.load(image)
+        if image is not None:
+            self.load(image)
 
     def bind(self):
         texture = self.texture
@@ -50,21 +51,24 @@ class MatuiImageTexture(MatuiTextureUnit):
         if size is not None:
             image = image.resize(size)
         self.image = image
+        self.premultiply(False)
         return image
 
-    def premultiply(self):
+    def premultiply(self, raiseOnInvalid=True):
         image = self.image
         bands = image.getbands()
         if bands[-1] != 'A':
-            raise TypeError("Image does not have an alpha channel as the last band")
+            if raiseOnInvalid:
+                raise TypeError("Image does not have an alpha channel as the last band")
+            else: return self
 
         imageData = image.getdata()
 
         a = imageData.getband(len(bands)-1)
         
         for idx in xrange(len(bands)-1):
-            premult = a.chop_multiply(imageData.getband(idx))
-            imageData.putband(premult, idx)
+            ba = a.chop_multiply(imageData.getband(idx))
+            imageData.putband(ba, idx)
 
         return self
 ImageLoaderMixin._addLoader_(MatuiImageTexture, 'imageTexture')
