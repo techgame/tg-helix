@@ -205,6 +205,9 @@ class MatuiNode(object):
         isMatuiNode = getattr(item, 'isMatuiNode', lambda: False)
         if isMatuiNode():
             return self.removeNode(item)
+        node = getattr(item, 'node', None)
+        if node is not None:
+            return self.removeNode(node)
 
         for each in item:
             self.remove(each)
