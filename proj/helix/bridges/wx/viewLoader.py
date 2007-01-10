@@ -10,6 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import TG.openGL.raw
+
 from .viewportEvents import wxViewportEventSource
 from .keyboardEvents import wxKeyboardEventSource
 from .mouseEvents import wxMouseEventSource
@@ -23,6 +25,10 @@ class wxHelixSceneHostViewLoader(object):
     @classmethod
     def load(klass, glviewhost, stage, sceneFactory, **kwsetup):
         glviewhost.SetCurrent()
+
+        # Reload the opengl raw api to support windows
+        TG.openGL.raw.apiReload()
+
         evtSources = klass.loadEvtSources(glviewhost)
 
         scene = sceneFactory(stage)
