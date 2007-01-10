@@ -10,7 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.openGL.raw import gl
 from .units import MatuiLoaderMixin, MatuiMaterialUnit
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,12 +112,9 @@ MaterialLoaderMixin._addLoader_(ActorPickRenderer, 'actorPickRenderer')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class OrthoProjectionMaterial(MatuiMaterial):
-    gl = gl
     def bind(self, actor, res, mgr):
-        return [self.partial(self.render, actor)]
-    def render(self, actor):
-        gl = self.gl
-
+        return [self.partial(self.render, actor, mgr.gl)]
+    def render(self, actor, gl):
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glPushMatrix()
         x1, y1 = actor.box.pos
@@ -130,9 +126,8 @@ class OrthoProjectionMaterial(MatuiMaterial):
         gl.glLoadIdentity()
 
     def bindUnwind(self, actor, res, mgr):
-        return [self.partial(self.renderUnwind)]
-    def renderUnwind(self):
-        gl = self.gl
+        return [self.partial(self.renderUnwind, mgr.gl)]
+    def renderUnwind(self, gl):
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glPopMatrix()
         gl.glMatrixMode(gl.GL_MODELVIEW)
@@ -142,19 +137,21 @@ MaterialLoaderMixin._addLoader_(OrthoProjectionMaterial, 'orthoProjectionMateria
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BlendMaterial(MatuiMaterial):
-    blendModes = {
-        'none': (gl.glBlendFunc, gl.GL_ONE, gl.GL_ZERO),
-        'blend': (gl.glBlendFunc, gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA),
-        'multiply': (gl.glBlendFunc, gl.GL_DST_COLOR, gl.GL_ONE_MINUS_SRC_ALPHA),
-        'screen': NotImplemented,
-        }
-
     def __init__(self, mode='blend'):
-        self.render = self.partial(*self.blendModes[mode])
+        self.mode = mode
 
     def bind(self, actor, res, mgr):
+        gl = mgr.gl
         gl.glEnable(gl.GL_BLEND)
-        return [self.render]
+
+        blendModes = {
+            'none': (gl.GL_ONE, gl.GL_ZERO),
+            'blend': (gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA),
+            'multiply': (gl.GL_DST_COLOR, gl.GL_ONE_MINUS_SRC_ALPHA),
+            'screen': NotImplemented,
+            }
+
+        return [self.partial(gl.glBlendFunc, blendModes[self.mode])]
 MaterialLoaderMixin._addLoader_(BlendMaterial, 'blendMaterial')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -177,13 +174,13 @@ class MatrixMaterial(MatuiMaterial):
         self.scale = (sx,sy,sz)
 
     def bind(self, actor, res, mgr):
-        return [self.render]
-    def render(self):
+        return [self.partial(self.render, mgr.gl)]
+    def render(self, gl):
         gl.glPushMatrix()
         gl.glTranslatef(*self.pos)
         gl.glScalef(*self.scale)
 
     def bindUnwind(self, actor, res, mgr):
-        return [gl.glPopMatrix]
+        return [mgr.gl.glPopMatrix]
 MaterialLoaderMixin._addLoader_(MatrixMaterial, 'matrixMaterial')
 

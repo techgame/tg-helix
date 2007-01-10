@@ -13,7 +13,6 @@
 import numpy
 
 from TG.openGL import data as glData
-from TG.openGL.raw import gl
 from TG.openGL.data.bufferObjects import ArrayBuffer
 
 from .units import MatuiLoaderMixin, MatuiMeshUnit
@@ -68,6 +67,9 @@ class BoxMesh(GLArrayMeshUnit):
         self.vertexEnable, self.vertexPtr = self._bindArray(vertex)
         count = vertex.size/vertex.shape[-1]
         assert count == 4, count
+
+    def bind(self, actor, res, mgr):
+        gl = mgr.gl
         self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
 
     def render(self):
@@ -100,6 +102,10 @@ class TextMesh(MatuiMeshUnit):
     def update(self, geometry):
         self.geometry = geometry
 
+    def bind(self, actor, res, mgr):
+        gl = mgr.gl
+
+        geometry = self.geometry
         count = geometry.size
         self.interleavedArray = self.partial(gl.glInterleavedArrays, geometry.glTypeId, 0, geometry.ctypes)
         self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
@@ -120,6 +126,8 @@ class BufferedTextMesh(MatuiMeshUnit):
     def update(self, geometry):
         self.geometry = geometry
 
+    def bind(self, actor, res, mgr):
+        gl = mgr.gl
         # push the data to the card
         buff = self.buffer 
         if buff is None:
