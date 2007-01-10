@@ -43,6 +43,7 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
         for op, node in itree:
             if op < 0: 
                 passResult.extend(passUnwindStack.pop())
+                node.treeChanged = False
                 continue
 
             actor = node.actor; resources = actor.resources
@@ -83,6 +84,7 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
             if op < 0: 
                 passResult.extend(passUnwindStack.pop())
                 passResultPP.append(passUnwindStackPP.pop())
+                node.treeChanged = False
                 continue
 
             actor = node.actor; resources = actor.resources
