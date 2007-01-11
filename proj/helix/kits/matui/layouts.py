@@ -159,6 +159,9 @@ class MatuiLayoutCell(LayoutCell, MatuiCellMixin):
         for each in item:
             self.remove(each)
 
+    def clear(self):
+        self.clearCells()
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def addCell(self, cell):
@@ -170,6 +173,8 @@ class MatuiLayoutCell(LayoutCell, MatuiCellMixin):
     def removeCell(self, cell):
         self.cells.remove(cell)
         return cell
+    def clearCells(self):
+        del self.cells[:]
 
 MatuiLayout = MatuiLayoutCell
 
