@@ -212,6 +212,9 @@ class MatuiNode(object):
         for each in item:
             self.remove(each)
 
+    def clear(self):
+        return self.clearNodes()
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def insertNodeBefore(self, node, nidx):
