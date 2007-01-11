@@ -46,7 +46,7 @@ class wxTimerEventSource(wxEventSourceMixin, TimerEventSource):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxIdleEventSource(wxEventSourceMixin, IdleEventSource):
-    def __init__(self, glCanvas, frequency=60.):
+    def __init__(self, glCanvas):
         IdleEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_IDLE, self.onEvtIdle)
