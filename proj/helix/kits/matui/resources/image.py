@@ -39,7 +39,7 @@ class MatuiImageTexture(MatuiTextureUnit):
 
     def bind(self):
         texture = self.texture
-        if texture is None:
+        if texture is None and self.image is not None:
             texture = ImageTexture(self.image)
             self.texture = texture
         return texture
@@ -55,6 +55,11 @@ class MatuiImageTexture(MatuiTextureUnit):
 
     def premultiply(self, raiseOnInvalid=True):
         image = self.image
+        if image is None:
+            if raiseOnInvalid:
+                raise ValueError("Image is None")
+            else: return self
+
         bands = image.getbands()
         if bands[-1] != 'A':
             if raiseOnInvalid:
