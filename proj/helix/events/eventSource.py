@@ -65,13 +65,6 @@ class EventSource(object):
         return visitor.visitEventSource(self, [self.kind])
 
 class HostViewEventSource(EventSource):
-    if sys.platform.startswith('win'):
-        # time.clock is the fastest updating query on unix heritage platforms
-        newTimestamp = staticmethod(time.clock)
-    else:
-        # time.time is the fastest updating query on windows
-        newTimestamp = staticmethod(time.time)
-
     def getViewSize(self):
         """getSize is provided by concrete implementations"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
@@ -85,6 +78,9 @@ class HostViewEventSource(EventSource):
     def newInfo(self, **kw):
         kw.update(timestamp=self.newTimestamp())
         return kw
+
+    def newTimestamp(self):
+        return self.root.newTimestamp()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Event Root to coordinate the EventSources with the event Handlers
@@ -147,4 +143,13 @@ class EventRoot(ObservableObjectWithProp):
 
             if evth not in handlers:
                 handlers.append(evth)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if sys.platform.startswith('win'):
+        # time.clock is the fastest updating query on unix heritage platforms
+        newTimestamp = staticmethod(time.clock)
+    else:
+        # time.time is the fastest updating query on windows
+        newTimestamp = staticmethod(time.time)
 
