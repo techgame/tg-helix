@@ -36,6 +36,7 @@ class FreetypeFont(MatuiFontUnit):
         if self.font is None:
             self.font = self.loader.font
             self.texture = self.font.texture
+            self.texture.deselect()
         return self.font
 FontLoaderMixin._addLoader_(FreetypeFont, 'freetypeFont')
 

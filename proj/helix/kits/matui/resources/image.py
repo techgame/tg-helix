@@ -41,6 +41,7 @@ class MatuiImageTexture(MatuiTextureUnit):
         texture = self.texture
         if texture is None and self.image is not None:
             texture = ImageTexture(self.image)
+            texture.deselect()
             self.texture = texture
         return texture
 
