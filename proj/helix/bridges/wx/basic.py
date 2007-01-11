@@ -52,9 +52,13 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
         </menubar>
 
         <layout>
-            <opengl-canvas>
-                CallAfter(ctx.model.setupCanvas, elem, obj)
-            </opengl-canvas>
+            <panel>
+                <layout>
+                    <opengl-canvas size='ctx.model.clientSize' layout-minsize='ctx.model.minSize'>
+                        ctx.model.setupCanvas(elem, obj)
+                    </opengl-canvas>
+                </layout>
+            </panel>
         </layout>
         ctx.model.setupFrame(obj)
     </frame>
