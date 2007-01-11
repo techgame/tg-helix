@@ -10,6 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import TG.openGL.raw
+
 from .viewportEvents import wxViewportEventSource
 from .keyboardEvents import wxKeyboardEventSource
 from .mouseEvents import wxMouseEventSource
@@ -23,10 +25,15 @@ class wxHelixSceneHostViewLoader(object):
     @classmethod
     def load(klass, glviewhost, stage, sceneFactory, **kwsetup):
         glviewhost.SetCurrent()
+        TG.openGL.raw.apiReload()
+
         evtSources = klass.loadEvtSources(glviewhost)
 
         scene = sceneFactory(stage)
         scene.setup(evtSources=evtSources, **kwsetup)
+
+        evtSources[0].sendSize(tuple(glviewhost.GetClientSize()))
+        evtSources[0].sendPaint()
         return scene
 
     @classmethod

@@ -35,6 +35,7 @@ class wxViewportEventSource(wxEventSourceMixin, ViewportEventSource):
             evt.Skip()
 
     def onEvtPaint(self, evt):
+        wx.PaintDC(evt.GetEventObject())
         if not self.sendPaint():
             evt.Skip()
 

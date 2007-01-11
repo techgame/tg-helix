@@ -53,7 +53,7 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
 
         <layout>
             <opengl-canvas>
-                ctx.model.setupCanvas(elem, obj)
+                CallAfter(ctx.model.setupCanvas, elem, obj)
             </opengl-canvas>
         </layout>
         ctx.model.setupFrame(obj)
