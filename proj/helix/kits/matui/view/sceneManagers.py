@@ -14,12 +14,11 @@ class SceneGraphPassManager(object):
     def __init__(self, scene):
         self.scene = scene
         self.stage = scene.stage
-        self.root = scene.stage.node
 
     _passResult = None
     _passVersion = None
     def sgPass(self):
-        root = self.root
+        root = self.stage.node
         if self._passVersion is root.treeVersion:
             return self._passResult
 

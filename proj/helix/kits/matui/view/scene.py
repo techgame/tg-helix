@@ -30,7 +30,6 @@ class MatuiScene(ObservableObject):
     stage = None
     def init(self, stage):
         self.stage = stage
-        stage.loadForScene(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -41,6 +40,7 @@ class MatuiScene(ObservableObject):
         self.setupEvtSources(evtSources)
 
         self.stage.onSceneSetup(self)
+        self.stage.loadForScene(self)
         return True
 
     def shutdown(self):
