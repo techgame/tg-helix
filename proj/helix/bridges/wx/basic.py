@@ -75,6 +75,7 @@ class BasicRenderSkinModel(wxSkinModel):
     frameTitle = 'Basic wxPython HelixUI Render Skin'
     clientSize = (800, 800)
     minSize = (200, 200)
+    fullscreen = False
 
     def setupStage(self, stage, sceneFactory):
         self.stage = stage
@@ -93,5 +94,12 @@ class BasicRenderSkinModel(wxSkinModel):
         if self.minSize:
             frame.SetMinSize(self.minSize)
 
+        if self.fullscreen:
+            frame.ShowFullScreen(True)
+
     def close(self):
         self.frame.Close()
+
+    def showAndRun(self):
+        self.skinModel()
+
