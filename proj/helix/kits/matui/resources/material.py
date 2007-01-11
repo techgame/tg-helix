@@ -149,12 +149,26 @@ class BlendMaterial(MatuiMaterial):
         'screen': NotImplemented,
         }
 
-    def __init__(self, mode='blend'):
+    def __init__(self, mode='blend', modeUnwind='blend'):
         self.render = self.partial(*self.blendModes[mode])
+        if modeUnwind:
+            self.renderUnwind = self.partial(*self.blendModes[modeUnwind])
+
+    render = None
+    renderUnwind = None
 
     def bind(self, actor, res, mgr):
         gl.glEnable(gl.GL_BLEND)
-        return [self.render]
+        wind = self.render
+        if wind is not None: 
+            return [wind]
+        else: return []
+    def bindUnwind(self, actor, res, mgr):
+        unwind = self.renderUnwind
+        if unwind is not None: 
+            return [unwind]
+        else: return []
+
 MaterialLoaderMixin._addLoader_(BlendMaterial, 'blendMaterial')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
