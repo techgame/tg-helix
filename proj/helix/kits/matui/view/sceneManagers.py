@@ -46,8 +46,13 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
                 node.treeChanged = False
                 continue
 
-            actor = node.actor; resources = actor.resources
-            material = resources.get(resourceSelector, None)
+            material = None
+            actor = node.actor
+            if actor is not None:
+                resources = actor.resources
+                if resources is not None:
+                    material = resources.get(resourceSelector, None)
+
             if material is not None:
                 wind = material.bind(actor, resources, self)
                 unwind = material.bindUnwind(actor, resources, self)
