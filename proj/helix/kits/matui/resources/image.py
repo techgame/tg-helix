@@ -51,6 +51,7 @@ class MatuiImageTexture(MatuiTextureUnit):
             image = self.openImage(image)
         if size is not None:
             image = image.resize(size)
+        self.texture = None
         self.image = image
         return image
 
