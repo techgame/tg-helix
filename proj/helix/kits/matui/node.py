@@ -173,6 +173,9 @@ class MatuiNode(object):
     #~ Node collection protocol
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def __contains__(self, other):
+        node = self.itemAsNode(other)
+        return node in self.children
     def __iadd__(self, other):
         self.add(other)
         return self
