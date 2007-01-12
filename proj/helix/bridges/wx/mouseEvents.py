@@ -10,8 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .common import wx, wxEventSourceMixin
 from TG.helix.events.mouseEvents import MouseEventSource
+from .common import wx, wxEventSourceMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -30,7 +30,7 @@ class wxMouseEventSource(wxEventSourceMixin, MouseEventSource):
         0x8: 'meta',
         }
 
-    def __init__(self, glCanvas):
+    def __init__(self, glCanvas, stage):
         MouseEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_MOUSE_EVENTS, self.onEvtMouse)

@@ -29,7 +29,7 @@ class wxHelixSceneHostViewLoader(object):
         # Reload the opengl raw api to support windows
         TG.openGL.raw.apiReload()
 
-        evtSources = klass.loadEvtSources(glviewhost)
+        evtSources = klass.loadEvtSources(glviewhost, stage)
 
         scene = sceneFactory(stage)
         scene.setup(evtSources=evtSources, **kwsetup)
@@ -39,13 +39,13 @@ class wxHelixSceneHostViewLoader(object):
         return scene
 
     @classmethod
-    def loadEvtSources(self, glviewhost):
+    def loadEvtSources(self, glviewhost, stage):
         return [
-            wxViewportEventSource(glviewhost),
-            wxMouseEventSource(glviewhost),
-            wxKeyboardEventSource(glviewhost),
-            wxTimerEventSource(glviewhost),
-            wxIdleEventSource(glviewhost),
+            wxViewportEventSource(glviewhost, stage),
+            wxMouseEventSource(glviewhost, stage),
+            wxKeyboardEventSource(glviewhost, stage),
+            wxTimerEventSource(glviewhost, stage),
+            wxIdleEventSource(glviewhost, stage),
             ]
 
 SceneHostViewLoader = wxHelixSceneHostViewLoader

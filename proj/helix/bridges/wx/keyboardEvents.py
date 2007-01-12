@@ -10,15 +10,15 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .common import wx, wxEventSourceMixin
 from TG.helix.events.keyboardEvents import KeyboardEventSource
+from .common import wx, wxEventSourceMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxKeyboardEventSource(wxEventSourceMixin, KeyboardEventSource):
-    def __init__(self, glCanvas):
+    def __init__(self, glCanvas, stage):
         KeyboardEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_KEY_DOWN, self.onEvtKey)
