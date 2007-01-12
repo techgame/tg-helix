@@ -30,7 +30,7 @@ class FontLoaderMixin(MatuiLoaderMixin):
 class FreetypeFont(MatuiFontUnit):
     font = None
     def __init__(self, face, size, charset=string.printable, **kw):
-        self.loader = FreetypeFontLoader(face, size, **kw)
+        self.loader = FreetypeFontLoader(face, size, charset=charset, **kw)
 
     def bind(self):
         if self.font is None:
