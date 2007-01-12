@@ -10,10 +10,22 @@
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class ScenePassMeter(object):
+    def start(self): pass
+    def end(self): pass
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class SceneGraphPassManager(object):
+    meter = ScenePassMeter()
+
     def __init__(self, scene):
         self.scene = scene
         self.stage = scene.stage
+
+        sceneMeter = getattr(scene, 'meter', None)
+        if sceneMeter is not None:
+            self.meter = sceneMeter
 
     _passResult = None
     _passVersion = None
@@ -140,11 +152,13 @@ class ViewportResizeManager(SceneGraphRenderPassManager):
 
     def resize(self, hostView, viewportSize):
         self.viewportSize = viewportSize
-
+        
+        self.meter.start()
         hostView.setViewCurrent()
         sgpass = self.sgPass()
         for each in sgpass:
             each()
+        self.meter.end()
 
         return True
 
@@ -155,13 +169,13 @@ class RenderManager(SceneGraphRenderPassManager):
 
     def render(self, hostView):
         hostView.setViewCurrent()
-        hostView.frameStart()
 
+        self.meter.start()
         sgpass = self.sgPass()
         for each in sgpass:
             each()
+        self.meter.end()
 
-        hostView.frameEnd()
         hostView.viewSwapBuffers()
         return True
 
@@ -180,9 +194,11 @@ class SelectManager(SceneGraphRenderPassManager):
         self.selectPos = pos
         self.selection = []
 
+        self.meter.start()
         sgpass = self.sgPass()
         for each in sgpass:
             each()
+        self.meter.end()
 
         if self.debugView:
             hostView.viewSwapBuffers()
