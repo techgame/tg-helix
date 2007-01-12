@@ -54,7 +54,7 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
         <layout>
             <panel>
                 <layout>
-                    <opengl-canvas size='ctx.model.clientSize' layout-minsize='ctx.model.minSize'>
+                    <opengl-canvas size='100,100'>
                         ctx.model.setupCanvas(elem, obj)
                     </opengl-canvas>
                 </layout>
