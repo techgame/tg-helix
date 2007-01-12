@@ -37,12 +37,17 @@ class MatuiImageTexture(MatuiTextureUnit):
         if image is not None:
             self.load(image)
 
-    def bind(self):
+    def bind(self, forceBind=False):
         texture = self.texture
-        if texture is None and self.image is not None:
+        if not forceBind and texture is not None:
+            return texture
+
+        if self.image is not None:
             texture = ImageTexture(self.image)
             texture.deselect()
-            self.texture = texture
+        else: texture = None
+
+        self.texture = texture
         return texture
 
     openImage = staticmethod(PIL.Image.open)
@@ -51,8 +56,9 @@ class MatuiImageTexture(MatuiTextureUnit):
             image = self.openImage(image)
         if size is not None:
             image = image.resize(size)
-        self.texture = None
         self.image = image
+        if self.texture is not None:
+            self.bind(True)
         return image
 
     def premultiply(self, raiseOnInvalid=True):
