@@ -202,6 +202,7 @@ class MatuiNode(object):
         return self.addNode(node)
 
     def remove(self, item):
+        if item is None: return
         isMatuiNode = getattr(item, 'isMatuiNode', lambda: False)
         if isMatuiNode():
             return self.removeNode(item)
