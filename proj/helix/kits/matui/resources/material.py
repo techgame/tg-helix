@@ -143,29 +143,30 @@ MaterialLoaderMixin._addLoader_(OrthoProjectionMaterial, 'orthoProjectionMateria
 
 class BlendMaterial(MatuiMaterial):
     blendModes = {
-        'none': (gl.glBlendFunc, gl.GL_ONE, gl.GL_ZERO),
-        'blend': (gl.glBlendFunc, gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA),
-        'multiply': (gl.glBlendFunc, gl.GL_DST_COLOR, gl.GL_ONE_MINUS_SRC_ALPHA),
+        'none': (gl.GL_ONE, gl.GL_ZERO),
+        'blend': (gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA),
+        'multiply': (gl.GL_DST_COLOR, gl.GL_ONE_MINUS_SRC_ALPHA),
         'screen': NotImplemented,
         }
 
     def __init__(self, mode='blend', modeUnwind='blend'):
-        self.render = self.partial(*self.blendModes[mode])
+        self.blend = self.blendModes[mode]
         if modeUnwind:
-            self.renderUnwind = self.partial(*self.blendModes[modeUnwind])
+            self.blendUnwind = self.blendModes[modeUnwind]
+        else: self.blendUnwind = None
 
     render = None
     renderUnwind = None
 
     def bind(self, actor, res, mgr):
         gl.glEnable(gl.GL_BLEND)
-        wind = self.render
-        if wind is not None: 
+        if self.blend is not None: 
+            wind = self.partial(gl.glBlendFunc, *self.blend)
             return [wind]
         else: return []
     def bindUnwind(self, actor, res, mgr):
-        unwind = self.renderUnwind
-        if unwind is not None: 
+        if self.blendUnwind:
+            unwind = self.partial(gl.glBlendFunc, *self.blendUnwind)
             return [unwind]
         else: return []
 
