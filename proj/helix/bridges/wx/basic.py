@@ -96,7 +96,6 @@ class BasicRenderSkinModel(wxSkinModel):
 
         if self.fullscreen:
             frame.ShowFullScreen(True)
-            wx.CallAfter(frame.ShowFullScreen, True)
 
     def close(self):
         self.frame.Close()
