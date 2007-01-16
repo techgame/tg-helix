@@ -192,7 +192,7 @@ class MatuiNode(object):
                 idx += 1 # advance the index as we add items
             return self
 
-        return self.insertNode(idx, node)
+        return self.insertNode(node, idx)
 
     def add(self, item):
         node = self.itemAsNode(item)
@@ -224,11 +224,11 @@ class MatuiNode(object):
     def insertNodeBefore(self, node, nidx):
         """Inserts node before index of nidx in children"""
         idx = self.children.index(nidx)
-        return self.insertNode(idx, node)
+        return self.insertNode(node, idx)
     def insertNodeAfter(self, node, nidx):
         """Inserts node after index of nidx in children"""
         idx = self.children.index(nidx) + 1
-        return self.insertNode(idx, node)
+        return self.insertNode(node, idx)
 
     # workhorses
 
