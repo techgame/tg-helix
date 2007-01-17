@@ -119,18 +119,28 @@ class MatuiNode(object):
     #~ Node and Node Tree  iteration
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def root(self):
+    def getParent(self):
+        p = self.parents
+        if p: return p[0]
+        else: return None
+    parent = property(getParent)
+
+    def getRoot(self):
         root = self
-        while root.parents:
-            root = root.parents[0]
+        parent = root.parent
+        while parent is not None:
+            root = root.parent
         return root
-    def linage(self):
+    root = property(getRoot)
+
+    def getLinage(self):
         return list(self.iterLinage())
+    linage = property(getLinage)
     def iterLinage(self):
         each = self
         while each is not None:
             yield each
-            each = each.parents[0]
+            each = each.parent
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
