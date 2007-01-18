@@ -12,7 +12,7 @@
 
 import string
 
-from TG.openGL.text.freetypeFontLoader import FreetypeFontLoader
+from TG.openGL.text import Font, Font2d
 
 from .units import MatuiLoaderMixin, MatuiFontUnit
 
@@ -28,9 +28,10 @@ class FontLoaderMixin(MatuiLoaderMixin):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class FreetypeFont(MatuiFontUnit):
+    FontFactory = Font
     font = None
     def __init__(self, face, size, charset=string.printable, **kw):
-        self.loader = FreetypeFontLoader(face, size, charset=charset, **kw)
+        self.loader = self.FontFactory.loaderFromFilename(face, size, charset=charset, **kw)
 
     def bind(self):
         if self.font is None:
@@ -39,4 +40,8 @@ class FreetypeFont(MatuiFontUnit):
             self.texture.deselect()
         return self.font
 FontLoaderMixin._addLoader_(FreetypeFont, 'freetypeFont')
+
+class FreetypeFont2d(FreetypeFont):
+    FontFactory = Font2d
+FontLoaderMixin._addLoader_(FreetypeFont2d, 'freetypeFont2d')
 

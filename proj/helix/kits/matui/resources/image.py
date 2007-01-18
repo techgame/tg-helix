@@ -12,7 +12,7 @@
 
 import PIL.Image
 
-from TG.openGL.data.image import ImageTextureRect as ImageTexture
+from TG.openGL.data.image import ImageTextureRect, ImageTexture2d
 
 from .units import MatuiLoaderMixin, MatuiTextureUnit
 
@@ -28,6 +28,8 @@ class ImageLoaderMixin(MatuiLoaderMixin):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiImageTexture(MatuiTextureUnit):
+    ImageTextureFactory = ImageTextureRect
+
     def isResourceImage(self): 
         return True
 
@@ -43,7 +45,7 @@ class MatuiImageTexture(MatuiTextureUnit):
             return texture
 
         if self.image is not None:
-            texture = ImageTexture(self.image)
+            texture = self.ImageTextureFactory(self.image)
             texture.deselect()
         else: texture = None
 
@@ -84,4 +86,10 @@ class MatuiImageTexture(MatuiTextureUnit):
 
         return self
 ImageLoaderMixin._addLoader_(MatuiImageTexture, 'imageTexture')
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatuiImageTexture2d(MatuiImageTexture):
+    ImageTextureFactory = ImageTexture2d
+ImageLoaderMixin._addLoader_(MatuiImageTexture2d, 'imageTexture2d')
 
