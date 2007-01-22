@@ -91,6 +91,24 @@ class ImageTextureCoordMesh(GLArrayMeshUnit):
         self.texCoordsPtr()
 MeshLoaderMixin._addLoader_(ImageTextureCoordMesh, 'imageTextureCoordMesh')
 
+class ImagePartTextureCoordMesh(ImageTextureCoordMesh):
+    box = glData.Rectf.property()
+
+    def __init__(self, pos=None, size=None):
+        box = self.box
+        if pos is not None:
+            box.pos = pos
+        if size is not None:
+            box.size = size
+
+    def update(self, imageTexture=None):
+        if imageTexture is None:
+            return
+
+        self.texCoords = imageTexture.texCoordsForRect(self.box)
+        self.texCoordsEnable, self.texCoordsPtr = self._bindArray(self.texCoords)
+MeshLoaderMixin._addLoader_(ImagePartTextureCoordMesh, 'imagePartTextureCoordMesh')
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ TextMesh
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
