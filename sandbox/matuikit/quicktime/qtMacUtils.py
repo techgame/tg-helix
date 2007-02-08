@@ -99,9 +99,8 @@ class QTNewMoviePropertyElement(ctypes.Structure):
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class QTMoiveHost(object):
-    def __init__(self):
-        libQuickTime.EnterMovies()
+def qtEnterMovies():
+    libQuickTime.EnterMovies()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -194,7 +193,7 @@ class QTOpenGLVisualContext(object):
         return self
 
     def process(self):
-        libQuickTime.QTVisualContextTask(self.visualContext)
+        libQuickTime.QTVisualContextTask(self)
 
     _texture = None
     def texture(self):
@@ -207,14 +206,12 @@ class QTOpenGLVisualContext(object):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class QTMovie(object):
-    def __init__(self, movieHost=None, filePath=None):
-        if movieHost is not None:
-            self.setHost(movieHost)
+    def __init__(self, filePath=None):
+        self.createContext()
         if filePath is not None:
             self.loadPath(filePath)
 
-    def setHost(self, movieHost):
-        self.movieHost = movieHost
+    def createContext(self):
         self.visualContext = QTOpenGLVisualContext()
         self.texMovie = self.visualContext.texture()
         
@@ -271,13 +268,16 @@ class QTMovie(object):
 
         return True
 
-    def process(self, milisec=0):
-        libQuickTime.QTVisualContextTask(self.visualContext)
-        return libQuickTime.MoviesTask(self, milisec)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    @classmethod
-    def processAll(klass, milisec=0):
-        return libQuickTime.MoviesTask(None, milisec)
+    def process(self, millisec=0):
+        self.visualContext.process()
+        return self.processMovieTask()
+
+    def processMovieTask(self, millisec=0):
+        return libQuickTime.MoviesTask(self, millisec)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def getLoadState(self):
         return libQuickTime.GetMovieLoadState(self)

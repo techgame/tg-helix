@@ -30,46 +30,29 @@ import qtMacUtils
 #~ Scene
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MovieHostRenderer(MatuiMaterial):
-    def bind(self, actor, res, mgr):
-        return [self.partial(self.render, actor)]
-    def render(self, actor):
-        pass
-        #actor.movieHost.process()
-
-class MovieHost(MatuiActor):
-    def __init__(self):
-        MatuiActor.__init__(self)
-        self.movieHost = qtMacUtils.QTMoiveHost()
-        #self.movieHost.process()
-
-    def loadResources(self, resources):
-        with resources as (res, factory):
-            res.render = MovieHostRenderer()
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class MovieRenderer(MatuiMaterial):
     def bind(self, actor, res, mgr):
-        return [self.partial(self.render, actor)]
-    def render(self, actor):
+        return [self.partial(self.render, actor, res)]
+    def render(self, actor, res):
         texMovie = actor.texMovie
         texMovie.update()
 
         x,y = actor.box.pos
         gl.glPushMatrix()
         gl.glTranslatef(x,y,0)
+        color = res['color'].render()
         texMovie.renderDirect()
         gl.glPopMatrix()
 
         actor.movie.process()
 
 class Movie(MatuiActor):
+    color = data.Color.property('#ff:ff')
     box = data.Rect.property()
 
-    def __init__(self, movieHost, moviePath, bLooping=True):
+    def __init__(self, moviePath, bLooping=False):
         MatuiActor.__init__(self)
-        self.movie = qtMacUtils.QTMovie(movieHost)
+        self.movie = qtMacUtils.QTMovie()
 
         if '://' in moviePath:
             self.movie.loadURL(moviePath)
@@ -89,6 +72,10 @@ class Movie(MatuiActor):
     def loadResources(self, resources):
         with resources as (res, factory):
             res.render = MovieRenderer()
+            res.color = factory.immediate(self.color)
+
+    def onCellLayout(self, cell, cbox):
+        self.box.centerIn(cbox)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -116,20 +103,21 @@ class SandboxStage(MatuiStage):
         self.resources['layout'] = layout
 
         aglUtils.setAGLSwapInterval()
-        self.movieHost = MovieHost()
-        node += self.movieHost
+        qtMacUtils.qtEnterMovies()
 
-        self.movieA = Movie(self.movieHost.movieHost, 'cercle.mov', True)
-        self.movieA.box.pos = (100,100)
+        self.movieA = Movie('milkgirls1080.mov', True)
         node += self.movieA
+        layout += self.movieA
 
-        self.movieB = Movie(self.movieHost.movieHost, 'iSight.mov')
-        node += self.movieB
-        self.movieB.box.pos = self.movieA.box.posAt((1,0))+(10,0)
-
-        self.movieC = Movie(self.movieHost.movieHost, 'cercle.mov')
+        self.movieC = Movie('masseffect_x06walkthru_HD720p.mov')
+        self.movieC.color.set('#ff:80')
         node += self.movieC
-        self.movieC.box.pos = self.movieB.box.posAt((1,0))+(10,0)
+        layout += self.movieC
+
+        self.movieD = Movie('cercle.mov', True)
+        self.movieD.color.set('#00:80')
+        node += self.movieD
+        layout += self.movieD
 
     timerFrequency = 60
     def onSceneAnimate(self, scene, hostView, info):
