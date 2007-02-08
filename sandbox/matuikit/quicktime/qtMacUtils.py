@@ -75,12 +75,15 @@ class QTNewMoviePropertyElement(ctypes.Structure):
         ]
     
     @classmethod
-    def new(klass, cid, pid, valueType, value):
+    def new(klass, cid, pid, value):
+        if hasattr(value, '_as_parameter_'):
+            value = value._as_parameter_
+        valueSize = ctypes.sizeof(type(value))
         p_value = cast(byref(value), c_void_p)
         return klass(
                 fromAppleId(cid), 
                 fromAppleId(pid), 
-                ctypes.sizeof(valueType), 
+                valueSize,
                 p_value, 0)
 
     @classmethod
@@ -97,19 +100,109 @@ class QTNewMoviePropertyElement(ctypes.Structure):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class QTMoiveHost(object):
-    visualContext = c_void_p()
-
     def __init__(self):
         libQuickTime.EnterMovies()
 
-        cglCtx, cglPix = aglUtils.getCGLContextAndFormat()
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        self.visualContext = c_void_p()
-        errqt = libQuickTime.QTOpenGLTextureContextCreate(None, cglCtx, cglPix, None, byref(self.visualContext))
+class CVOpenGLTexture(object):
+    texCoords = None
+    texTarget = None
+    texName = None
+
+    def __init__(self, visualContext):
+        self.texCoords = numpy.zeros((4,2), 'f')
+        self._texCoordsAddresses = [tc.ctypes.data for tc in self.texCoords]
+        assert len(self._texCoordsAddresses) == 4
+
+        self.visualContext = visualContext
+        self._cvTextureRef = c_void_p(0)
+
+    def isNewImageAvailable(self):
+        return libQuickTime.QTVisualContextIsNewImageAvailable(self.visualContext, None)
+        
+
+    def update(self, force=False):
+        if not force and not self.isNewImageAvailable():
+            return False
+
+        libCoreVideo.CVOpenGLTextureRelease(self._cvTextureRef)
+        cvTextureRef = c_void_p(0)
+        self._cvTextureRef = cvTextureRef
+
+        libQuickTime.QTVisualContextCopyImageForTime(self.visualContext, None, None, byref(cvTextureRef))
+
+        self.texTarget = libCoreVideo.CVOpenGLTextureGetTarget(cvTextureRef)
+        self.texName = libCoreVideo.CVOpenGLTextureGetName(cvTextureRef)
+
+        # CVOpenGLTextureGetCleanTexCoords takes into account whether or not the texture is flipped
+        libCoreVideo.CVOpenGLTextureGetCleanTexCoords(cvTextureRef, *self._texCoordsAddresses)
+        #libCoreVideo.CVOpenGLTextureIsFlipped(cvTextureRef)
+
+        self.movieSize = abs(self.texCoords[2]-self.texCoords[0])
+        return True
+
+    movieSize = None
+    def renderDirect(self):
+        if not self.texName:
+            return False
+
+        texCoords = self.texCoords
+        w, h = texCoords[2]-texCoords[0]
+        gl.glPushMatrix()
+        if h<0:
+            gl.glTranslatef(0, -h, 0)
+            gl.glScalef(1, -1, 1)
+
+        gl.glEnable(self.texTarget)
+        gl.glBindTexture(self.texTarget, self.texName)
+        gl.glBegin(gl.GL_QUADS)
+
+        gl.glTexCoord2f(*texCoords[0])
+        gl.glVertex2f(*texCoords[0])
+
+        gl.glTexCoord2f(*texCoords[1])
+        gl.glVertex2f(*texCoords[1])
+
+        gl.glTexCoord2f(*texCoords[2])
+        gl.glVertex2f(*texCoords[2])
+
+        gl.glTexCoord2f(*texCoords[3])
+        gl.glVertex2f(*texCoords[3])
+
+        gl.glEnd()
+
+        gl.glPopMatrix()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class QTOpenGLVisualContext(object):
+    _as_parameter_ = None
+
+    def __init__(self, bCreate=True):
+        if bCreate:
+            self.create()
+
+    def create(self):
+        if self._as_parameter_:
+            return self
+
+        cglCtx, cglPix = aglUtils.getCGLContextAndFormat()
+        self._as_parameter_ = c_void_p()
+        errqt = libQuickTime.QTOpenGLTextureContextCreate(None, cglCtx, cglPix, None, byref(self._as_parameter_))
         assert not errqt, errqt
+        return self
 
     def process(self):
         libQuickTime.QTVisualContextTask(self.visualContext)
+
+    _texture = None
+    def texture(self):
+        tex = self._texture
+        if tex is None:
+            tex = CVOpenGLTexture(self)
+            self._texture = tex
+        return tex
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -122,38 +215,37 @@ class QTMovie(object):
 
     def setHost(self, movieHost):
         self.movieHost = movieHost
-        self.visualContext = movieHost.visualContext
-        self.texMovie = CVMovieTexture(self.visualContext)
+        self.visualContext = QTOpenGLVisualContext()
+        self.texMovie = self.visualContext.texture()
         
     def loadURL(self, fileURL):
         cfFileURL = asCFURL(fileURL)
 
         return self.loadFromProperties([
-                ('dloc', 'cfur', cfFileURL, cfFileURL),
+                ('dloc', 'cfur', cfFileURL),
 
-                ('mprp', 'actv', Boolean, booleanTrue),
-                #('mprp', 'intn', Boolean, booleanTrue),
-                #('mins', 'aurn', Boolean, booleanTrue),
+                ('mprp', 'actv', booleanTrue),
+                #('mprp', 'intn', booleanTrue),
+                #('mins', 'aurn', booleanTrue),
                 # No async for right now
-                ('mins', 'asok', Boolean, booleanTrue),
-                ('mins', 'imok', Boolean, booleanTrue),
+                ('mins', 'asok', booleanTrue),
 
-                ('ctxt', 'visu', self.visualContext, self.visualContext),
+                ('ctxt', 'visu', self.visualContext),
                 ])
 
     def loadPath(self, filePath):
         cfFilePath = asCFString(filePath)
 
         return self.loadFromProperties([
-                ('dloc', 'cfnp', cfFilePath, cfFilePath),
+                ('dloc', 'cfnp', cfFilePath),
 
-                ('mprp', 'actv', Boolean, booleanTrue),
-                ('mprp', 'intn', Boolean, booleanTrue),
-                ('mins', 'aurn', Boolean, booleanTrue),
+                ('mprp', 'actv', booleanTrue),
+                #('mprp', 'intn', booleanTrue),
+                #('mins', 'aurn', booleanTrue),
                 # No async for right now
-                ('mins', 'asok', Boolean, booleanTrue),
+                ('mins', 'asok', booleanTrue),
 
-                ('ctxt', 'visu', self.visualContext, self.visualContext),
+                ('ctxt', 'visu', self.visualContext),
                 ])
 
     def loadFromProperties(self, movieProperties):
@@ -170,7 +262,7 @@ class QTMovie(object):
             print
             print 
             raise Exception("Failed to initialize QuickTime movie from properties")
-        elif 1:
+        elif 0:
             print 'Movie Properties::'
             for prop in movieProperties:
                 print '   ', toAppleId(prop.propClass), toAppleId(prop.propID), prop.propStatus
@@ -180,6 +272,7 @@ class QTMovie(object):
         return True
 
     def process(self, milisec=0):
+        libQuickTime.QTVisualContextTask(self.visualContext)
         return libQuickTime.MoviesTask(self, milisec)
 
     @classmethod
@@ -242,73 +335,4 @@ class QTMovie(object):
         libQuickTime.QTVisualContextSetImageAvailableCallback(self.visualContext, onImageAvailableCallback, None)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class CVMovieTexture(object):
-    texCoords = None
-    texTarget = None
-    texName = None
-
-    def __init__(self, visualContext):
-        self.texCoords = numpy.zeros((4,2), 'f')
-        self._texCoordsAddresses = [tc.ctypes.data for tc in self.texCoords]
-        assert len(self._texCoordsAddresses) == 4
-
-        self.visualContext = visualContext
-        self._cvTextureRef = c_void_p(0)
-
-    def isNewImageAvailable(self):
-        return libQuickTime.QTVisualContextIsNewImageAvailable(self.visualContext, None)
-        
-
-    def update(self, force=False):
-        if not force and not self.isNewImageAvailable():
-            return False
-
-        libCoreVideo.CVOpenGLTextureRelease(self._cvTextureRef)
-        cvTextureRef = c_void_p(0)
-        self._cvTextureRef = cvTextureRef
-
-        libQuickTime.QTVisualContextCopyImageForTime(self.visualContext, None, None, byref(cvTextureRef))
-
-        self.texTarget = libCoreVideo.CVOpenGLTextureGetTarget(cvTextureRef)
-        self.texName = libCoreVideo.CVOpenGLTextureGetName(cvTextureRef)
-
-        # CVOpenGLTextureGetCleanTexCoords takes into account whether or not the texture is flipped
-        libCoreVideo.CVOpenGLTextureGetCleanTexCoords(cvTextureRef, *self._texCoordsAddresses)
-        #print 'flipped:', libCoreVideo.CVOpenGLTextureIsFlipped(cvTextureRef)
-        return True
-
-    def renderDirect(self):
-        if not self.texName:
-            return False
-
-        texCoords = self.texCoords
-        w, h = texCoords[2]-texCoords[0]
-        #print w, h, texCoords[:]
-        gl.glPushMatrix()
-        if h<0:
-            gl.glTranslatef(w, -2*h, 0)
-            gl.glScalef(1, -1, 1)
-        else:
-            gl.glTranslatef(w, h, 0)
-
-        gl.glEnable(self.texTarget)
-        gl.glBindTexture(self.texTarget, self.texName)
-        gl.glBegin(gl.GL_QUADS)
-
-        gl.glTexCoord2f(*texCoords[0])
-        gl.glVertex2f(*texCoords[0])
-
-        gl.glTexCoord2f(*texCoords[1])
-        gl.glVertex2f(*texCoords[1])
-
-        gl.glTexCoord2f(*texCoords[2])
-        gl.glVertex2f(*texCoords[2])
-
-        gl.glTexCoord2f(*texCoords[3])
-        gl.glVertex2f(*texCoords[3])
-
-        gl.glEnd()
-
-        gl.glPopMatrix()
 

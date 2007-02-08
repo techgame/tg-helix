@@ -16,12 +16,12 @@ from __future__ import with_statement
 from TG.openGL.raw import gl
 from TG.openGL import data
 
-from TG.helix.events.timerEvents import TimerEventHandler
 from TG.helix.kits.matui.resources.material import MatuiMaterial
 from TG.helix.kits.matui.resources.stageMaterial import StageRenderMaterial, StageResizeMaterial
 
 from TG.helix.kits.matui import MatuiStage, MatuiActor
 from TG.helix.kits.matui.view import MatuiScene
+from TG.helix.kits.matui.view.events import MatuiAnimationEventHandler
 
 import aglUtils
 import qtMacUtils
@@ -34,13 +34,14 @@ class MovieHostRenderer(MatuiMaterial):
     def bind(self, actor, res, mgr):
         return [self.partial(self.render, actor)]
     def render(self, actor):
-        actor.movieHost.process()
+        pass
+        #actor.movieHost.process()
 
 class MovieHost(MatuiActor):
     def __init__(self):
         MatuiActor.__init__(self)
         self.movieHost = qtMacUtils.QTMoiveHost()
-        self.movieHost.process()
+        #self.movieHost.process()
 
     def loadResources(self, resources):
         with resources as (res, factory):
@@ -54,13 +55,19 @@ class MovieRenderer(MatuiMaterial):
     def render(self, actor):
         texMovie = actor.texMovie
         texMovie.update()
-        texMovie.renderDirect()
 
-        #if actor.movie.isDone():
-        #    print 'movie is done'
+        x,y = actor.box.pos
+        gl.glPushMatrix()
+        gl.glTranslatef(x,y,0)
+        texMovie.renderDirect()
+        gl.glPopMatrix()
+
+        actor.movie.process()
 
 class Movie(MatuiActor):
-    def __init__(self, movieHost, moviePath):
+    box = data.Rect.property()
+
+    def __init__(self, movieHost, moviePath, bLooping=True):
         MatuiActor.__init__(self)
         self.movie = qtMacUtils.QTMovie(movieHost)
 
@@ -68,8 +75,16 @@ class Movie(MatuiActor):
             self.movie.loadURL(moviePath)
         else: self.movie.loadPath(moviePath)
 
-        self.movie.start()
+        if bLooping:
+            self.movie.setLooping()
+
+        self.movie.process(100)
         self.texMovie = self.movie.texMovie
+        self.texMovie.update(True)
+        print self.texMovie.movieSize
+        self.box.size[:] = self.texMovie.movieSize
+
+        self.movie.start()
 
     def loadResources(self, resources):
         with resources as (res, factory):
@@ -104,31 +119,25 @@ class SandboxStage(MatuiStage):
         self.movieHost = MovieHost()
         node += self.movieHost
 
-        #self.movie = Movie(self.movieHost.movieHost, 'http://techgame.net/~shane/iSight.mov')
-        #self.movie = Movie(self.movieHost.movieHost, 'http://techgame.net/~shane/cercle.mov')
-        self.movie = Movie(self.movieHost.movieHost, 'http://213.229.27.207/cgi-bin/video320x240.mjpg?dummy=garb')
-        #self.movie = Movie(self.movieHost.movieHost, 'cercle.mov')
-        #self.movie = Movie(self.movieHost.movieHost, 'iSight.mov')
-        node += self.movie
+        self.movieA = Movie(self.movieHost.movieHost, 'cercle.mov', True)
+        self.movieA.box.pos = (100,100)
+        node += self.movieA
+
+        self.movieB = Movie(self.movieHost.movieHost, 'iSight.mov')
+        node += self.movieB
+        self.movieB.box.pos = self.movieA.box.posAt((1,0))+(10,0)
+
+        self.movieC = Movie(self.movieHost.movieHost, 'cercle.mov')
+        node += self.movieC
+        self.movieC.box.pos = self.movieB.box.posAt((1,0))+(10,0)
 
     timerFrequency = 60
     def onSceneAnimate(self, scene, hostView, info):
-        self.movie.movie.processAll(10)
-        self.movieHost.movieHost.process()
         scene.performRender(hostView)
 
     def onSceneSetup(self, scene):
         MatuiStage.onSceneSetup(self, scene)
-        scene.evtRoot += TimingEventHandler(scene)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class TimingEventHandler(TimerEventHandler):
-    def __init__(self, scene):
-        self.scene = scene
-
-    def timer(self, hostView, info):
-        self.scene.stage.onSceneAnimate(self.scene, hostView, info)
+        scene.evtRoot += MatuiAnimationEventHandler(scene)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 
