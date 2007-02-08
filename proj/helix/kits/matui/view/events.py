@@ -12,6 +12,7 @@
 
 from TG.helix.events.eventSource import EventRoot
 from TG.helix.events.viewportEvents import ViewportEventHandler
+from TG.helix.events.timerEvents import TimerEventHandler
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -26,7 +27,6 @@ class MatuiEventRoot(EventRoot):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiViewportEventHandler(ViewportEventHandler):
-    eventKinds = ['viewport']
     def __init__(self, scene):
         self.scene = scene
 
@@ -38,4 +38,13 @@ class MatuiViewportEventHandler(ViewportEventHandler):
 
     def paint(self, hostView):
         return self.scene.performRender(hostView)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class MatuiAnimationEventHandler(TimerEventHandler):
+    def __init__(self, scene):
+        self.scene = scene
+
+    def timer(self, hostView, info):
+        return self.scene.performAnimation(hostView, info)
 
