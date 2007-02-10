@@ -28,7 +28,7 @@ class FontLoaderMixin(MatuiLoaderMixin):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class FreetypeFont(MatuiFontUnit):
-    FontFactory = Font
+    FontFactory = Font2d
     font = None
     def __init__(self, face, size, charset=string.printable, **kw):
         self.loader = self.FontFactory.loaderFromFilename(face, size, charset=charset, **kw)
@@ -41,6 +41,9 @@ class FreetypeFont(MatuiFontUnit):
         return self.font
 FontLoaderMixin._addLoader_(FreetypeFont, 'freetypeFont')
 
+class FreetypeFontRect(FreetypeFont):
+    FontFactory = Font
+FontLoaderMixin._addLoader_(FreetypeFontRect, 'freetypeFontRect')
 class FreetypeFont2d(FreetypeFont):
     FontFactory = Font2d
 FontLoaderMixin._addLoader_(FreetypeFont2d, 'freetypeFont2d')
