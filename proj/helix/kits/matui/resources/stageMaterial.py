@@ -31,12 +31,10 @@ def stageMaterialGroup():
 
 class StageRenderMaterial(MatuiMaterial):
     mask = gl.GL_COLOR_BUFFER_BIT|gl.GL_DEPTH_BUFFER_BIT
-    gl = gl
-
     def bind(self, stage, res, mgr):
         return [self.perform]
     def perform(self):
-        gl = self.gl
+        #print 'RENDER START', gl.glGetError()
         gl.glClear(self.mask)
 
         gl.glMatrixMode(gl.GL_PROJECTION)
@@ -44,24 +42,30 @@ class StageRenderMaterial(MatuiMaterial):
         gl.glMatrixMode(gl.GL_MODELVIEW)
         gl.glLoadIdentity()
 
+    #def bindUnwind(self, stage, res, mgr):
+    #    return [self.performUnwind]
+    #def performUnwind(self):
+    #    print 'RENDER END', gl.glGetError()
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StageResizeMaterial(MatuiMaterial):
-    gl = gl
-
     def bind(self, stage, res, mgr):
         return [self.partial(self.perform, stage, mgr)]
     def perform(self, stage, mgr):
-        gl = self.gl
+        #print 'RESIZE START', gl.glGetError()
         w, h = mgr.viewportSize
         stage.box.size[:2] = (w, h)
         gl.glViewport(0, 0, w, h)
 
+    #def bindUnwind(self, stage, res, mgr):
+    #    return [self.performUnwind]
+    #def performUnwind(self):
+    #    print 'RESIZE END', gl.glGetError()
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StagePickMaterial(MatuiMaterial):
-    gl = gl
-
     SelectorFactory = NameSelector
     def __init__(self):
         self.selector = self.SelectorFactory()
@@ -69,7 +73,7 @@ class StagePickMaterial(MatuiMaterial):
     def bind(self, stage, res, mgr):
         return [self.partial(self.perform, stage, mgr)]
     def perform(self, stage, mgr):
-        gl = self.gl
+        #print 'PICK START', gl.glGetError()
         selector = self.selector
         selector.start()
 
@@ -93,11 +97,11 @@ class StagePickMaterial(MatuiMaterial):
         selection = [s[-1] for s in selection]
 
         mgr.finishSelector(selector, selection)
+        #print 'PICK END', gl.glGetError()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StageDebugPickMaterial(StagePickMaterial):
-    gl = gl
     mask = gl.GL_COLOR_BUFFER_BIT|gl.GL_DEPTH_BUFFER_BIT
 
     def __init__(self, usePickMatrix=False):
@@ -107,7 +111,7 @@ class StageDebugPickMaterial(StagePickMaterial):
     def bind(self, stage, res, mgr):
         return [self.partial(self.perform, stage, mgr)]
     def perform(self, stage, mgr):
-        gl = self.gl
+        #print 'DEBUG PICK START', gl.glGetError()
         selector = self.selector
         selector.start()
         selector.finish()
@@ -148,4 +152,5 @@ class StageDebugPickMaterial(StagePickMaterial):
 
         mgr.finishSelector(self.selector, [])
         mgr.debugView = True
+        #print 'DEBUG PICK END', gl.glGetError()
 
