@@ -42,6 +42,9 @@ class SceneGraphPassManager(object):
     def _sgGeneratePass(self, root):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
+    def _handleException(self, err):
+        return False
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SceneGraphRenderPassManager(SceneGraphPassManager):
@@ -153,12 +156,16 @@ class ViewportResizeManager(SceneGraphRenderPassManager):
     def resize(self, hostView, viewportSize):
         self.viewportSize = viewportSize
         
-        self.meter.start()
-        hostView.setViewCurrent()
-        sgpass = self.sgPass()
-        for each in sgpass:
-            each()
-        self.meter.end()
+        try:
+            self.meter.start()
+            hostView.setViewCurrent()
+            sgpass = self.sgPass()
+            for each in sgpass:
+                each()
+            self.meter.end()
+        except Exception, err:
+            if not self._handleException(err):
+                raise
 
         return True
 
@@ -170,11 +177,15 @@ class RenderManager(SceneGraphRenderPassManager):
     def render(self, hostView):
         hostView.setViewCurrent()
 
-        self.meter.start()
-        sgpass = self.sgPass()
-        for each in sgpass:
-            each()
-        self.meter.end()
+        try:
+            self.meter.start()
+            sgpass = self.sgPass()
+            for each in sgpass:
+                each()
+            self.meter.end()
+        except Exception, err:
+            if not self._handleException(err):
+                raise
 
         hostView.viewSwapBuffers()
         return True
@@ -191,14 +202,18 @@ class SelectManager(SceneGraphRenderPassManager):
     def select(self, hostView, pos):
         hostView.setViewCurrent()
 
-        self.selectPos = pos
-        self.selection = []
+        try:
+            self.selectPos = pos
+            self.selection = []
 
-        self.meter.start()
-        sgpass = self.sgPass()
-        for each in sgpass:
-            each()
-        self.meter.end()
+            self.meter.start()
+            sgpass = self.sgPass()
+            for each in sgpass:
+                each()
+            self.meter.end()
+        except Exception, err:
+            if not self._handleException(err):
+                raise
 
         if self.debugView:
             hostView.viewSwapBuffers()
