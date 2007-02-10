@@ -67,7 +67,6 @@ class BoxMesh(GLArrayMeshUnit):
         vertex[:] = box.pos + box.size*self.vertexScale
         self.vertexEnable, self.vertexPtr = self._bindArray(vertex)
         count = vertex.size/vertex.shape[-1]
-        assert count == 4, count
         self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
 
     def render(self):
@@ -119,8 +118,12 @@ class TextMesh(MatuiMeshUnit):
         self.geometry = geometry
 
         count = geometry.size
-        self.interleavedArray = self.partial(gl.glInterleavedArrays, geometry.glTypeId, 0, geometry.ctypes)
-        self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+        if count > 0:
+            self.interleavedArray = self.partial(gl.glInterleavedArrays, geometry.glTypeId, 0, geometry.ctypes)
+            self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+        else:
+            self.interleavedArray = lambda: None
+            self.drawArray = lambda: None
 
     def render(self):
         self.interleavedArray()
@@ -149,8 +152,12 @@ class BufferedTextMesh(MatuiMeshUnit):
         buff.unbind()
 
         count = geometry.size
-        self.interleavedArray = self.partial(gl.glInterleavedArrays, geometry.glTypeId, 0, 0)
-        self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+        if count > 0:
+            self.interleavedArray = self.partial(gl.glInterleavedArrays, geometry.glTypeId, 0, 0)
+            self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+        else:
+            self.interleavedArray = lambda: None
+            self.drawArray = lambda: None
 
     def render(self):
         buff = self.buffer
