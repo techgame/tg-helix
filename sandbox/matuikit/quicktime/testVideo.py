@@ -136,6 +136,7 @@ if __name__=='__main__':
 
     from TG.helix.bridges.wx.basic import BasicRenderSkinModel
     model = BasicRenderSkinModel()
+    model.fullscreen = True
     model.setupStage(stage, MatuiScene)
     model.skinModel()
 

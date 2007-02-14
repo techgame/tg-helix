@@ -1,6 +1,7 @@
-syntax: glob
-
 syntax: regexp
+^sandbox/matuikit/quicktime/Curious George.m4b
+^sandbox/matuikit/quicktime/masseffect_x06walkthru_HD720p.mov
+^sandbox/matuikit/quicktime/milkgirls1080.mov
 
 syntax: glob
 Icon?
@@ -13,5 +14,3 @@ Icon?
 .*.swo
 \.svn/
 
-syntax: regexp
-.*/uiOld/.*
