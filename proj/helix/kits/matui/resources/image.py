@@ -29,6 +29,7 @@ class ImageLoaderMixin(MatuiLoaderMixin):
 
 class MatuiImageTexture(MatuiTextureUnit):
     ImageTextureFactory = ImageTexture2d
+    #ImageTextureFactory = ImageTextureRect
 
     def isResourceImage(self): 
         return True
