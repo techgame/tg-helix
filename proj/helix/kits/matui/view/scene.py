@@ -10,7 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableObject
 from . import events
 from . import sceneManagers
 
@@ -18,7 +17,7 @@ from . import sceneManagers
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiScene(ObservableObject):
+class MatuiScene(object):
     def __repr__(self):
         return '%s: %r' % (self.__class__.__name__, self.stage)
 
@@ -49,8 +48,11 @@ class MatuiScene(ObservableObject):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    evtRoot = events.MatuiEventRoot.property()
+    EventRootFactory = events.MatuiEventRoot
+    evtRoot = None
     def setupEvtSources(self, evtSources=[]):
+        if self.evtRoot is None:
+            self.evtRoot = self.EventRootFactory()
         self.evtRoot.configFor(self, evtSources)
 
     def setupManagers(self, managers):

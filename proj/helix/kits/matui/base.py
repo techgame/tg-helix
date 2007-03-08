@@ -10,7 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.observing import ObservableObject
 from . import node, layouts
 from .resources import MatuiResources
 
@@ -18,7 +17,7 @@ from .resources import MatuiResources
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiActor(ObservableObject):
+class MatuiActor(object):
     def isMatuiNode(self): return False
     def isMatuiActor(self): return True
     def isMatuiCell(self): return False

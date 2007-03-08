@@ -13,8 +13,6 @@
 import sys
 import time
 
-from TG.observing import ObservableObjectWithProp, ObservableDict, ObservableList
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,17 +84,23 @@ class HostViewEventSource(EventSource):
 #~ Event Root to coordinate the EventSources with the event Handlers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class EventRoot(ObservableObjectWithProp):
+class EventRoot(object):
     """An event root is an object that represents an object that has events.
     Examples are mice, keyboards, joysticks.  These objects recreate state from
     the events they recieve from EventSource.
     """
 
-    sources = ObservableDict.property()
-    SourceList = ObservableList
+    sources = None
+    SourcesDict = dict
+    SourceList = list
 
-    handlersByKind = ObservableDict.property()
-    HandlerList = ObservableList
+    handlersByKind = None
+    HandlersByKindDict = dict
+    HandlerList = list
+
+    def __init__(self):
+        self.sources = self.SourcesDict()
+        self.handlersByKind = self.HandlersByKindDict()
 
     def iterHandlers(self, kind):
         return iter(self.handlersByKind[kind])
