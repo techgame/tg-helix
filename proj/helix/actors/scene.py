@@ -22,6 +22,14 @@ from . import sceneManagers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixScene(HelixObject):
+    """A Helix Scene is a mediator, tieing viewport, events, and managers together in an extensible way.
+    
+    The managers are called on by the events to handle rendering, resizing, and
+    selection operations over the scene's stage object.  The stage is the
+    scene's link to the web of actors that are set in the stage, but is mostly
+    used to allow customization of the creation and setup process without
+    having to understand all of the details of a Scene and it's various objects.
+    """
     stage = None
 
     def isScene(self): return True

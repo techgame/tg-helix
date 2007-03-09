@@ -27,23 +27,3 @@ class HelixObject(object):
     def asWeakProxy(self, proxy=weakref.proxy):
         return proxy(self)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class HelixActor(HelixObject):
-    def isActor(self): return True
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class HelixStage(HelixActor):
-    def isStage(self): return True
-
-    def onSceneSetup(self, scene):
-        pass
-
-    def onSceneShutdown(self, scene):
-        pass
-
-    def onSceneAnimate(self, scene, hostView, info):
-        pass
-
-
