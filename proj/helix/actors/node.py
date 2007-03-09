@@ -16,263 +16,117 @@ from .base import HelixObject
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def printNodeTree(treeEntry, indent=0):
-    node, children = treeEntry
-    if not indent:
-        print
-        title = "Node Tree for: %r" % (node,)
-        print title
-        print "=" * len(title)
-
-    print '%s- %r' % (' '*indent*2, node)
-
-    indent += 1
-    for ce in children:
-        printNodeTree(ce, indent)
-    indent -= 1
-
-    if not indent:
-        print
-        print
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class Node(HelixObject):
-    actor = None
+    treeChangeset = None # set(), created in flyweight()
+    treeNodeTable = None # dict(), created in flyweight()
+
     parents = None
+    children = None
+    data = None
     
     def isNode(self): return True
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def __init__(self, actor=None, **kwinfo):
-        self.info = {}
-
+    def __init__(self, data=None):
         self.parents = []
         self.children = []
-        if actor is not None:
-            self.setActor(actor)
 
-        self.update(kwinfo)
-
-    def __repr__(self):
-        if self.actor is not None:
-            if self.children:
-                return 'Node|%d|: %r' % (len(self.children), self.actor,)
-            else: return 'Node: %r' % (self.actor,)
-        elif self.info is not None:
-            return 'Node|%d|: {%r}' % (len(self.children), ', '.join(self.info.keys()),)
-        else: return 'Node|%d|' % (len(self.children), )
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    printNodeTree = staticmethod(printNodeTree)
-    def debugTree(self):
-        print
-        title = "Node Tree for: %r" % (self,)
-        print title
-        print "=" * len(title)
-
-        indent = 0
-        for op, node in self.iterTree(): 
-            if op >= 0:
-                print '%s- %r' % (2*indent*' ', node)
-            indent += op
-
-        print
-        print
+        if data is not None:
+            self.data = data
+            self.treeNodeTable[data] = node
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
-    def newNodeForActor(klass, actor):
-        return klass(actor)
-
-    def itemAsNode(self, item):
-        isNode = getattr(item, 'isNode', lambda: False)
-        if isNode():
-            return item
-        isActor = getattr(item, 'isActor', lambda: False)
-        if isActor():
-            return item.asNodeForHost(self)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def accept(self, visitor):
-        return visitor.visitNode(self)
-
-    def update(self, info={}, **kwinfo):
-        if info: self.info.update(info)
-        if kwinfo: self.info.update(kwinfo)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    _actor = None
-    def getActor(self):
-        return self._actor
-    def setActor(self, actor):
-        self._actor = actor
-        if actor is not None:
-            actor.onNodeSetActor(self)
-    actor = property(getActor, setActor)
+    def flyweight(klass):
+        subklass = type(klass)(klass.__name__+'*', (klass,), dict(
+            treeChangeset=set(),
+            treeNodeTable=dict(),
+            ))
+        return subklass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node and Node Tree  iteration
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getParent(self):
-        p = self.parents
-        if p: return p[0]
-        else: return None
-    parent = property(getParent)
-
-    def getRoot(self):
-        root = self
-        parent = root.parent
-        while parent is not None:
-            root = root.parent
-        return root
-    root = property(getRoot)
-
-    def getLinage(self):
-        return list(self.iterLinage())
-    linage = property(getLinage)
-    def iterLinage(self):
-        each = self
-        while each is not None:
-            yield each
-            each = each.parent
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def __iter__(self):
-        return iter(self.children)
-
-    def iter(self):
-        return iter(self.children)
-    def iterChanged(self):
-        if not self.treeChanged:
-            return self, iter([])
-
-        return (n for n in self.children if n.treeChanged)
-
-    def iterTree(self):
+    def iterTree(self, depthFirst=True, nextLevelFor=(lambda cnode: cnode.children)):
+        return (cnode for op, cnode in self.iterTreeStack(depthFirst, nextLevelFor) if op >= 0)
+    def iterTreeStack(self, depthFirst=True, nextLevelFor=(lambda cnode: cnode.children)):
         stack = [(None, iter([self]))]
 
         while stack:
-            ttree = stack[-1][1]
+            if depthFirst:
+                idx = len(stack)
+            else: idx = 0
+            ttree = stack[idx][1]
 
             for cnode in ttree:
-                if cnode.children:
+                nextLevel = nextLevelFor(cnode)
+                if nextLevel:
                     if (yield +1, cnode):
                         yield 'no-push'
                     else:
-                        stack.append((cnode, iter(cnode.children)))
-                        break
+                        stack.append((cnode, iter(nextLevel)))
+                        if depthFirst: break
                 else: 
                     if (yield 0, cnode):
                         yield 'no-op'
 
             else:
-                cnode = stack.pop()[0]
+                cnode = stack.pop(idx)[0]
                 if cnode is not None:
                     if (yield -1, cnode):
                         yield 'no-op'
                 
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Node collection protocol
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def __contains__(self, other):
-        node = self.itemAsNode(other)
-        return node in self.children
-    def __iadd__(self, other):
-        self.add(other)
-        return self
-    def __isub__(self, other):
-        self.remove(other)
-        return self
-
-    def insert(self, idx, item):
-        node = self.itemAsNode(item)
-
-        if node is None:
-            for each in item:
-                self.insert(idx, each)
-                idx += 1 # advance the index as we add items
-            return self
-
-        return self.insertNode(node, idx)
-
-    def add(self, item):
-        node = self.itemAsNode(item)
-
-        if node is None:
-            for each in item:
-                self.add(each)
-            return self
-
-        return self.addNode(node)
-
-    def remove(self, item):
-        if item is None: return
-        isNode = getattr(item, 'isNode', lambda: False)
-        if isNode():
-            return self.removeNode(item)
-        node = getattr(item, 'node', None)
-        if node is not None:
-            return self.removeNode(node)
-
-        for each in item:
-            self.remove(each)
-
-    def clear(self):
-        return self.clearNodes()
+    def iterParentTree(self, depthFirst=True, nextLevelFor=lambda cnode: cnode.parents):
+        return (cnode for op, cnode in self.iterTreeStack(depthFirst, nextLevelFor) if op >= 0)
+    def iterParentTreeStack(self, depthFirst=True, nextLevelFor=lambda cnode: cnode.parents):
+        return self.iterTreeStack(depthFirst, nextLevelFor)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def insertNodeBefore(self, node, nidx):
-        """Inserts node before index of nidx in children"""
-        idx = self.children.index(nidx)
-        return self.insertNode(node, idx)
-    def insertNodeAfter(self, node, nidx):
-        """Inserts node after index of nidx in children"""
-        idx = self.children.index(nidx) + 1
-        return self.insertNode(node, idx)
+    def debugTree(self, indent=0, indentStr='  ', nextLevelFor=lambda cnode: cnode.children):
+        print
+        title = "Node Tree for: %r" % (self,)
+        print title
+        print "=" * len(title)
 
-    # workhorses
+        for op, node in self.iterTreeStack(True, nextLevelFor): 
+            if op >= 0:
+                print '%s- %r' % (indent*indentStr, node)
+            indent += op
 
-    def insertNode(self, node, idx):
-        if node.onAddToParent(self):
-            self.children.insert(idx, node)
-            self.onTreeChange()
-            return node
-    def addNode(self, node):
-        if node.onAddToParent(self):
-            self.children.append(node)
-            self.onTreeChange()
-            return node
-    def removeNode(self, node):
-        if node.onRemoveFromParent(self):
-            while node in self.children:
-                self.children.remove(node)
-            self.onTreeChange()
-            return node
-    def extendNodes(self, nodes):
-        if nodes:
-            for node in nodes:
-                if node.onAddToParent(self):
-                    self.children.append(node)
-            self.onTreeChange()
-    def clearNodes(self):
-        nodeList = self.children[:]
-        del self.children[:]
+        print
+        print
 
-        for node in nodeList:
-            node.onRemoveFromParent(self)
-        self.onTreeChange()
+    def debugParentTree(self, indent=0, indentStr='  ', nextLevelFor=lambda cnode: cnode.parents):
+        return self.debugTree(indent, indentStr, nextLevelFor)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Graph Change Recording
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def treeChanged(self):
+        treeChangeset = self.treeChangeset
+        if self in treeChangeset:
+            # we are already changed
+            return
+
+        changeset = set([self])
+
+        itree = root.iterParentTreeStack(False)
+        for op, p in itree:
+            if op >= 0:
+                if p in changeset or p in treeChangeset:
+                    # cull the depth first search iteration because this parent
+                    # tree is already recorded in the changeset
+                    itree.send(True) 
+                else:
+                    chaneset.add(p)
+
+        treeChangeset.update(changeset)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Parents collection
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def onAddToParent(self, parent):
@@ -285,30 +139,86 @@ class Node(HelixObject):
             self.parents.remove(parent)
         return True
 
-    treeChanged = False
-    def onTreeChange(self):
-        if self.treeChanged:
-            # we are already changed
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Children collection
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def __contains__(self, other):
+        node = self.itemAsNode(other, False)
+        return node in self.children
+    def __iadd__(self, other):
+        self.add(other)
+        return self
+    def __isub__(self, other):
+        self.remove(other)
+        return self
+
+    def insert(self, idx, item):
+        node = self.itemAsNode(item)
+        if node.onAddToParent(self):
+            self.children.insert(idx, node)
+            self.treeChanged()
+            return node
+
+    def insertBefore(self, node, nidx):
+        """Inserts node before index of nidx in children"""
+        nidx = self.itemAsNode(nidx, False)
+        idx = self.children.index(nidx)
+        return self.insert(idx, node)
+    def insertAfter(self, node, nidx):
+        """Inserts node after index of nidx in children"""
+        nidx = self.itemAsNode(nidx, False)
+        idx = self.children.index(nidx) + 1
+        return self.insert(idx, node)
+
+    def add(self, item):
+        node = self.itemAsNode(item)
+        if node.onAddToParent(self):
+            self.children.append(node)
+            self.treeChanged()
+            return node
+
+    def extend(self, iterable):
+        itemAsNode = self.itemAsNode
+        children = self.children
+        for each in iterable:
+            node = itemAsNode(each)
+            if node.onAddToParent(self):
+                children.append(node)
+        self.treeChanged()
+
+    def remove(self, item):
+        node = self.itemAsNode(item, False)
+        if node is None: 
             return
+        if node.onRemoveFromParent(self):
+            while node in self.children:
+                self.children.remove(node)
+            self.treeChanged()
+            return node
 
-        self.treeChanged = True
+    def clear(self):
+        nodeList = self.children[:]
+        del self.children[:]
 
-        for p in self.parents:
-            p.onTreeChange()
+        for node in nodeList:
+            node.onRemoveFromParent(self)
+        self.treeChanged()
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Node coersion
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class RootNode(Node):
-    treeVersion = 0
-    def onTreeChange(self):
-        if self.treeChanged:
-            return
+    def itemAsNode(self, item, create=True):
+        if item.isNode():
+            return item
 
-        self.treeVersion += 1
+        node = self.treeNodeTable.get(item, None)
+        if node is None and create:
+            node = item.asNodeWith(self.nodeFactory)
+        return node
 
-        if self.parents:
-            # root nodes don't generally have parents, but just in case someone
-            # wants to hijack it... ;)
-            for p in self.parents:
-                p.onTreeChange()
+    @classmethod
+    def nodeFactory(klass, data):
+        return klass(data)
 

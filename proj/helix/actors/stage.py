@@ -21,6 +21,9 @@ class HelixActor(HelixObject):
 
     def isActor(self): return True
 
+    def asNodeWith(self, nodeFactory):
+        return nodeFactory(self)
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixStage(HelixActor):

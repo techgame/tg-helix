@@ -52,7 +52,7 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
 
         passResult = []
         passUnwindStack = []
-        itree = root.iterTree()
+        itree = root.iterTreeStack()
         for op, node in itree:
             if op < 0: 
                 passResult.extend(passUnwindStack.pop())
