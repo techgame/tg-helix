@@ -22,16 +22,10 @@ class EventHandler(object):
     are links in that chain that may or may not handle the event.
     """
     eventKinds = []
+    root = None
 
     def accept(self, visitor):
         return visitor.visitEventHandler(self, self.eventKinds)
-
-    _root = None
-    def getRoot(self):
-        return self._root
-    def setRoot(self, root):
-        self._root = root
-    root = property(getRoot, setRoot)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -44,6 +38,8 @@ class EventSource(object):
     normalized at this layer.
     """
 
+    root = None
+
     kind = None
     def iterHandlers(self, kind=None):
         if self.root is None:
@@ -51,13 +47,6 @@ class EventSource(object):
         if kind is None:
             kind = self.kind
         return self.root.iterHandlers(kind)
-
-    _root = None
-    def getRoot(self):
-        return self._root
-    def setRoot(self, root):
-        self._root = root
-    root = property(getRoot, setRoot)
 
     def accept(self, visitor):
         return visitor.visitEventSource(self, [self.kind])
@@ -126,7 +115,7 @@ class EventRoot(object):
         for kind in eventKinds:
             if kind not in self.handlersByKind:
                 self.handlersByKind[kind] = self.HandlerList()
-            evtSrc.setRoot(self)
+            evtSrc.root = self
 
             sources = self.sources.get(kind)
             if sources is None:
@@ -143,7 +132,7 @@ class EventRoot(object):
             if handlers is None:
                 handlers = self.HandlerList()
                 self.handlersByKind[kind] = handlers
-            evth.setRoot(self)
+            evth.root = self
 
             if evth not in handlers:
                 handlers.append(evth)
