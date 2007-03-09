@@ -29,17 +29,15 @@ class MatuiScene(object):
     stage = None
     def init(self, stage):
         self.stage = stage
+        self.managers = {}
+        self.evtRoot = self.EventRootFactory()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def setup(self, evtSources=[], **kwinfo):
-        self.managers = {}
         self.setupManagers(self.managers)
-
         self.setupEvtSources(evtSources)
-
         self.stage.onSceneSetup(self)
-        self.stage.loadForScene(self)
         return True
 
     def shutdown(self):
@@ -51,8 +49,6 @@ class MatuiScene(object):
     EventRootFactory = events.MatuiEventRoot
     evtRoot = None
     def setupEvtSources(self, evtSources=[]):
-        if self.evtRoot is None:
-            self.evtRoot = self.EventRootFactory()
         self.evtRoot.configFor(self, evtSources)
 
     def setupManagers(self, managers):
@@ -61,25 +57,4 @@ class MatuiScene(object):
             resize=sceneManagers.ViewportResizeManager(self),
             select=sceneManagers.SelectManager(self),
             )
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Perform Actions from scene event handlers
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def performResize(self, hostView, viewportSize):
-        resizeMgr = self.managers['resize']
-        return resizeMgr.resize(hostView, viewportSize)
-
-    def performRender(self, hostView):
-        renderMgr = self.managers['render']
-        return renderMgr.render(hostView)
-
-    def performAnimation(self, hostView, info):
-        if self.stage.onSceneAnimate(self, hostView, info):
-            return self.performRender()
-        else: return None
-
-    def performSelect(self, hostView, pos):
-        selectMgr = self.managers['select']
-        return selectMgr.select(hostView, pos)
 

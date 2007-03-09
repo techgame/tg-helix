@@ -60,20 +60,20 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
                 node.treeChanged = False
                 continue
 
-            material = None
+            passItem = None
             actor = node.actor
             if actor is not None:
                 resources = actor.resources
                 if resources is not None:
-                    material = resources.get(resourceSelector, None)
+                    passItem = resources.get(resourceSelector, None)
 
-            if material is not None:
-                wind = material.bind(actor, resources, self)
-                unwind = material.bindUnwind(actor, resources, self)
+            if passItem is not None:
+                wind = passItem.bind(actor, resources, self)
+                unwind = passItem.bindUnwind(actor, resources, self)
 
                 if op:
                     passResult.extend(wind)
-                    if material.cullStack:
+                    if passItem.cullStack:
                         passResult.extend(unwind)
                         itree.send(True)
                     else:
@@ -91,63 +91,6 @@ class SceneGraphRenderPassManager(SceneGraphPassManager):
         assert not passUnwindStack, passUnwindStack
         return passResult
 
-    def _sgGeneratePassDebug(self, root):
-        resourceSelector = self.resourceSelector
-        passResult = []
-        passResultPP = []
-
-        passUnwindStack = []
-        passUnwindStackPP = []
-        itree = root.iterTree()
-        for op, node in itree:
-            if op < 0: 
-                passResult.extend(passUnwindStack.pop())
-                passResultPP.append(passUnwindStackPP.pop())
-                node.treeChanged = False
-                continue
-
-            actor = node.actor; resources = actor.resources
-            material = resources.get(resourceSelector, None)
-            if material is not None:
-                wind = material.bind(actor, resources, self)
-                unwind = material.bindUnwind(actor, resources, self)
-
-                if op:
-                    passResult.extend(wind)
-                    passResultPP.append(('++', actor))
-
-                    if material.cullStack:
-                        passResult.extend(unwind)
-                        passResultPP.append(('--', actor))
-                        itree.send(True)
-                    else:
-                        # push our unwind stack
-                        passUnwindStack.append(unwind)
-                        passUnwindStackPP.append(('--', actor))
-
-                else:
-                    passResultPP.append(('+-', actor))
-                    passResult.extend(wind)
-                    passResult.extend(unwind)
-
-            elif op > 0: 
-                # push an empty unwind stack
-                passResultPP.append(('+0', actor))
-                passUnwindStack.append([])
-                passUnwindStackPP.append(('-0', actor))
-            else:
-                passResultPP.append(('=0', actor))
-
-        assert not passUnwindStack, passUnwindStack
-        assert not passUnwindStackPP, passUnwindStackPP
-        print
-        print 'sgGeneratePassDebug:', resourceSelector
-        for op, actor in passResultPP:
-            print '  ', op, actor
-        print 
-        return passResult
-
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ViewportResizeManager(SceneGraphRenderPassManager):
@@ -155,10 +98,10 @@ class ViewportResizeManager(SceneGraphRenderPassManager):
 
     def resize(self, hostView, viewportSize):
         self.viewportSize = viewportSize
+        hostView.setViewCurrent()
         
         try:
             self.meter.start()
-            hostView.setViewCurrent()
             sgpass = self.sgPass()
             for each in sgpass:
                 each()

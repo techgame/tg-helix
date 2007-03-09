@@ -95,7 +95,9 @@ class SandboxStage(MatuiStage):
                 factory.blendMaterial(),
                 ])
 
-    def loadForScene(self, scene):
+    def onSceneSetup(self, scene):
+        MatuiStage.onSceneSetup(self, scene)
+        scene.evtRoot += MatuiAnimationEventHandler(scene)
         node = self.newNode()
         self.node = node
 
@@ -110,22 +112,18 @@ class SandboxStage(MatuiStage):
         layout += self.movieA
 
         self.movieC = Movie('masseffect_x06walkthru_HD720p.mov')
-        self.movieC.color.set('#ff:80')
+        self.movieC.color.set('#ff:E0')
         node += self.movieC
         layout += self.movieC
 
         self.movieD = Movie('cercle.mov', True)
-        self.movieD.color.set('#00:80')
+        self.movieD.color.set('#00:ff:00:80')
         node += self.movieD
         layout += self.movieD
 
     timerFrequency = 60
     def onSceneAnimate(self, scene, hostView, info):
-        scene.performRender(hostView)
-
-    def onSceneSetup(self, scene):
-        MatuiStage.onSceneSetup(self, scene)
-        scene.evtRoot += MatuiAnimationEventHandler(scene)
+        return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

@@ -29,22 +29,29 @@ class MatuiEventRoot(EventRoot):
 class MatuiViewportEventHandler(ViewportEventHandler):
     def __init__(self, scene):
         self.scene = scene
+        self.sceneManagers = scene.managers
 
     def resize(self, hostView, viewportSize):
-        return self.scene.performResize(hostView, viewportSize)
+        resizeManager = self.sceneManagers['resize']
+        return resizeManager.resize(hostView, viewportSize)
 
     def erase(self, hostView):
         return True
 
     def paint(self, hostView):
-        return self.scene.performRender(hostView)
+        renderManager = self.scene.managers['render']
+        return renderManager.render(hostView)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiAnimationEventHandler(TimerEventHandler):
     def __init__(self, scene):
         self.scene = scene
+        self.sceneManagers = scene.managers
 
     def timer(self, hostView, info):
-        return self.scene.performAnimation(hostView, info)
+        scene = self.scene
+        if scene.stage.onSceneAnimate(scene, hostView, info):
+            renderManager = self.sceneManagers['render']
+            return renderManager.render(hostView)
 

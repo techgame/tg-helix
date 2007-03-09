@@ -91,10 +91,10 @@ class MatuiActor(object):
 class MatuiStage(MatuiActor):
     NodeFactory = node.MatuiRootNode.newNodeForActor
 
-    def loadForScene(self, scene):
+    def onSceneSetup(self, scene):
         pass
 
-    def onSceneSetup(self, scene):
+    def onSceneShutdown(self, scene):
         pass
 
     def onSceneAnimate(self, scene, hostView, info):

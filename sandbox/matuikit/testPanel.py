@@ -68,7 +68,7 @@ class SandboxStage(MatuiStage):
                 factory.blendMaterial(),
                 ])
 
-    def loadForScene(self, scene):
+    def onSceneSetup(self, scene):
         node = self.newNode()
         self.node = node
 
