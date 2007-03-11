@@ -21,7 +21,7 @@ class HelixActor(HelixObject):
 
     def isActor(self): return True
 
-    def asNodeWith(self, nodeFactory):
+    def packagedInNode(self, nodeFactory):
         return nodeFactory(self)
 
 Actor = HelixActor

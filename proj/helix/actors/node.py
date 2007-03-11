@@ -29,10 +29,31 @@ class HelixNode(HelixObject):
     def __init__(self, data=None):
         self.parents = []
         self.children = []
+        self.data = data
 
-        if data is not None:
-            self.data = data
-            self.treeNodeTable[data] = node
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    _data = None
+    def getData(self):
+        return self._data
+    def setData(self, data):
+        prevData = self._data
+        if prevData is not data:
+            treeNodeTable = self.treeNodeTable
+            if prevData is not None:
+                del treeNodeTable[prevData]
+            self._data = data
+            if data is not None:
+                treeNodeTable[data] = self
+    def delData(self):
+        prevData = self._data
+        if prevData is not None:
+            del self.treeNodeTable[prevData]
+            del self._data
+            return True
+        else: return False
+
+    data = property(getData, setData, delData)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -43,6 +64,20 @@ class HelixNode(HelixObject):
             treeNodeTable=dict(),
             ))
         return subklass
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Node coersion
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @classmethod
+    def itemAsNode(klass, item, create=True):
+        if item.isNode():
+            return item
+
+        node = klass.treeNodeTable.get(item, None)
+        if node is None and create:
+            node = item.packagedInNode(klass)
+        return node
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node and Node Tree  iteration
@@ -205,22 +240,17 @@ class HelixNode(HelixObject):
             node.onRemoveFromParent(self)
         self.treeChanged()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #~ Node coersion
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def itemAsNode(self, item, create=True):
-        if item.isNode():
-            return item
-
-        node = self.treeNodeTable.get(item, None)
-        if node is None and create:
-            node = item.asNodeWith(self.nodeFactory)
-        return node
-
     @classmethod
-    def nodeFactory(klass, data):
-        return klass(data)
+    def clearAll(klass, clearData=True):
+        nodesToClear = klass.treeNodeTable.itervalues()
+
+        if clearData:
+            for n in nodesToClear:
+                n.delData()
+                n.clear()
+        else:
+            for n in nodesToClear:
+                n.clear()
 
 Node = HelixNode
 
