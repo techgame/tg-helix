@@ -24,6 +24,8 @@ class HelixActor(HelixObject):
     def asNodeWith(self, nodeFactory):
         return nodeFactory(self)
 
+Actor = HelixActor
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixStage(HelixActor):
@@ -43,5 +45,7 @@ class HelixStage(HelixActor):
 
     def onSceneAnimate(self, scene, hostView, info):
         pass
+
+Stage =  HelixStage
 
 

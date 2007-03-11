@@ -16,7 +16,7 @@ from .base import HelixObject
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Node(HelixObject):
+class HelixNode(HelixObject):
     treeChangeset = None # set(), created in flyweight()
     treeNodeTable = None # dict(), created in flyweight()
 
@@ -221,4 +221,6 @@ class Node(HelixObject):
     @classmethod
     def nodeFactory(klass, data):
         return klass(data)
+
+Node = HelixNode
 

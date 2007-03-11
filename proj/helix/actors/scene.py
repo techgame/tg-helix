@@ -71,6 +71,8 @@ class HelixScene(HelixObject):
         self.stage.onSceneShutdown(self)
         return True
 
+Scene = HelixScene
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene Event adaptations 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
