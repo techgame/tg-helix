@@ -22,38 +22,37 @@ class HelixNode(HelixObject):
 
     parents = None
     children = None
-    data = None
     
     def isNode(self): return True
 
-    def __init__(self, data=None):
+    def __init__(self, item=None):
         self.parents = []
         self.children = []
-        self.data = data
+        self.item = item
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     _data = None
-    def getData(self):
+    def getItem(self):
         return self._data
-    def setData(self, data):
-        prevData = self._data
-        if prevData is not data:
+    def setItem(self, item):
+        prevItem = self._data
+        if prevItem is not item:
             treeNodeTable = self.treeNodeTable
-            if prevData is not None:
-                del treeNodeTable[prevData]
-            self._data = data
-            if data is not None:
-                treeNodeTable[data] = self
-    def delData(self):
-        prevData = self._data
-        if prevData is not None:
-            del self.treeNodeTable[prevData]
+            if prevItem is not None:
+                del treeNodeTable[prevItem]
+            self._data = item
+            if item is not None:
+                treeNodeTable[item] = self
+    def delItem(self):
+        prevItem = self._data
+        if prevItem is not None:
+            del self.treeNodeTable[prevItem]
             del self._data
             return True
         else: return False
 
-    data = property(getData, setData, delData)
+    item = property(getItem, setItem, delItem)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -98,19 +97,19 @@ class HelixNode(HelixObject):
                 nextLevel = nextLevelFor(cnode)
                 if nextLevel:
                     if (yield +1, cnode):
-                        yield 'no-push'
+                        yield 'cull'
                     else:
                         stack.append((cnode, iter(nextLevel)))
                         if depthFirst: break
                 else: 
                     if (yield 0, cnode):
-                        yield 'no-op'
+                        yield 'noop'
 
             else:
                 cnode = stack.pop(idx)[0]
                 if cnode is not None:
                     if (yield -1, cnode):
-                        yield 'no-op'
+                        yield 'noop'
                 
     def iterParentTree(self, depthFirst=True, nextLevelFor=lambda cnode: cnode.parents):
         return (cnode for op, cnode in self.iterTreeStack(depthFirst, nextLevelFor) if op >= 0)
@@ -241,12 +240,12 @@ class HelixNode(HelixObject):
         self.treeChanged()
 
     @classmethod
-    def clearAll(klass, clearData=True):
+    def clearAll(klass, clearItem=True):
         nodesToClear = klass.treeNodeTable.itervalues()
 
-        if clearData:
+        if clearItem:
             for n in nodesToClear:
-                n.delData()
+                n.delItem()
                 n.clear()
         else:
             for n in nodesToClear:

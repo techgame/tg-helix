@@ -40,54 +40,65 @@ class SceneGraphPassManager(object):
         return result
 
     def _compileGraphPass(self, root):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        graphPassOpsFrom = self._graphPassOpsFrom
+
+        passUnwindStack = [] # a stack of unwind ops, which are lists themselves
+        passResult = [] # a list of callables -- will eventuall contain all of the unwind stack
+
+        itree = root.iterTreeStack()
+        for op, node in itree:
+            if op < 0: 
+                # a pop operation -- add the unwind stack top to our pass
+                # result and continue the iteration
+                passResult.extend(passUnwindStack.pop())
+                continue
+
+            # get passOps fromm our node using template method
+            passOps = graphPassOpsFrom(node)
+            if passOps is None:
+                if op > 0:
+                    # push an empty unwind on the stack
+                    passUnwindStack.append([])
+                continue
+
+            # unpack passOps
+            wind, unwind, cullStack = passOps
+
+            # wind ops go directly on the result
+            passResult.extend(wind)
+
+            # if we are pushing and not culling...
+            if op and not cullStack:
+                # push the unwind ops on the stack
+                passUnwindStack.append(unwind)
+            else:
+                # otherwise, just add the unwind as the next operations on the stack
+                passResult.extend(unwind)
+                # and tell the tree walk to cull the DFS tree walk of the scene graph
+                itree.send(True)
+
+        # make sure that all the pop operations came through to empty our unwind stack
+        assert not passUnwindStack, passUnwindStack
+        return passResult
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SceneGraphRenderPassManager(SceneGraphPassManager):
     resourceSelector = None 
-    def _compileGraphPass(self, root):
-        graphPassItemFrom = self._graphPassItemFrom
-        resourceSelector = self.resourceSelector
+    def _graphPassOpsFrom(self, node):
+        actor = node.item
+        if actor is None:
+            return None
 
-        passResult = []
-        passUnwindStack = []
-        itree = root.iterTreeStack()
-        for op, node in itree:
-            if op < 0: 
-                passResult.extend(passUnwindStack.pop())
-                node.treeChanged = False
-                continue
+        resources = actor.resources
+        if resources is None:
+            return None
 
-            passItem = graphPassItemFrom(node)
-            if passItem is not None:
-                wind = passItem.bind(actor, resources, self)
-                unwind = passItem.bindUnwind(actor, resources, self)
+        passItem = resources.get(self.resourceSelector, None)
+        if passItem is None:
+            return None
 
-                if op:
-                    passResult.extend(wind)
-                    if passItem.cullStack:
-                        passResult.extend(unwind)
-                        itree.send(True)
-                    else:
-                        # push our unwind stack
-                        passUnwindStack.append(unwind)
-
-                else: 
-                    passResult.extend(wind)
-                    passResult.extend(unwind)
-
-            elif op > 0: 
-                # push an empty unwind stack
-                passUnwindStack.append([])
-
-        assert not passUnwindStack, passUnwindStack
-        return passResult
-
-    def _graphPassItemFrom(self, node):
-        actor = node.actor
-        if actor is not None:
-            resources = actor.resources
-            if resources is not None:
-                passItem = resources.get(resourceSelector, None)
+        wind = passItem.bind(actor, resources, self)
+        unwind = passItem.bindUnwind(actor, resources, self)
+        return (wind, unwind, cullStack)
 
