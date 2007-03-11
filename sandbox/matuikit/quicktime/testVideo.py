@@ -50,7 +50,7 @@ class Movie(MatuiActor):
     color = data.Color.property('#ff:ff')
     box = data.Rect.property()
 
-    def __init__(self, moviePath, bLooping=False):
+    def __init__(self, moviePath, looping=0):
         MatuiActor.__init__(self)
         self.movie = qtMacUtils.QTMovie()
 
@@ -58,8 +58,7 @@ class Movie(MatuiActor):
             self.movie.loadURL(moviePath)
         else: self.movie.loadPath(moviePath)
 
-        if bLooping:
-            self.movie.setLooping()
+        self.movie.setLooping(looping)
 
         self.movie.process(100)
         self.texMovie = self.movie.texMovie
@@ -107,16 +106,16 @@ class SandboxStage(MatuiStage):
         aglUtils.setAGLSwapInterval()
         qtMacUtils.qtEnterMovies()
 
-        self.movieA = Movie('milkgirls1080.mov', True)
+        self.movieA = Movie('milkgirls1080.mov', 2)
         node += self.movieA
         layout += self.movieA
 
-        self.movieC = Movie('masseffect_x06walkthru_HD720p.mov')
-        self.movieC.color.set('#ff:E0')
-        node += self.movieC
-        layout += self.movieC
+        #self.movieC = Movie('masseffect_x06walkthru_HD720p.mov')
+        #self.movieC.color.set('#ff:80')
+        #node += self.movieC
+        #layout += self.movieC
 
-        self.movieD = Movie('cercle.mov', True)
+        self.movieD = Movie('cercle.mov', 2)
         self.movieD.color.set('#00:ff:00:80')
         node += self.movieD
         layout += self.movieD

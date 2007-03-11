@@ -282,10 +282,10 @@ class QTMovie(object):
     def getLoadState(self):
         return libQuickTime.GetMovieLoadState(self)
 
-    def setLooping(self):
+    def setLooping(self, looping=1):
         libQuickTime.GoToBeginningOfMovie(self)
         timeBase = libQuickTime.GetMovieTimeBase(self)
-        libQuickTime.SetTimeBaseFlags(timeBase, 0x1) # loopTimeBase
+        libQuickTime.SetTimeBaseFlags(timeBase, looping) # loopTimeBase
 
         hintsLoop = 0x2
         libQuickTime.SetMoviePlayHints(self, hintsLoop, hintsLoop)
