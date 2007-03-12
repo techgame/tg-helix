@@ -80,6 +80,9 @@ class HelixScene(base.HelixObject):
         self.stage.onSceneShutdown(self)
         return True
 
+    def animate(self, info):
+        return self.stage.onSceneAnimate(self, info)
+
 Scene = HelixScene
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,10 +106,10 @@ class SceneViewportEventHandler(ViewportEventHandler):
 
 class SceneAnimationEventHandler(TimerEventHandler):
     def __init__(self, scene):
-        self.stage = scene.stage
+        self.scene = scene
         self.sgManagers = scene.sgManagers
 
     def timer(self, viewport, info):
-        if stage.onAnimateEvent(info):
+        if self.scene.animate(info):
             return self.sgManagers['render'](viewport)
 

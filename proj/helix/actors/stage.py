@@ -25,7 +25,7 @@ Actor = HelixActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixStage(HelixActor):
+class HelixStage(HelixObject):
     """The stage is the entry point for setup and interaction with the Scene mediator.
 
     It's primary responsibility is to implement the logic of the application,
@@ -40,7 +40,7 @@ class HelixStage(HelixActor):
     def onSceneShutdown(self, scene):
         pass
 
-    def onSceneAnimate(self, scene, hostView, info):
+    def onSceneAnimate(self, scene, info):
         pass
 
 Stage =  HelixStage
