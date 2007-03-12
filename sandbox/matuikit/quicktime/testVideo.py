@@ -23,8 +23,8 @@ from TG.helix.kits.matui import MatuiStage, MatuiActor
 from TG.helix.kits.matui.view import MatuiScene
 from TG.helix.kits.matui.view.events import MatuiAnimationEventHandler
 
-import aglUtils
-import qtMacUtils
+from TG.openGL.raw import aglUtils
+from TG.quicktime import quickTimeMovie
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene
@@ -52,7 +52,7 @@ class Movie(MatuiActor):
 
     def __init__(self, moviePath, looping=0):
         MatuiActor.__init__(self)
-        self.movie = qtMacUtils.QTMovie()
+        self.movie = quickTimeMovie.QTMovie()
 
         if '://' in moviePath:
             self.movie.loadURL(moviePath)
@@ -63,8 +63,8 @@ class Movie(MatuiActor):
         self.movie.process(100)
         self.texMovie = self.movie.texMovie
         self.texMovie.update(True)
-        print self.texMovie.movieSize
-        self.box.size[:] = self.texMovie.movieSize
+        print self.texMovie.size
+        self.box.size[:] = self.texMovie.size
 
         self.movie.start()
 
@@ -104,7 +104,7 @@ class SandboxStage(MatuiStage):
         self.resources['layout'] = layout
 
         aglUtils.setAGLSwapInterval()
-        qtMacUtils.qtEnterMovies()
+        quickTimeMovie.qtEnterMovies()
 
         self.movieA = Movie('milkgirls1080.mov', 2)
         node += self.movieA
