@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~ Copyright (C) 2002-2007  TechGame Networks, LLC.              ##
 ##~                                                               ##
@@ -10,40 +11,35 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from functools import partial
-
-from TG.helix.actors import HelixActor
-from TG.helix.actors import HelixStage
+from TG.helix.kits.express import scene, stage
+from TG.helix.kits.express.actors import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ExpressGraphOp(object):
-    cullStack = False
-    _partial = staticmethod(partial)
-    def __init__(self, actor):
-        self.actor = actor
+class DemoStage(stage.ExpressStage):
+    def onSceneSetup(self, scene):
+        renderRoot = scene['render']
 
-    def bind(self, node, mgr):
-        return [self.render]
-    def bindUnwind(self, node, mgr):
-        return []
+        bgLayer = BackgroundLayer()
+        scene['resize'] += bgLayer
+        renderRoot += bgLayer
 
-class ExpressActor(HelixActor):
-    sceneGraphOps = {'render': None, 'resize': None}
-    def __init__(self):
-        self.nodes = {}
+        renderRoot += PictureLayer('aPicture.png', '#ff:ff')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Main 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ExpressStage(HelixStage):
-    def onSceneSetup(self, scene):
-        pass
+def main():
+    stage = DemoStage()
 
-    def onSceneShutdown(self, scene):
-        pass
+    from TG.helix.bridges.wx.basic import BasicRenderSkinModel
+    model = BasicRenderSkinModel()
+    model.setupStage(stage, scene.ExpressScene)
+    model.skinModel()
 
-    def onSceneAnimate(self, scene, info):
-        pass
+if __name__=='__main__':
+    main()
 

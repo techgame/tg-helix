@@ -60,6 +60,9 @@ class BoxMesh(GLArrayMeshUnit):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ImageTextureCoordMesh(GLArrayMeshUnit):
+    def __init__(self, imageTexture=None):
+        if imageTexture is not None:
+            self.update(imageTexture)
     def update(self, imageTexture=None):
         if imageTexture is None:
             return
