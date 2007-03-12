@@ -10,23 +10,21 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .sceneGraphPass import SceneGraphRenderPassManager
+from .sceneGraphPass import SceneGraphPassManager
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ViewportResizeManager(SceneGraphRenderPassManager):
-    resourceSelector = 'resize'
-
+class ResizeManager(SceneGraphPassManager):
     def resize(self, viewport, viewportSize):
         self.viewportSize = viewportSize
         viewport.setViewCurrent()
         
         self.meter.start()
-        sgpass = self.sgPass()
-        for each in sgpass:
-            each()
+        graphPass = self.graphPass()
+        for graphOp in graphPass:
+            graphOp()
         self.meter.end()
 
         return True
@@ -34,16 +32,14 @@ class ViewportResizeManager(SceneGraphRenderPassManager):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class RenderManager(SceneGraphRenderPassManager):
-    resourceSelector = 'render'
-
+class RenderManager(SceneGraphPassManager):
     def render(self, viewport):
         viewport.setViewCurrent()
 
         self.meter.start()
-        sgpass = self.sgPass()
-        for each in sgpass:
-            each()
+        graphPass = self.graphPass()
+        for graphOp in graphPass:
+            graphOp()
         self.meter.end()
 
         viewport.viewSwapBuffers()
@@ -52,9 +48,7 @@ class RenderManager(SceneGraphRenderPassManager):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SelectManager(SceneGraphRenderPassManager):
-    resourceSelector = 'pick'
-
+class SelectManager(SceneGraphPassManager):
     debugView = False
     selectPos = (0,0)
     selectSize = (1,1)
@@ -66,9 +60,9 @@ class SelectManager(SceneGraphRenderPassManager):
         self.selection = []
 
         self.meter.start()
-        sgpass = self.sgPass()
-        for each in sgpass:
-            each()
+        graphPass = self.graphPass()
+        for graphOp in graphPass:
+            graphOp()
         self.meter.end()
 
         if self.debugView:
@@ -78,7 +72,8 @@ class SelectManager(SceneGraphRenderPassManager):
         return self.selection
     __call__ = select
 
-
+    # these operations may be called by the graphOps.  Reference to the manager
+    # may be obtained during the compileGraphPass() operation
     def startSelector(self, selector):
         self.selector = selector
     def finishSelector(self, selector, selection):

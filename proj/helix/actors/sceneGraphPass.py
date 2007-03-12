@@ -19,31 +19,27 @@ class ScenePassMeter(object):
 class SceneGraphPassManager(object):
     meter = ScenePassMeter()
 
-    def __init__(self, scene):
-        self.scene = scene
-        self.stage = scene.stage
-
+    def __init__(self, scene, root):
+        self.root = root
         sceneMeter = getattr(scene, 'meter', None)
         if sceneMeter is not None:
             self.meter = sceneMeter
 
-    _passResult = None
-    _passVersion = None
-    def sgPass(self):
-        root = self.stage.node
-        if self._passVersion is root.treeVersion:
-            return self._passResult
+    graphPassCache = []
+    def graphPass(self):
+        if self.root.treeChangeset:
+            # there are changes... recompile the graph
+            self.graphPassCache = self.compileGraphPass(self.root)
+        return self.graphPassCache
 
-        result = self._compileGraphPass(root)
-        self._passResult = result
-        self._passVersion = root.treeVersion
-        return result
-
-    def _compileGraphPass(self, root):
+    def compileGraphPass(self, root):
         graphPassOpsFrom = self._graphPassOpsFrom
 
-        passUnwindStack = [] # a stack of unwind ops, which are lists themselves
-        passResult = [] # a list of callables -- will eventuall contain all of the unwind stack
+        emptyUnwind = [] # a "constant" empty list
+        passUnwindStack = [] # a stack of unwind op lists
+        passResult = [] # a linearized graph pass -- will eventually contain
+                        # the wind ops and all of the unwind op stack in 
+                        # correct traversal order
 
         itree = root.iterTreeStack()
         for op, node in itree:
@@ -58,7 +54,7 @@ class SceneGraphPassManager(object):
             if passOps is None:
                 if op > 0:
                     # push an empty unwind on the stack
-                    passUnwindStack.append([])
+                    passUnwindStack.append(emptyUnwind)
                 continue
 
             # unpack passOps
@@ -81,20 +77,8 @@ class SceneGraphPassManager(object):
         assert not passUnwindStack, passUnwindStack
         return passResult
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class SceneGraphRenderPassManager(SceneGraphPassManager):
-    resourceSelector = None 
     def _graphPassOpsFrom(self, node):
-        actor = node.item
-        if actor is None:
-            return None
-
-        resources = actor.resources
-        if resources is None:
-            return None
-
-        passItem = resources.get(self.resourceSelector, None)
+        passItem = node.item
         if passItem is None:
             return None
 

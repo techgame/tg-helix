@@ -16,9 +16,13 @@ from .base import HelixObject
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def defaultNodeBuilder(NodeFactory, item):
+    return NodeFactory(item)
+
 class HelixNode(HelixObject):
     treeChangeset = None # set(), created in flyweight()
     treeNodeTable = None # dict(), created in flyweight()
+    nodeBuilder = staticmethod(defaultNodeBuilder)
 
     parents = None
     children = None
@@ -57,12 +61,12 @@ class HelixNode(HelixObject):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
-    def flyweight(klass):
-        subklass = type(klass)(klass.__name__+'*', (klass,), dict(
-            treeChangeset=set(),
-            treeNodeTable=dict(),
-            ))
-        return subklass
+    def flyweight(klass, **kwdata=None):
+        flyweightData = dict(
+                treeChangeset=set(),
+                treeNodeTable=dict())
+        flyweightData.update(kwdata)
+        return type(klass)(klass.__name__+'*', (klass,), flyweightData)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node coersion
@@ -75,7 +79,7 @@ class HelixNode(HelixObject):
 
         node = klass.treeNodeTable.get(item, None)
         if node is None and create:
-            node = item.packagedInNode(klass)
+            node = klass.nodeBuilder(klass, item)
         return node
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
