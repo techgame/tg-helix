@@ -61,12 +61,17 @@ class HelixNode(HelixObject):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
-    def flyweight(klass, **kwdata=None):
+    def flyweight(klass, **kwdata):
         flyweightData = dict(
                 treeChangeset=set(),
                 treeNodeTable=dict())
         flyweightData.update(kwdata)
         return type(klass)(klass.__name__+'*', (klass,), flyweightData)
+
+    @classmethod
+    def createRootFor(klass, scene):
+        rootKlass = klass.flyweight(scene=scene)
+        return rootKlass()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node coersion
