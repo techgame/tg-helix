@@ -110,10 +110,10 @@ class SandboxStage(MatuiStage):
         node += self.movieA
         layout += self.movieA
 
-        #self.movieC = Movie('masseffect_x06walkthru_HD720p.mov')
-        #self.movieC.color.set('#ff:80')
-        #node += self.movieC
-        #layout += self.movieC
+        self.movieC = Movie('masseffect_x06walkthru_HD720p.mov')
+        self.movieC.color.set('#ff:80')
+        node += self.movieC
+        layout += self.movieC
 
         self.movieD = Movie('cercle.mov', 2)
         self.movieD.color.set('#00:ff:00:80')
