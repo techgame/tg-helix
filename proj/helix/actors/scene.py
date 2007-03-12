@@ -14,14 +14,13 @@ from ..events.eventSource import EventRoot
 from ..events.viewportEvents import ViewportEventHandler
 from ..events.timerEvents import TimerEventHandler
 
-from .base import HelixObject
-from . import sceneManagers
+from . import base, node, sceneManagers
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixScene(HelixObject):
+class HelixScene(base.HelixObject):
     """A Helix Scene is a mediator, tieing viewport, events, and managers together in an extensible way.
     
     The sgManagers are called on by the events to handle rendering, resizing, and
@@ -31,6 +30,12 @@ class HelixScene(HelixObject):
     having to understand all of the details of a Scene and it's various objects.
     """
     stage = None
+
+    sgPassFactories = {
+        'render': (node.HelixNode, sceneManagers.RenderManager),
+        'resize': (node.HelixNode, sceneManagers.ResizeManager),
+        #'select': (node.HelixNode, sceneManagers.SelectManager),
+        }
 
     def isScene(self): return True
 
@@ -45,29 +50,31 @@ class HelixScene(HelixObject):
     def init(self, stage):
         self.stage = stage
         self.evtRoot = self.EventRootFactory()
-
         self.sgManagers = {}
         self.sgNodes = {}
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def setup(self, evtSources=[], **kwinfo):
-        self.setupManagers()
         self.setupEvtSources(evtSources)
+        self.setupSceneGraph()
         self.stage.onSceneSetup(self)
         return True
 
-    EventRootFactory = None #SceneEventRoot
+    EventRootFactory = EventRoot
     evtRoot = None
     def setupEvtSources(self, evtSources=[]):
-        self.evtRoot.configFor(self, evtSources)
+        evtRoot = self.evtRoot
+        evtRoot.visitGroup(evtSources)
+        evtRoot.visit(SceneViewportEventHandler(self))
 
     def setupSceneGraph(self):
-        self.sgManagers.update(
-            render=sceneManagers.RenderManager(self),
-            resize=sceneManagers.ResizeManager(self),
-            select=sceneManagers.SelectManager(self),
-            )
+        for kind, nodeType, managerFactory in self.sgPassFactories.iteritems():
+            rootNode = nodeType.createRootFor(self)
+            self.sgNodes[kind] = rootNode
+
+            manager = managerFactory(self, rootNode)
+            self.sgManagers[kind] = manager
 
     def shutdown(self):
         self.stage.onSceneShutdown(self)
@@ -77,16 +84,6 @@ Scene = HelixScene
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene Event adaptations 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class SceneEventRoot(EventRoot):
-    def configFor(self, scene, evtSources):
-        self.visitGroup(evtSources)
-
-        self.visit(SceneViewportEventHandler(scene))
-
-HelixScene.EventRootFactory = SceneEventRoot
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SceneViewportEventHandler(ViewportEventHandler):
