@@ -27,7 +27,7 @@ class SceneGraphPassManager(object):
 
     graphPassCache = []
     def graphPass(self):
-        if self.root.treeChangeset:
+        if self.root.isChanged():
             # there are changes... recompile the graph
             self.graphPassCache = self.compileGraphPass(self.root)
         return self.graphPassCache
