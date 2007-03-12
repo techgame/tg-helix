@@ -82,7 +82,10 @@ class SceneGraphPassManager(object):
         if passItem is None:
             return None
 
-        wind = passItem.bind(actor, resources, self)
-        unwind = passItem.bindUnwind(actor, resources, self)
-        return (wind, unwind, cullStack)
+        wind = passItem.bind(node, self)
+        unwind = passItem.bindUnwind(node, self)
+
+        return (wind, 
+                unwind, 
+                passItem.cullStack)
 

@@ -12,6 +12,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.helix.kits.express import scene, stage
+from TG.helix.kits.express.actors import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -19,7 +20,13 @@ from TG.helix.kits.express import scene, stage
 
 class DemoStage(stage.ExpressStage):
     def onSceneSetup(self, scene):
-        pass
+        renderRoot = scene['render']
+
+        bgLayer = BackgroundLayer()
+        scene['resize'] += bgLayer
+        renderRoot += bgLayer
+
+        renderRoot += Layer('#ff:ff', ((200,200), (400, 400)))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

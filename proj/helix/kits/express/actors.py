@@ -10,29 +10,10 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.actors import HelixActor
-from TG.helix.actors import HelixStage
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Definitions 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class ExpressActor(HelixActor):
-    sceneGraphOps = {
-        'render': None,
-        'resize': None,
-        }
-
-    def __init__(self):
-        self.nodes = {}
-
-class ExpressStage(HelixStage):
-    def onSceneSetup(self, scene):
-        pass
-
-    def onSceneShutdown(self, scene):
-        pass
-
-    def onSceneAnimate(self, scene, info):
-        pass
+from .composite import Composite
+from .layer import Layer, BackgroundLayer
+from .colorLayer import ColorLayer
+from .pictureLayer import PictureLayer
+from .quickTimeLayer import QuickTimeLayer, QTMovieLayer
+from .textLayer import TextLayer
 

@@ -23,7 +23,11 @@ class ExpressNode(HelixNode):
 
     @staticmethod
     def nodeBuilder(klass, item):
-        sgOp = item.sceneGraphOps[klass.key](item)
+        sgOpFactory = item.sceneGraphOps[klass.key]
+        if sgOpFactory:
+            sgOp = sgOpFactory(item)
+        else: sgOp = None
+
         node = klass(sgOp)
         item.nodes[klass.key] = node
         return node
@@ -31,7 +35,7 @@ class ExpressNode(HelixNode):
 class RenderNode(ExpressNode):
     key = 'render'
 
-class ResizeNode(HelixNode):
+class ResizeNode(ExpressNode):
     key = 'resize'
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

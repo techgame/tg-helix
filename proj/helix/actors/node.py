@@ -98,7 +98,7 @@ class HelixNode(HelixObject):
 
         while stack:
             if depthFirst:
-                idx = len(stack)
+                idx = len(stack) -1
             else: idx = 0
             ttree = stack[idx][1]
 
@@ -156,7 +156,7 @@ class HelixNode(HelixObject):
 
         changeset = set([self])
 
-        itree = root.iterParentTreeStack(False)
+        itree = self.iterParentTreeStack(False)
         for op, p in itree:
             if op >= 0:
                 if p in changeset or p in treeChangeset:

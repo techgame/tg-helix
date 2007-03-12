@@ -49,6 +49,10 @@ class HelixScene(base.HelixObject):
 
     def __getitem__(self, key):
         return self.sgRoots[key]
+    def __setitem__(self, key, value):
+        # provided for convinence only... value must be
+        # what is already stored there
+        assert self.sgRoots[key] is value
     def get(self, key, default=None):
         return self.sgRoots.get(key, default)
 
