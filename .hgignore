@@ -2,6 +2,7 @@ syntax: regexp
 ^sandbox/matuikit/quicktime/Curious George.m4b
 ^sandbox/matuikit/quicktime/masseffect_x06walkthru_HD720p.mov
 ^sandbox/matuikit/quicktime/milkgirls1080.mov
+^proj/helix/kits/express/test/.*\.mov
 
 syntax: glob
 Icon?
