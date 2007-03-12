@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~ Copyright (C) 2002-2007  TechGame Networks, LLC.              ##
 ##~                                                               ##
@@ -10,21 +11,28 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .stage import ExpressActor
+from TG.helix.kits.express import scene, stage
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Composite(ExpressActor):
-    """A group of layers to be displayed
+class DemoStage(stage.ExpressStage):
+    def onSceneSetup(self, scene):
+        pass
 
-    Composite Sets:
-        Group fade
-        Add/Remove/Reorder
-            Timeline "Animate" ops
-        Does not own child Layers		
-    """
-    def isLayer(self): return False
-    def isComposite(self): return True
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Main 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def main():
+    stage = DemoStage()
+
+    from TG.helix.bridges.wx.basic import BasicRenderSkinModel
+    model = BasicRenderSkinModel()
+    model.setupStage(stage, scene.ExpressScene)
+    model.skinModel()
+
+if __name__=='__main__':
+    main()
 
