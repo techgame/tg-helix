@@ -52,7 +52,9 @@ class PictureLayer(Layer):
         if size is not None:
             image = image.resize(size)
         self.image = image
-        self.box.size[:] = image.size
+        imageAspect = image.size[0]/float(image.size[1])
+        self.box.setSize((2,2), imageAspect)
+        self.box.pos[:] = -.5*self.box.size
         return image
 
     def _configResources(self):

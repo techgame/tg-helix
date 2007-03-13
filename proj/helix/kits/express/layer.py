@@ -54,8 +54,8 @@ class Layer(ExpressActor):
     sceneGraphOps = dict(
         render=LayerRenderOp,
         resize=None)
-    box = Rect.property()
-    color = Color.property('#00:FF')
+    box = Rect.property(((-.5, -.5), (1,1)))
+    color = Color.property('#FF:FF')
 
     def isLayer(self): return True
     def isComposite(self): return False

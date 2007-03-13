@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.openGL.data import Rect, Vector, Color
 from TG.openGL.raw import gl
 
 from .stage import ExpressGraphOp
@@ -40,7 +41,9 @@ class BGLayerResizeOp(ExpressGraphOp):
         return [self._partial(self.resize, mgr)]
     def resize(self, mgr):
         actor = self.actor
-        actor.box.size[:] = mgr.viewportSize
+        viewportAspect = mgr.viewportSize[0]/float(mgr.viewportSize[1])
+        actor.box.setSize((2,2), viewportAspect, grow=True)
+        actor.box.pos[:] = -.5*actor.box.size
         actor.geom.update(actor.box)
 
         gl.glViewport(0,0,*mgr.viewportSize)
@@ -49,4 +52,7 @@ class BackgroundLayer(Layer):
     sceneGraphOps = dict(
         render=BGLayerRenderOp,
         resize=BGLayerResizeOp)
+
+    box = Rect.property(((-1, -1), (2, 2)))
+    color = Color.property('#00:ff')
 

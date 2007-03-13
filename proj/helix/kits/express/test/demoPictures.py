@@ -11,6 +11,9 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import os
+filePath = os.path.dirname(__file__)
+
 from TG.helix.kits.express import scene, stage
 from TG.helix.kits.express.actors import *
 
@@ -26,7 +29,7 @@ class DemoStage(stage.ExpressStage):
         scene['resize'] += bgLayer
         renderRoot += bgLayer
 
-        renderRoot += PictureLayer('aPicture.png', '#ff:ff')
+        renderRoot += PictureLayer(os.path.join(filePath, 'aPicture.png'))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

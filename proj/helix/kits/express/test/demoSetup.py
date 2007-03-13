@@ -26,7 +26,7 @@ class DemoStage(stage.ExpressStage):
         scene['resize'] += bgLayer
         renderRoot += bgLayer
 
-        renderRoot += Layer('#ff:ff', ((200,200), (400, 400)))
+        renderRoot += Layer('#00:00:ff:ff')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

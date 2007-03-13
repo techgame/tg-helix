@@ -26,7 +26,7 @@ class DemoStage(stage.ExpressStage):
         scene['resize'] += bgLayer
         renderRoot += bgLayer
 
-        renderRoot += QTMovieLayer('aPicture.png', '#ff:ff')
+        renderRoot += QTMovieLayer(os.path.join(filePath, 'cercle.mov'))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 
