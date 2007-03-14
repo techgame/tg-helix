@@ -15,7 +15,7 @@ from itertools import izip
 import numpy
 from numpy import zeros_like, zeros, empty_like, empty, ndindex
 
-from ..data import Rect, Vector
+from .data import Rect, Vector
 from .gridLayout import GridLayoutStrategy
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

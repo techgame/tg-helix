@@ -13,7 +13,7 @@
 import numpy
 from numpy import floor, ceil
 
-from ..data import Rect, Vector
+from .data import Rect, Vector
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

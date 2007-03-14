@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from ..data import Vector, Rect
+from .data import Vector, Rect
 
 from .cells import BasicCell
 from .absLayout import AbsLayoutStrategy
