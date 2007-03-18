@@ -32,7 +32,7 @@ class DemoStage(stage.ExpressStage):
 
         @bgLayer.kvwatch('box.*')
         def layerBox(kvw, key, layer=layer):
-            layer.box.setAspectSize(layer.aspect, kvw.value.size, .5)
+            layer.box.setAspectWithSize(layer.aspect, kvw.value.size, .5)
 
         l2 = Layer('#ff')
         renderRoot += l2

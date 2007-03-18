@@ -46,7 +46,7 @@ class BGLayerResizeOp(ExpressGraphOp):
     def resize(self, mgr):
         gl.glViewport(0,0,*mgr.viewportSize)
 
-        self.actorBox.setAspectSize(
+        self.actorBox.setAspectWithSize(
                         (mgr.viewportAspect, True), 
                         size=(2, 2), at=0.5)
 
