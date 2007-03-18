@@ -33,26 +33,15 @@ class DemoStage(stage.ExpressStage):
         scene['resize'] += bgLayer
         renderRoot += bgLayer
 
-        bigMovie = QTMovieLayer(os.path.join(filePath, 'milkgirls1080.mov'))
+        bigMovie = QTMovieLayer(os.path.join(filePath, 'milkgirls1080.mov'), hostBox=bgLayer.box)
         bigMovie.looping()
         renderRoot += bigMovie
         bigMovie.play()
 
-        @bgLayer.kvwatch('box.*')
-        def updateBox(kvw, key='value', bigMovie=bigMovie, bgLayer=bgLayer):
-            bigMovie.box.setAspectWithSize(bigMovie.aspect, bgLayer.box.size, at=0.5)
-
-        cameraMovie = QTMovieLayer(os.path.join(filePath, 'iSight.mov'))
+        cameraMovie = QTMovieLayer(os.path.join(filePath, 'cercle.mov'), color='#f:a:a:4')
+        cameraMovie.palindrome()
         renderRoot += cameraMovie
         cameraMovie.play()
-        cameraMovie.color.a = 0x80
-
-        @bgLayer.kvwatch('box.*')
-        def updateBox(kvw, key='value', cameraMovie=cameraMovie, bgLayer=bgLayer):
-            cameraMovie.box.setAspectWithSize(cameraMovie.aspect, 0.25*bgLayer.box.size, at=(0.5, 0))
-
-    def onSceneAnimate(self, scene, info):
-        return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

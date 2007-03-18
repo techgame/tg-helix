@@ -51,5 +51,5 @@ class ExpressStage(HelixStage, KVObject):
         pass
 
     def onSceneAnimate(self, scene, info):
-        pass
+        return True
 

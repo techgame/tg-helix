@@ -12,6 +12,8 @@
 
 from TG.kvObserving import KVProperty
 from TG.quicktime import quickTimeMovie
+from TG.geomath.data.kvBox import KVBox
+
 from .layer import Layer, LayerRenderOp, LayerResources
 from . import mesh
 
@@ -74,6 +76,9 @@ class QuickTimeLayer(Layer):
     aspect = KVProperty(1)
 
     def __init__(self, path=None, color=None, hostBox=None):
+        self.kvwatch('hostBox.*')(self._updateBoxAspect)
+        self.kvwatch('aspect')(self._updateBoxAspect)
+
         Layer.__init__(self, color)
         self.qtMedia = quickTimeMovie.QTMovie()
         if path is not None:
@@ -84,9 +89,7 @@ class QuickTimeLayer(Layer):
     def loadPath(self, path):
         self.qtMedia.loadPath(path)
 
-    @kvpub.on('aspect')
-    @kvpub.on('hostBox.*')
-    def _updateAspect(self, key=None):
+    def _updateBoxAspect(self, kvw, key):
         self.box.setAspectWithSize(self.aspect, self.hostBox.size, at=0.5)
 
 class QTMovieLayer(QuickTimeLayer):
