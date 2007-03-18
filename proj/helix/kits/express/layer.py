@@ -10,11 +10,11 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from functools import partial
-from TG.openGL.data import Rect, Vector, Color
-from TG.openGL.raw import gl
+from TG.geomath.data.kvBox import KVBox
+from TG.geomath.data.color import Color
 
 from .stage import ExpressGraphOp, ExpressActor
+from .resources import ExpressResources
 from . import mesh
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,13 +22,30 @@ from . import mesh
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class LayerRenderOp(ExpressGraphOp):
+    def __init__(self, actor):
+        self.res = actor.resData
     def bind(self, node, mgr):
-        self.actor.configResources()
+        self.res.load(node, mgr)
         return [self.render]
     def render(self):
-        actor = self.actor
-        actor.geomColor()
-        actor.geom.render()
+        res = self.res
+        res.color()
+        res.vertex()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class LayerResources(ExpressResources):
+    def __init__(self, actor):
+        ExpressResources.__init__(self, actor)
+
+        #self.mcolor = mesh.ColorSingle(actor.color)
+        self.mcolor = actor.color
+        self.mvertex = mesh.BoxMesh(actor.box)
+        self.vertex = self.mvertex.render
+
+    def load(self, node, mgr):
+        glImmediateV = self.mcolor.glinfo.glImmediateFor(self.mcolor)
+        self.color = self._partial(glImmediateV, self.mcolor.ctypes.data_as(glImmediateV.api.argtypes[-1]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -41,7 +58,7 @@ class Layer(ExpressActor):
             Animation
             Add/subtract
 
-        Rectangle Geometry
+        Box
             Animation
             Fit, proportion, etc.
 
@@ -51,31 +68,17 @@ class Layer(ExpressActor):
             Translate, Scale, Rotate
     """
 
-    sceneGraphOps = dict(
-        render=LayerRenderOp,
-        resize=None)
-    box = Rect.property(((-.5, -.5), (1,1)))
+    sceneGraphOps = dict(render=LayerRenderOp)
+    resData = LayerResources.property()
+
+    box = KVBox.property([[-1, -1], [1, 1]])
     color = Color.property('#FF:FF')
 
     def isLayer(self): return True
     def isComposite(self): return False
 
-    def __init__(self, color=None, box=None):
+    def __init__(self, color=None):
         ExpressActor.__init__(self)
         if color is not None:
             self.color = color
-        if box is not None:
-            self.box = box
-
-    geom = None
-    def configResources(self):
-        if self.geom is None:
-            self._configResources()
-        return True
-
-    def _configResources(self):
-        self.geom = mesh.BoxMesh(self.box)
-
-        glImmediateV = self.color.glinfo.glImmediateFor(self.color)
-        self.geomColor = partial(glImmediateV, self.color.ctypes.data_as(glImmediateV.api.argtypes[-1]))
 

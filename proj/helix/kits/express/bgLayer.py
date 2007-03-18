@@ -14,45 +14,50 @@ from TG.openGL.data import Rect, Vector, Color
 from TG.openGL.raw import gl
 
 from .stage import ExpressGraphOp
-from .layer import Layer
+from .layer import Layer, LayerRenderOp
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Background Layer
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class BGLayerRenderOp(ExpressGraphOp):
-    def bind(self, node, mgr):
-        self.actor.configResources()
-        return [self.render]
+class BGLayerRenderOp(LayerRenderOp):
+    def __init__(self, actor):
+        self.res = actor.resData
+        self.actorBox = actor.box
     def render(self):
-        actor = self.actor
-        box = actor.box
+        box = self.actorBox
+
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
-        gl.glOrtho(box.left, box.right, box.bottom, box.top, -1, 1)
+        l,b,r,t = box.pv.flat
+        gl.glOrtho(l, r, b, t, -1, 1)
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
-        actor.geomColor()
-        actor.geom.render()
+        LayerRenderOp.render(self)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BGLayerResizeOp(ExpressGraphOp):
+    def __init__(self, actor):
+        self.actorBox = actor.box
+
     def bind(self, node, mgr):
-        self.actor.configResources()
         return [self._partial(self.resize, mgr)]
     def resize(self, mgr):
-        actor = self.actor
-        viewportAspect = mgr.viewportSize[0]/float(mgr.viewportSize[1])
-        actor.box.setSize((2,2), viewportAspect, grow=True)
-        actor.box.pos[:] = -.5*actor.box.size
-        actor.geom.update(actor.box)
-
         gl.glViewport(0,0,*mgr.viewportSize)
+
+        self.actorBox.setAspectSize(
+                        (mgr.viewportAspect, True), 
+                        size=(2, 2), at=0.5)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Background layer
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BackgroundLayer(Layer):
     sceneGraphOps = dict(
         render=BGLayerRenderOp,
         resize=BGLayerResizeOp)
 
-    box = Rect.property(((-1, -1), (2, 2)))
     color = Color.property('#00:ff')
 

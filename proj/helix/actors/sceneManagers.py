@@ -19,6 +19,8 @@ from .sceneGraphPass import SceneGraphPassManager
 class ResizeManager(SceneGraphPassManager):
     def resize(self, viewport, viewportSize):
         self.viewportSize = viewportSize
+        self.viewportAspect = viewportSize[0].__truediv__(viewportSize[1])
+
         viewport.setViewCurrent()
         
         self.meter.start()

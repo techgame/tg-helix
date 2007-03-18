@@ -11,40 +11,52 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import PIL.Image
-from TG.openGL.data.image import ImageTextureRect, ImageTexture2d
 
-from .stage import ExpressGraphOp
-from .layer import Layer
+from TG.kvObserving import KVProperty
+
+from .layer import Layer, LayerRenderOp, LayerResources
 from . import mesh
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class PictureLayerRenderOp(ExpressGraphOp):
-    def bind(self, node, mgr):
-        self.actor.configResources()
-        return [self.render]
+class TextureLayerRenderOp(LayerRenderOp):
     def render(self):
-        actor = self.actor
-        actor.geomColor()
-        actor.texture.select()
-        actor.geomTexCoords.render()
-        actor.geom.render()
+        res = self.res
+        res.texture()
+        res.color()
+        res.texcoords()
+        res.vertex()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class TextureLayerResources(LayerResources):
+    def __init__(self, actor):
+        LayerResources.__init__(self, actor)
+
+        self.mtexture = mesh.ImageTextureRect(actor.image)
+        self.mtexture.deselect()
+        self.texture = self.mtexture.select
+
+        self.mtexcoords = mesh.ImageTextureCoordMesh(self.mtexture)
+        self.texcoords = self.mtexcoords.render
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class PictureLayer(Layer):
     """Displays geometry with a texture"""
 
-    sceneGraphOps = dict(render=PictureLayerRenderOp)
+    sceneGraphOps = dict(render=TextureLayerRenderOp)
+    resData = TextureLayerResources.property()
 
-    def __init__(self, image=None, color=None, box=None):
+    image = KVProperty(None)
+
+    def __init__(self, image=None, color=None):
         if image is not None:
             self.load(image)
-        Layer.__init__(self, color, box)
+        Layer.__init__(self, color)
 
-    image = None
     openImage = staticmethod(PIL.Image.open)
     def load(self, image, size=None):
         if isinstance(image, basestring):
@@ -52,17 +64,6 @@ class PictureLayer(Layer):
         if size is not None:
             image = image.resize(size)
         self.image = image
-        imageAspect = image.size[0]/float(image.size[1])
-        self.box.setSize((2,2), imageAspect)
-        self.box.pos[:] = -.5*self.box.size
+        self.box.setAspect(image.size, at=.5)
         return image
-
-    def _configResources(self):
-        Layer._configResources(self)
-
-        #texture = ImageTexture2d(self.image)
-        texture = ImageTextureRect(self.image)
-        texture.deselect()
-        self.texture = texture
-        self.geomTexCoords = mesh.ImageTextureCoordMesh(texture)
 

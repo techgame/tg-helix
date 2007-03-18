@@ -26,7 +26,20 @@ class DemoStage(stage.ExpressStage):
         scene['resize'] += bgLayer
         renderRoot += bgLayer
 
-        renderRoot += Layer('#00:00:ff:ff')
+        layer = Layer('#00:80:00')
+        layer.aspect = 1.6
+        renderRoot += layer
+
+        @bgLayer.kvwatch('box.*')
+        def layerBox(kvw, key, layer=layer):
+            layer.box.setAspectSize(layer.aspect, kvw.value.size, .5)
+
+        l2 = Layer('#ff')
+        renderRoot += l2
+
+        @layer.kvwatch('box.*')
+        def layerBox(kvw, key, l2=l2):
+            l2.box.setSize(kvw.value.size - .1, at=.5)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

@@ -18,11 +18,13 @@ from TG.openGL import data as glData
 from TG.openGL.raw import gl
 from TG.openGL.data.bufferObjects import ArrayBuffer
 
+from TG.openGL.data.image import ImageTextureRect, ImageTexture2d
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GLArrayMeshUnit(object):
+class GLArrayMesh(object):
     partial = staticmethod(partial)
     def _bindArray(self, arr):
         ainfo = arr.glinfo
@@ -34,32 +36,36 @@ class GLArrayMeshUnit(object):
                 arr.strides[-1]*arr.shape[-1], arr.ctypes)#.data_as(arrPtrType))
         return glEnableArray, glArrayPointer
 
-class BoxMesh(GLArrayMeshUnit):
-    vertexScale = glData.VertexArray([[0., 0.], [1., 0.], [1., 1.], [0., 1.]], '2f')
-    vertex = None
+class GLVertexMesh(GLArrayMesh):
+    mesh = glData.VertexArray([], '2f')
+    def createMesh(self):
+        mesh = self.mesh.copy()
+        self.mesh = mesh
+
+        self.vaEnable, self.vaBindPtr = self._bindArray(mesh)
+        count = mesh.size/mesh.shape[-1]
+        self.vaDraw = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+
+class BoxMesh(GLVertexMesh):
+    mesh = glData.VertexArray([[0., 0.], [1., 0.], [1., 1.], [0., 1.]], '2f')
 
     def __init__(self, box=None):
-        if box is not None:
-            self.update(box)
-    def update(self, box):
-        vertex = self.vertex
-        if vertex is None:
-            vertex = self.vertexScale.copy()
-            self.vertex = vertex
+        self.createMesh()
 
-        vertex[:] = box.pos + box.size*self.vertexScale
-        self.vertexEnable, self.vertexPtr = self._bindArray(vertex)
-        count = vertex.size/vertex.shape[-1]
-        self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+        box.kvpub.add('*', self.updateMesh)
+        self.updateMesh(box, '*')
+
+    def updateMesh(self, box, key):
+        self.mesh[:] = box.geoXfrm('quads')
 
     def render(self):
-        self.vertexEnable()
-        self.vertexPtr()
-        self.drawArray()
+        self.vaEnable()
+        self.vaBindPtr()
+        self.vaDraw()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ImageTextureCoordMesh(GLArrayMeshUnit):
+class ImageTextureCoordMesh(GLArrayMesh):
     def __init__(self, imageTexture=None):
         if imageTexture is not None:
             self.update(imageTexture)

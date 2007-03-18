@@ -12,6 +12,8 @@
 
 from functools import partial
 
+from TG.kvObserving import KVObject
+
 from TG.helix.actors import HelixActor
 from TG.helix.actors import HelixStage
 
@@ -22,22 +24,26 @@ from TG.helix.actors import HelixStage
 class ExpressGraphOp(object):
     cullStack = False
     _partial = staticmethod(partial)
-    def __init__(self, actor):
-        self.actor = actor
-
-    def bind(self, node, mgr):
-        return [self.render]
-    def bindUnwind(self, node, mgr):
-        return []
-
-class ExpressActor(HelixActor):
-    sceneGraphOps = {'render': None, 'resize': None}
-    def __init__(self):
-        self.nodes = {}
+    def __init__(self, actor): pass
+    def bind(self, node, mgr): return []
+    def bindUnwind(self, node, mgr): return []
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ExpressStage(HelixStage):
+class ExpressActor(KVObject, HelixActor):
+    sceneGraphOps = {'render': None, 'resize': None}
+
+    def __init__(self):
+        self._createSGNodes()
+
+    def _createSGNodes(self):
+        # sgNodes is filled in by the scene graph node
+        # constructors as a debugging courtesy 
+        self.sgNodes = {}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ExpressStage(KVObject, HelixStage):
     def onSceneSetup(self, scene):
         pass
 

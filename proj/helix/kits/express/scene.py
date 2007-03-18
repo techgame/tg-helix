@@ -19,24 +19,40 @@ from TG.helix.actors import sceneManagers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ExpressNode(HelixNode):
-    key = None
+    nodeKey = None
 
-    @staticmethod
+    @staticmethod # klass is passed in explicitly
     def nodeBuilder(klass, item):
-        sgOpFactory = item.sceneGraphOps[klass.key]
+        # try the node cache on the item itself
+        sgItemNodes = getattr(item, 'sgNodes', None)
+
+        if sgItemNodes is not None:
+            node = sgItemNodes.get(klass.nodeKey, None)
+            if node is not None:
+                return node
+
+        # get the graph op factory for the item.
+        # should be compatable with ExpressGraphOp in stage module
+        sgOpFactory = item.sceneGraphOps[klass.nodeKey]
+
+        # create the scene graph op for the item
         if sgOpFactory:
             sgOp = sgOpFactory(item)
         else: sgOp = None
 
+        # create the scene graph node for the op
         node = klass(sgOp)
-        item.nodes[klass.key] = node
+
+        if sgItemNodes is not None:
+            # cache it in item.sgNodes, so the item itself can get back to it
+            sgItemNodes[klass.nodeKey] = node
         return node
 
 class RenderNode(ExpressNode):
-    key = 'render'
+    nodeKey = 'render'
 
 class ResizeNode(ExpressNode):
-    key = 'resize'
+    nodeKey = 'resize'
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
