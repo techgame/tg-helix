@@ -11,6 +11,13 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from __future__ import with_statement
+
+import os
+filePath = os.path.dirname(__file__)
+
+import numpy
+
 from TG.helix.kits.express import scene, stage
 from TG.helix.kits.express.actors import *
 
@@ -26,7 +33,26 @@ class DemoStage(stage.ExpressStage):
         scene['resize'] += bgLayer
         renderRoot += bgLayer
 
-        renderRoot += QTMovieLayer(os.path.join(filePath, 'cercle.mov'))
+        bigMovie = QTMovieLayer(os.path.join(filePath, 'milkgirls1080.mov'))
+        bigMovie.looping()
+        renderRoot += bigMovie
+        bigMovie.play()
+
+        @bgLayer.kvwatch('box.*')
+        def updateBox(kvw, key='value', bigMovie=bigMovie, bgLayer=bgLayer):
+            bigMovie.box.setAspectWithSize(bigMovie.aspect, bgLayer.box.size, at=0.5)
+
+        cameraMovie = QTMovieLayer(os.path.join(filePath, 'iSight.mov'))
+        renderRoot += cameraMovie
+        cameraMovie.play()
+        cameraMovie.color.a = 0x80
+
+        @bgLayer.kvwatch('box.*')
+        def updateBox(kvw, key='value', cameraMovie=cameraMovie, bgLayer=bgLayer):
+            cameraMovie.box.setAspectWithSize(cameraMovie.aspect, 0.25*bgLayer.box.size, at=(0.5, 0))
+
+    def onSceneAnimate(self, scene, info):
+        return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

@@ -34,14 +34,14 @@ class MovieRenderer(MatuiMaterial):
     def bind(self, actor, res, mgr):
         return [self.partial(self.render, actor, res)]
     def render(self, actor, res):
-        texMovie = actor.texMovie
-        texMovie.update()
+        qtTexture = actor.qtTexture
+        qtTexture.update()
 
         x,y = actor.box.pos
         gl.glPushMatrix()
         gl.glTranslatef(x,y,0)
         color = res['color'].render()
-        texMovie.renderDirect()
+        qtTexture.renderDirect()
         gl.glPopMatrix()
 
         actor.movie.process()
@@ -52,19 +52,14 @@ class Movie(MatuiActor):
 
     def __init__(self, moviePath, looping=0):
         MatuiActor.__init__(self)
-        self.movie = quickTimeMovie.QTMovie()
-
-        if '://' in moviePath:
-            self.movie.loadURL(moviePath)
-        else: self.movie.loadPath(moviePath)
+        self.movie = quickTimeMovie.QTMovie(moviePath)
 
         self.movie.setLooping(looping)
 
-        self.movie.process(100)
-        self.texMovie = self.movie.texMovie
-        self.texMovie.update(True)
-        print self.texMovie.size
-        self.box.size[:] = self.texMovie.size
+        self.movie.process(.05)
+        self.qtTexture = self.movie.qtTexture
+        self.qtTexture.update(True)
+        self.box.size[:] = self.qtTexture.size
 
         self.movie.start()
 

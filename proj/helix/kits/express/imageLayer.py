@@ -28,6 +28,7 @@ class TextureLayerRenderOp(LayerRenderOp):
         res.color()
         res.texcoords()
         res.vertex()
+        res.notexture()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -38,13 +39,14 @@ class TextureLayerResources(LayerResources):
         self.mtexture = mesh.ImageTextureRect(actor.image)
         self.mtexture.deselect()
         self.texture = self.mtexture.select
+        self.notexture = self.mtexture.deselect
 
         self.mtexcoords = mesh.ImageTextureCoordMesh(self.mtexture)
         self.texcoords = self.mtexcoords.render
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class PictureLayer(Layer):
+class ImageLayer(Layer):
     """Displays geometry with a texture"""
 
     sceneGraphOps = dict(render=TextureLayerRenderOp)

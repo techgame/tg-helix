@@ -36,21 +36,27 @@ class GLArrayMesh(object):
                 arr.strides[-1]*arr.shape[-1], arr.ctypes)#.data_as(arrPtrType))
         return glEnableArray, glArrayPointer
 
-class GLVertexMesh(GLArrayMesh):
     mesh = glData.VertexArray([], '2f')
-    def createMesh(self):
-        mesh = self.mesh.copy()
-        self.mesh = mesh
+    def bindMesh(self):
+        self.aoEnable, self.aoBindPtr = self._bindArray(self.mesh)
 
-        self.vaEnable, self.vaBindPtr = self._bindArray(mesh)
+    def render(self):
+        self.aoEnable()
+        self.aoBindPtr()
+
+class GLVertexMesh(GLArrayMesh):
+    def bindDraw(self):
+        mesh = self.mesh
         count = mesh.size/mesh.shape[-1]
-        self.vaDraw = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+        self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
 
 class BoxMesh(GLVertexMesh):
     mesh = glData.VertexArray([[0., 0.], [1., 0.], [1., 1.], [0., 1.]], '2f')
 
     def __init__(self, box=None):
-        self.createMesh()
+        self.mesh = self.mesh.copy()
+        self.bindMesh()
+        self.bindDraw()
 
         box.kvpub.add('*', self.updateMesh)
         self.updateMesh(box, '*')
@@ -59,11 +65,16 @@ class BoxMesh(GLVertexMesh):
         self.mesh[:] = box.geoXfrm('quads')
 
     def render(self):
-        self.vaEnable()
-        self.vaBindPtr()
-        self.vaDraw()
+        self.aoEnable()
+        self.aoBindPtr()
+        self.drawArray()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class QTTextureCoordMesh(GLArrayMesh):
+    def __init__(self, texCoords=None):
+        self.mesh = glData.TexCoordArray(texCoords)
+        self.bindMesh()
 
 class ImageTextureCoordMesh(GLArrayMesh):
     def __init__(self, imageTexture=None):
@@ -73,12 +84,12 @@ class ImageTextureCoordMesh(GLArrayMesh):
         if imageTexture is None:
             return
 
-        self.texCoords = imageTexture.texCoordsForImage()
-        self.texCoordsEnable, self.texCoordsPtr = self._bindArray(self.texCoords)
+        self.mesh = imageTexture.texCoordsForImage()
+        self.bindMesh()
 
     def render(self):
-        self.texCoordsEnable()
-        self.texCoordsPtr()
+        self.tcaEnable()
+        self.tcaBindPtr()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ TextMesh

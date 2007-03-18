@@ -30,7 +30,7 @@ class ExpressGraphOp(object):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ExpressActor(KVObject, HelixActor):
+class ExpressActor(HelixActor, KVObject):
     sceneGraphOps = {'render': None, 'resize': None}
 
     def __init__(self):
@@ -43,7 +43,7 @@ class ExpressActor(KVObject, HelixActor):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ExpressStage(KVObject, HelixStage):
+class ExpressStage(HelixStage, KVObject):
     def onSceneSetup(self, scene):
         pass
 

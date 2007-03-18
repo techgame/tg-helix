@@ -27,6 +27,9 @@ class BGLayerRenderOp(LayerRenderOp):
     def render(self):
         box = self.actorBox
 
+        gl.glEnable(gl.GL_BLEND)
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
         l,b,r,t = box.pv.flat

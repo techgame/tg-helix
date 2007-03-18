@@ -14,7 +14,7 @@ from .composite import Composite
 from .layer import Layer
 from .bgLayer import BackgroundLayer
 from .colorLayer import ColorLayer
-from .pictureLayer import PictureLayer
+from .imageLayer import ImageLayer
 from .quickTimeLayer import QuickTimeLayer, QTMovieLayer
 from .textLayer import TextLayer
 

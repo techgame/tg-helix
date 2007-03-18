@@ -11,8 +11,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.helix.actors import HelixNode
-from TG.helix.actors import HelixScene
 from TG.helix.actors import sceneManagers
+from TG.helix.actors.scene import HelixScene, SceneAnimationEventHandler
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -61,4 +61,8 @@ class ExpressScene(HelixScene):
         'render': (RenderNode, sceneManagers.RenderManager),
         'resize': (ResizeNode, sceneManagers.ResizeManager),
         }
+
+    def setupEvtSources(self, evtSources=[]):
+        super(ExpressScene, self).setupEvtSources(evtSources)
+        self.evtRoot.visit(SceneAnimationEventHandler(self))
 

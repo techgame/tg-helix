@@ -10,11 +10,51 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .layer import Layer
+from TG.kvObserving import KVProperty
+from TG.quicktime import quickTimeMovie
+from .layer import Layer, LayerRenderOp, LayerResources
+from . import mesh
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class QTTextureLayerRenderOp(LayerRenderOp):
+    def render(self):
+        res = self.res
+
+        res.qtTextureUpdate()
+
+        res.texture()
+        res.color()
+        res.texcoords()
+        res.vertex()
+        res.notexture()
+
+        res.qtMediaProcess()
+
+class QTTextureLayerResources(LayerResources):
+    def __init__(self, actor):
+        qtMedia = actor.qtMedia
+        qtMedia.process(0.05)
+        qtTexture = qtMedia.qtTexture
+        qtTexture.update(True)
+
+        actor.aspect = qtTexture.size[0]/float(qtTexture.size[1])
+
+        LayerResources.__init__(self, actor)
+
+        self.mtexture = qtTexture
+        self.qtTextureUpdate = qtTexture.update
+        self.mtexture.deselect()
+        self.texture = self.mtexture.select
+        self.notexture = self.mtexture.deselect
+
+        self.qtMediaProcess = qtMedia.process
+
+        self.mtexcoords = mesh.QTTextureCoordMesh(self.mtexture.texCoords)
+        self.texcoords = self.mtexcoords.render
+
 
 class QuickTimeLayer(Layer):
     """Displays geometry with a quicktime texture
@@ -24,6 +64,30 @@ class QuickTimeLayer(Layer):
         Contrast, brightness, saturation
             Implement with shader?
     """
+
+    kvpub = Layer.kvpub.copy()
+
+    hostBox = KVBox.property([[-1, -1], [1, 1]])
+    sceneGraphOps = dict(render=QTTextureLayerRenderOp)
+    resData = QTTextureLayerResources.property()
+
+    aspect = KVProperty(1)
+
+    def __init__(self, path=None, color=None, hostBox=None):
+        Layer.__init__(self, color)
+        self.qtMedia = quickTimeMovie.QTMovie()
+        if path is not None:
+            self.loadPath(path)
+        if hostBox is not None:
+            self.hostBox = hostBox
+
+    def loadPath(self, path):
+        self.qtMedia.loadPath(path)
+
+    @kvpub.on('aspect')
+    @kvpub.on('hostBox.*')
+    def _updateAspect(self, key=None):
+        self.box.setAspectWithSize(self.aspect, self.hostBox.size, at=0.5)
 
 class QTMovieLayer(QuickTimeLayer):
     """Displays geometry with a quicktime movie texture
@@ -38,4 +102,11 @@ class QTMovieLayer(QuickTimeLayer):
         Volume
             What about redirecting output?
     """
+
+    def play(self): self.qtMedia.start()
+    def pause(self): self.qtMedia.pause()
+    def stop(self): self.qtMedia.stop()
+
+    def looping(self, bloop=True): self.qtMedia.setLooping(bloop)
+    def palindrome(self, bloop=True): self.qtMedia.setLooping(bloop and 2 or 0)
 
