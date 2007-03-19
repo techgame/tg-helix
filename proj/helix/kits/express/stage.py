@@ -34,6 +34,7 @@ class ExpressActor(HelixActor, KVObject):
     sceneGraphOps = {'render': None, 'resize': None}
 
     def __init__(self):
+        self.kvpub.copyWithHost(self)
         self._createSGNodes()
 
     def _createSGNodes(self):

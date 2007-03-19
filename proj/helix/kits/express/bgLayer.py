@@ -10,8 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.openGL.data import Rect, Vector, Color
 from TG.openGL.raw import gl
+from TG.geomath.data.color import Color
 
 from .stage import ExpressGraphOp
 from .layer import Layer, LayerRenderOp

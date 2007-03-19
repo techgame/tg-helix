@@ -120,6 +120,7 @@ class TextMesh(object):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BufferedTextMesh(object):
+    partial = staticmethod(partial)
     geometry = None
     buffer = None
     def update(self, geometry):
