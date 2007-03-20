@@ -48,19 +48,18 @@ class HelixScene(base.HelixObject):
         return '%s: %r' % (self.__class__.__name__, self.stage)
 
     def __getitem__(self, key):
-        return self.sgRoots[key]
+        return self.sgManagers[key].root
     def __setitem__(self, key, value):
         # provided for convinence only... value must be
         # what is already stored there
-        assert self.sgRoots[key] is value
+        return self.sgManagers[key].root
     def get(self, key, default=None):
-        return self.sgRoots.get(key, default)
+        return self.sgManagers[key].root
 
     def init(self, stage):
         self.stage = stage
         self.evtRoot = self.EventRootFactory()
         self.sgManagers = {}
-        self.sgRoots = {}
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -80,8 +79,6 @@ class HelixScene(base.HelixObject):
     def setupSceneGraph(self):
         for kind, (nodeType, managerFactory) in self.sgPassFactories.iteritems():
             rootNode = nodeType.createRootFor(self)
-            self.sgRoots[kind] = rootNode
-
             manager = managerFactory(self, rootNode)
             self.sgManagers[kind] = manager
 

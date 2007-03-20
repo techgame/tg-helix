@@ -21,16 +21,22 @@ class SceneGraphPassManager(object):
 
     def __init__(self, scene, root):
         self.root = root
+        root.onTreeChange = self.onTreeRootChange
         sceneMeter = getattr(scene, 'meter', None)
         if sceneMeter is not None:
             self.meter = sceneMeter
 
-    graphPassCache = []
+    def onTreeRootChange(self, rootNode, treeChanges):
+        self.graphPassCache = None
+
+    graphPassCache = None
     def graphPass(self):
-        if self.root.isChanged():
+        graphPass = self.graphPassCache
+        if graphPass is None:
             # there are changes... recompile the graph
-            self.graphPassCache = self.compileGraphPass(self.root)
-        return self.graphPassCache
+            graphPass = self.compileGraphPass(self.root)
+            self.graphPassCache = graphPass
+        return graphPass
 
     def compileGraphPass(self, root):
         graphPassItemsFrom = self.graphPassItemsFrom

@@ -16,55 +16,24 @@ from .base import HelixObject
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def defaultNodeBuilder(NodeFactory, item):
-    return NodeFactory(item)
-
 class HelixNode(HelixObject):
-    _treeChangeset = None # set(), created in flyweight()
-    _treeNodeTable = None # dict(), created in flyweight()
-    nodeBuilder = staticmethod(defaultNodeBuilder)
+    _treeItemAsNodeCache = None # dict(), created in flyweight()
 
     parents = None
     children = None
     
     def isNode(self): return True
 
-    def __init__(self, item=None):
+    def __init__(self):
         self.parents = []
         self.children = []
-        self.item = item
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    _data = None
-    def getItem(self):
-        return self._data
-    def setItem(self, item):
-        prevItem = self._data
-        if prevItem is not item:
-            _treeNodeTable = self._treeNodeTable
-            if prevItem is not None:
-                del _treeNodeTable[prevItem]
-            self._data = item
-            if item is not None:
-                _treeNodeTable[item] = self
-    def delItem(self):
-        prevItem = self._data
-        if prevItem is not None:
-            del self._treeNodeTable[prevItem]
-            del self._data
-            return True
-        else: return False
-
-    item = property(getItem, setItem, delItem)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
     def flyweight(klass, **kwdata):
         flyweightData = dict(
-                _treeChangeset=set(),
-                _treeNodeTable=dict())
+                _treeItemAsNodeCache=dict())
         flyweightData.update(kwdata)
         return type(klass)(klass.__name__+'*', (klass,), flyweightData)
 
@@ -79,13 +48,14 @@ class HelixNode(HelixObject):
 
     @classmethod
     def itemAsNode(klass, item, create=True):
+        """Override to provide conversion utilities"""
         if item.isNode():
             return item
+        node = klass._treeItemAsNodeCache.get(item, None)
+        if not create or node is not None:
+            return node
 
-        node = klass._treeNodeTable.get(item, None)
-        if node is None and create:
-            node = klass.nodeBuilder(klass, item)
-        return node
+        raise ValueError("Unable to create node from %r item" % (item.__class__,))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node and Node Tree  iteration
@@ -148,28 +118,22 @@ class HelixNode(HelixObject):
     #~ Graph Change Recording
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def isChanged(self):
-        return self in self._treeChangeset
-
-    def treeChanged(self):
-        _treeChangeset = self._treeChangeset
-        if self in _treeChangeset:
-            # we are already changed
-            return
-
-        changeset = set([self])
+    onTreeChange = None #onTreeChange(node, changeStack)
+    def treeChanged(self, changeStack=None):
+        changeStack = changeStack or []
 
         itree = self.iterParentTreeStack(False)
-        for op, p in itree:
-            if op >= 0:
-                if p in changeset or p in _treeChangeset:
-                    # cull the depth first search iteration because this parent
-                    # tree is already recorded in the changeset
-                    itree.send(True) 
-                else:
-                    chaneset.add(p)
+        for op, node in itree:
+            if op < 0: 
+                changeStack.pop()
+                continue
 
-        _treeChangeset.update(changeset)
+            onTreeChange = node.onTreeChange
+            if onTreeChange is not None:
+                onTreeChange(node, changeStack)
+
+            if op > 0:
+                changeStack.append(node)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Parents collection
@@ -203,35 +167,38 @@ class HelixNode(HelixObject):
         node = self.itemAsNode(item)
         if node.onAddToParent(self):
             self.children.insert(idx, node)
-            self.treeChanged()
+            self.treeChanged([node])
             return node
 
-    def insertBefore(self, node, nidx):
-        """Inserts node before index of nidx in children"""
+    def insertBefore(self, item, nidx):
+        """Inserts item before index of nidx in children"""
         nidx = self.itemAsNode(nidx, False)
         idx = self.children.index(nidx)
-        return self.insert(idx, node)
-    def insertAfter(self, node, nidx):
-        """Inserts node after index of nidx in children"""
+        return self.insert(idx, item)
+    def insertAfter(self, item, nidx):
+        """Inserts item after index of nidx in children"""
         nidx = self.itemAsNode(nidx, False)
         idx = self.children.index(nidx) + 1
-        return self.insert(idx, node)
+        return self.insert(idx, item)
 
     def add(self, item):
         node = self.itemAsNode(item)
         if node.onAddToParent(self):
             self.children.append(node)
-            self.treeChanged()
+            self.treeChanged([node])
             return node
 
     def extend(self, iterable):
         itemAsNode = self.itemAsNode
         children = self.children
+
+        nodeChanges = set()
         for each in iterable:
             node = itemAsNode(each)
             if node.onAddToParent(self):
                 children.append(node)
-        self.treeChanged()
+                nodeChanges.add(node)
+        self.treeChanged([nodeChanges])
 
     def remove(self, item):
         node = self.itemAsNode(item, False)
@@ -240,20 +207,22 @@ class HelixNode(HelixObject):
         if node.onRemoveFromParent(self):
             while node in self.children:
                 self.children.remove(node)
-            self.treeChanged()
+            self.treeChanged([node])
             return node
 
     def clear(self):
         nodeList = self.children[:]
         del self.children[:]
 
+        nodeChanges = set()
         for node in nodeList:
             node.onRemoveFromParent(self)
-        self.treeChanged()
+            nodeChanges.add(node)
+        self.treeChanged([nodeChanges])
 
     @classmethod
     def clearAll(klass, clearItem=True):
-        nodesToClear = klass._treeNodeTable.itervalues()
+        nodesToClear = klass._treeItemAsNodeCache.itervalues()
 
         if clearItem:
             for n in nodesToClear:

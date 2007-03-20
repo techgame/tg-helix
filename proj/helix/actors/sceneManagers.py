@@ -17,7 +17,7 @@ from .sceneGraphPass import SceneGraphPassManager
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def graphPassBoundFnsFrom(self, node, hasChildren):
-    passItem = node.item
+    passItem = getattr(node, self.passItemKey, None)
     if passItem is None:
         return None, False
 
@@ -25,6 +25,7 @@ def graphPassBoundFnsFrom(self, node, hasChildren):
     return (wind, unwind), (hasChildren and passItem.cullStack)
 
 class ResizeManager(SceneGraphPassManager):
+    passItemKey = 'resizePass'
     graphPassItemsFrom = graphPassBoundFnsFrom
     sgo = property(lambda self: self)
 
@@ -48,6 +49,7 @@ class ResizeManager(SceneGraphPassManager):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class RenderManager(SceneGraphPassManager):
+    passItemKey = 'renderPass'
     graphPassItemsFrom = graphPassBoundFnsFrom
     sgo = property(lambda self: self)
 
@@ -69,6 +71,7 @@ class RenderManager(SceneGraphPassManager):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SelectManager(SceneGraphPassManager):
+    passItemKey = 'selectPass'
     graphPassItemsFrom = graphPassBoundFnsFrom
     sgo = property(lambda self: self)
 
