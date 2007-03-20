@@ -28,10 +28,23 @@ from TG.helix.kits.express.actors import *
 class DemoStage(stage.ExpressStage):
     def onSceneSetup(self, scene):
         renderRoot = scene['render']
+        resizeRoot = scene['resize']
+
+        viewport = Viewport()
+        resizeRoot += viewport
+        renderRoot += viewport
+
+        projection = Projection()
+        resizeRoot += projection
+        renderRoot += projection
 
         bgLayer = BackgroundLayer()
-        scene['resize'] += bgLayer
         renderRoot += bgLayer
+
+        @projection.kvwatch('box.*')
+        def onProjectionBox(kvw, key, bgbox=bgLayer.box):
+            v = kvw.value.pv[..., :-1]
+            bgbox.pv = v
 
         bigMovie = QTMovieLayer(os.path.join(filePath, 'milkgirls1080.mov'), hostBox=bgLayer.box)
         bigMovie.looping()
@@ -40,7 +53,6 @@ class DemoStage(stage.ExpressStage):
 
         cameraMovie = QTMovieLayer(os.path.join(filePath, 'cercle.mov'), color='#ff:40', hostBox=bgLayer.box)
         cameraMovie.looping()
-        #cameraMovie.palindrome()
         renderRoot += cameraMovie
         cameraMovie.play()
 

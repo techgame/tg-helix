@@ -83,3 +83,11 @@ class Layer(ExpressActor):
         if color is not None:
             self.color = color
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class BackgroundLayer(Layer):
+    color = Color.property('#00:ff')
+
+class ColorLayer(Layer):
+    pass
+
