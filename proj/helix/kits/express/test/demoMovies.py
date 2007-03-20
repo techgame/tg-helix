@@ -38,8 +38,9 @@ class DemoStage(stage.ExpressStage):
         renderRoot += bigMovie
         bigMovie.play()
 
-        cameraMovie = QTMovieLayer(os.path.join(filePath, 'cercle.mov'), color='#f:a:a:4')
-        cameraMovie.palindrome()
+        cameraMovie = QTMovieLayer(os.path.join(filePath, 'cercle.mov'), color='#ff:40', hostBox=bgLayer.box)
+        cameraMovie.looping()
+        #cameraMovie.palindrome()
         renderRoot += cameraMovie
         cameraMovie.play()
 

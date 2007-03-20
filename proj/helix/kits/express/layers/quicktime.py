@@ -14,8 +14,8 @@ from TG.kvObserving import KVProperty
 from TG.quicktime import quickTimeMovie
 from TG.geomath.data.kvBox import KVBox
 
-from .layer import Layer, LayerRenderOp, LayerResources
-from . import mesh
+from .base import Layer, LayerRenderOp, LayerResources
+from .. import mesh
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

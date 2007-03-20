@@ -32,6 +32,8 @@ class DemoStage(stage.ExpressStage):
 
         @bgLayer.kvwatch('box.*')
         def layerBox(kvw, key, layer=layer):
+            print 'width:', kvw.value.xv
+            print 'height:', kvw.value.yv
             layer.box.setAspectWithSize(layer.aspect, kvw.value.size, .5)
 
         l2 = Layer('#ff')

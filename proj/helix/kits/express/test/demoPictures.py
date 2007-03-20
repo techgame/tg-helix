@@ -29,7 +29,7 @@ class DemoStage(stage.ExpressStage):
         scene['resize'] += bgLayer
         renderRoot += bgLayer
 
-        renderRoot += PictureLayer(os.path.join(filePath, 'aPicture.png'))
+        renderRoot += ImageLayer(os.path.join(filePath, 'aPicture.png'))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

@@ -14,8 +14,8 @@ import PIL.Image
 
 from TG.kvObserving import KVProperty
 
-from .layer import Layer, LayerRenderOp, LayerResources
-from . import mesh
+from .base import Layer, LayerRenderOp, LayerResources
+from .. import mesh
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

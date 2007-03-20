@@ -87,10 +87,6 @@ class ImageTextureCoordMesh(GLArrayMesh):
         self.mesh = imageTexture.texCoordsForImage()
         self.bindMesh()
 
-    def render(self):
-        self.tcaEnable()
-        self.tcaBindPtr()
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ TextMesh
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

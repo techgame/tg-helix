@@ -19,9 +19,9 @@ from TG.freetype2.face import FreetypeFaceIndex
 from TG.openGL.raw import gl
 from TG.openGL.text import FontRect, Font2d, textLayout
 
-from .stage import ExpressGraphOp
-from .layer import Layer, LayerResources, LayerRenderOp
-from . import mesh
+from ..stage import ExpressGraphOp
+from .base import Layer, LayerResources, LayerRenderOp
+from .. import mesh
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

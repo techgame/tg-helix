@@ -13,9 +13,9 @@
 from TG.geomath.data.kvBox import KVBox
 from TG.geomath.data.color import Color
 
-from .stage import ExpressGraphOp, ExpressActor
-from .resources import ExpressResources
-from . import mesh
+from ..stage import ExpressGraphOp, ExpressActor
+from ..resources import ExpressResources
+from .. import mesh
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

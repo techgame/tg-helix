@@ -13,8 +13,8 @@
 from TG.openGL.raw import gl
 from TG.geomath.data.color import Color
 
-from .stage import ExpressGraphOp
-from .layer import Layer, LayerRenderOp
+from ..stage import ExpressGraphOp
+from .base import Layer, LayerRenderOp
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Background Layer
