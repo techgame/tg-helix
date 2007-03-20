@@ -16,17 +16,30 @@ from .sceneGraphPass import SceneGraphPassManager
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def graphPassBoundFnsFrom(self, node, hasChildren):
+    passItem = node.item
+    if passItem is None:
+        return None, False
+
+    wind, unwind = passItem.bindPass(node, self.sgo)
+    return (wind, unwind), (hasChildren and passItem.cullStack)
+
 class ResizeManager(SceneGraphPassManager):
+    graphPassItemsFrom = graphPassBoundFnsFrom
+    sgo = property(lambda self: self)
+
     def resize(self, viewport, viewportSize):
         self.viewportSize = viewportSize
         self.viewportAspect = viewportSize[0].__truediv__(viewportSize[1])
 
         viewport.setViewCurrent()
         
+        sgo = self.sgo
+
         self.meter.start()
-        graphPass = self.graphPass()
-        for graphOp in graphPass:
-            graphOp()
+        graphPassFns = self.graphPass()
+        for sgnFn in graphPassFns:
+            sgnFn(sgo)
         self.meter.end()
 
         return True
@@ -35,13 +48,18 @@ class ResizeManager(SceneGraphPassManager):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class RenderManager(SceneGraphPassManager):
+    graphPassItemsFrom = graphPassBoundFnsFrom
+    sgo = property(lambda self: self)
+
     def render(self, viewport):
         viewport.setViewCurrent()
 
+        sgo = self.sgo
+
         self.meter.start()
-        graphPass = self.graphPass()
-        for graphOp in graphPass:
-            graphOp()
+        graphPassFns = self.graphPass()
+        for sgnFn in graphPassFns:
+            sgnFn(sgo)
         self.meter.end()
 
         viewport.viewSwapBuffers()
@@ -51,6 +69,9 @@ class RenderManager(SceneGraphPassManager):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SelectManager(SceneGraphPassManager):
+    graphPassItemsFrom = graphPassBoundFnsFrom
+    sgo = property(lambda self: self)
+
     debugView = False
     selectPos = (0,0)
     selectSize = (1,1)
@@ -58,13 +79,15 @@ class SelectManager(SceneGraphPassManager):
     def select(self, viewport, pos):
         viewport.setViewCurrent()
 
+        sgo = self.sgo
+
         self.selectPos = pos
         self.selection = []
 
         self.meter.start()
-        graphPass = self.graphPass()
-        for graphOp in graphPass:
-            graphOp()
+        graphPassFns = self.graphPass()
+        for sgnFn in graphPassFns:
+            sgnFn(sgo)
         self.meter.end()
 
         if self.debugView:

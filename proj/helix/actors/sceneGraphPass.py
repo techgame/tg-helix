@@ -33,7 +33,7 @@ class SceneGraphPassManager(object):
         return self.graphPassCache
 
     def compileGraphPass(self, root):
-        graphPassOpsFrom = self._graphPassOpsFrom
+        graphPassItemsFrom = self.graphPassItemsFrom
 
         emptyUnwind = [] # a "constant" empty list
         passUnwindStack = [] # a stack of unwind op lists
@@ -48,44 +48,49 @@ class SceneGraphPassManager(object):
                 # result and continue the iteration
                 passResult.extend(passUnwindStack.pop())
                 continue
+            pushUnwind = (op > 0)
 
-            # get passOps fromm our node using template method
-            passOps = graphPassOpsFrom(node)
-            if passOps is None:
-                if op > 0:
+            # get sgNodeItems fromm our node using template method
+            sgNodeItems, cullStack = graphPassItemsFrom(node, pushUnwind)
+
+            if pushUnwind and cullStack:
+                itree.send(True)
+                itree.next() # consume conmfirmation
+                pushUnwind = False
+
+            if sgNodeItems is None:
+                if pushUnwind:
                     # push an empty unwind on the stack
                     passUnwindStack.append(emptyUnwind)
                 continue
 
-            # unpack passOps
-            wind, unwind, cullStack = passOps
+            # unpack sgNodeItems
+            wind, unwind = sgNodeItems
 
-            # wind ops go directly on the result
-            passResult.extend(wind)
+            if wind:
+                # wind ops go directly on the result
+                passResult.extend(wind)
 
             # if we are pushing and not culling...
-            if op and not cullStack:
+            if pushUnwind:
                 # push the unwind ops on the stack
-                passUnwindStack.append(unwind)
-            else:
-                # otherwise, just add the unwind as the next operations on the stack
+                passUnwindStack.append(unwind or emptyUnwind)
+            elif unwind:
+                # push(unwind); extend(pop) --> extend(unwind)
                 passResult.extend(unwind)
-                # and tell the tree walk to cull the DFS tree walk of the scene graph
-                itree.send(True)
 
         # make sure that all the pop operations came through to empty our unwind stack
         assert not passUnwindStack, passUnwindStack
         return passResult
 
-    def _graphPassOpsFrom(self, node):
-        passItem = node.item
-        if passItem is None:
-            return None
-
-        wind = passItem.bind(node, self)
-        unwind = passItem.bindUnwind(node, self)
-
-        return (wind, 
-                unwind, 
-                passItem.cullStack)
+    def graphPassItemsFrom(self, node, hasChildren):
+        """Should return ((wind, unwind), cullStack) 
+        
+        where 'wind' and 'unwind' are list of pass items for node.  
+        
+        'cullStack' is a directive to the algorithm on whether to continue down
+        the DFS traversal of the scene graph, and the 'hasChildren' parameters
+        signifies that traversal will continue in DFS order unless cullStack is
+        false."""
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
