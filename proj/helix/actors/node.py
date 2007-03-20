@@ -120,6 +120,7 @@ class HelixNode(HelixObject):
 
     onTreeChange = None #onTreeChange(node, changeStack)
     def treeChanged(self, changeStack=None):
+        visited = set()
         changeStack = changeStack or []
 
         itree = self.iterParentTreeStack(False)
@@ -127,7 +128,11 @@ class HelixNode(HelixObject):
             if op < 0: 
                 changeStack.pop()
                 continue
+            elif node in visited:
+                itree.send(True)
+                continue
 
+            visited.add(node)
             onTreeChange = node.onTreeChange
             if onTreeChange is not None:
                 onTreeChange(node, changeStack)
