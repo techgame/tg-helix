@@ -1,4 +1,4 @@
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+ ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~ Copyright (C) 2002-2007  TechGame Networks, LLC.              ##
 ##~                                                               ##
 ##~ This library is free software; you can redistribute it        ##
@@ -40,7 +40,6 @@ class ResizeManager(SceneGraphPassManager):
 
     def resize(self, viewport, viewportSize):
         self.viewportSize = viewportSize
-        self.viewportAspect = viewportSize[0].__truediv__(viewportSize[1])
 
         viewport.setViewCurrent()
         
