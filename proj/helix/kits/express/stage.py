@@ -26,7 +26,7 @@ class ExpressResources(object):
     _partial = staticmethod(partial)
     def __init__(self, actor):
         pass
-    def load(self, node, sgo):
+    def load(self, sgNode, sgo):
         pass
 
 ExpressResources.property = classmethod(obInstProperty)
@@ -35,9 +35,9 @@ ExpressResources.property = classmethod(obInstProperty)
 
 class ExpressGraphOp(object):
     cullStack = False
-    def __init__(self, actor): 
+    def __init__(self, actor, sgNode): 
         pass
-    def bindPass(self, node, sgo): 
+    def bindPass(self, sgNode, sgo): 
         return None
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,12 +47,11 @@ class ExpressActor(HelixActor, KVObject):
 
     def __init__(self):
         self.kvpub.copyWithHost(self)
-        self._createSGNodes()
 
-    def _createSGNodes(self):
-        # sgNodes is filled in by the scene graph node
-        # constructors as a debugging courtesy 
-        self.sgNodes = {}
+    def sceneGraphOpFor(self, sgOpKey, sgNode):
+        sgOpFactory = self.sceneGraphOps[sgOpKey]
+        if sgOpFactory is not None:
+            return sgOpFactory(self, sgNode)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

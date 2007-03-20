@@ -21,11 +21,11 @@ from .. import mesh
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class LayerRenderOp(ExpressGraphOp):
-    def __init__(self, actor):
+    def __init__(self, actor, sgNode):
         self.res = actor.resData
 
-    def bindPass(self, node, sgo):
-        self.res.load(node, sgo)
+    def bindPass(self, sgNode, sgo):
+        self.res.load(sgNode, sgo)
         return [self.render], None
 
     def render(self, sgo):
@@ -44,7 +44,7 @@ class LayerResources(ExpressResources):
         self.mvertex = mesh.BoxMesh(actor.box)
         self.vertex = self.mvertex.render
 
-    def load(self, node, sgo):
+    def load(self, sgNode, sgo):
         glImmediateV = self.mcolor.glinfo.glImmediateFor(self.mcolor)
         self.color = self._partial(glImmediateV, self.mcolor.ctypes.data_as(glImmediateV.api.argtypes[-1]))
 

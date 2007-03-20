@@ -21,7 +21,7 @@ from .base import Layer, LayerRenderOp
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BGLayerRenderOp(LayerRenderOp):
-    def __init__(self, actor):
+    def __init__(self, actor, sgNode):
         self.res = actor.resData
         self.actorBox = actor.box
     def render(self, sgo):
@@ -41,10 +41,10 @@ class BGLayerRenderOp(LayerRenderOp):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BGLayerResizeOp(ExpressGraphOp):
-    def __init__(self, actor):
+    def __init__(self, actor, sgNode):
         self.actorBox = actor.box
 
-    def bindPass(self, node, sgo):
+    def bindPass(self, sgNode, sgo):
         return [self.resize], None
 
     def resize(self, sgo):
