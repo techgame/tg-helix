@@ -55,7 +55,6 @@ class SceneGraphPassManager(object):
 
             if pushUnwind and cullStack:
                 itree.send(True)
-                itree.next() # consume conmfirmation
                 pushUnwind = False
 
             if sgNodeItems is None:
