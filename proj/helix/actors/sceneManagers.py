@@ -24,9 +24,18 @@ def graphPassBoundFnsFrom(self, node, hasChildren):
     wind, unwind = passItem.bindPass(node, self.sgo)
     return (wind, unwind), (hasChildren and passItem.cullStack)
 
+def walkGraph(self, graphPassFns, sgo):
+    # intended to be a replaceable method to call each method with a single
+    # argument in a tight loop.
+    for fn in graphPassFns:
+        fn(sgo)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class ResizeManager(SceneGraphPassManager):
     passItemKey = 'resizePass'
     graphPassItemsFrom = graphPassBoundFnsFrom
+    walkGraph = walkGraph
     sgo = property(lambda self: self)
 
     def resize(self, viewport, viewportSize):
@@ -35,12 +44,8 @@ class ResizeManager(SceneGraphPassManager):
 
         viewport.setViewCurrent()
         
-        sgo = self.sgo
-
         self.meter.start()
-        graphPassFns = self.graphPass()
-        for sgnFn in graphPassFns:
-            sgnFn(sgo)
+        self.walkGraph(self.graphPass(), self.sgo)
         self.meter.end()
 
         return True
@@ -51,6 +56,7 @@ class ResizeManager(SceneGraphPassManager):
 class RenderManager(SceneGraphPassManager):
     passItemKey = 'renderPass'
     graphPassItemsFrom = graphPassBoundFnsFrom
+    walkGraph = walkGraph
     sgo = property(lambda self: self)
 
     def render(self, viewport):
@@ -59,9 +65,7 @@ class RenderManager(SceneGraphPassManager):
         sgo = self.sgo
 
         self.meter.start()
-        graphPassFns = self.graphPass()
-        for sgnFn in graphPassFns:
-            sgnFn(sgo)
+        self.walkGraph(self.graphPass(), self.sgo)
         self.meter.end()
 
         viewport.viewSwapBuffers()
@@ -73,6 +77,7 @@ class RenderManager(SceneGraphPassManager):
 class SelectManager(SceneGraphPassManager):
     passItemKey = 'selectPass'
     graphPassItemsFrom = graphPassBoundFnsFrom
+    walkGraph = walkGraph
     sgo = property(lambda self: self)
 
     debugView = False
@@ -88,9 +93,7 @@ class SelectManager(SceneGraphPassManager):
         self.selection = []
 
         self.meter.start()
-        graphPassFns = self.graphPass()
-        for sgnFn in graphPassFns:
-            sgnFn(sgo)
+        self.walkGraph(self.graphPass(), self.sgo)
         self.meter.end()
 
         if self.debugView:
