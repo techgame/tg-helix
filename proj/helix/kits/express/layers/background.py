@@ -24,7 +24,7 @@ class BGLayerRenderOp(LayerRenderOp):
     def __init__(self, actor):
         self.res = actor.resData
         self.actorBox = actor.box
-    def render(self):
+    def render(self, sgo):
         box = self.actorBox
 
         gl.glEnable(gl.GL_BLEND)
@@ -36,7 +36,7 @@ class BGLayerRenderOp(LayerRenderOp):
         gl.glOrtho(l, r, b, t, -1, 1)
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
-        LayerRenderOp.render(self)
+        LayerRenderOp.render(self, sgo)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -44,13 +44,14 @@ class BGLayerResizeOp(ExpressGraphOp):
     def __init__(self, actor):
         self.actorBox = actor.box
 
-    def bind(self, node, mgr):
-        return [self._partial(self.resize, mgr)]
-    def resize(self, mgr):
-        gl.glViewport(0,0,*mgr.viewportSize)
+    def bindPass(self, node, sgo):
+        return [self.resize], None
+
+    def resize(self, sgo):
+        gl.glViewport(0,0,*sgo.viewportSize)
 
         self.actorBox.setAspectWithSize(
-                        (mgr.viewportAspect, True), 
+                        (sgo.viewportAspect, True), 
                         size=(2, 2), at=0.5)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

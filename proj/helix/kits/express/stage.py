@@ -24,8 +24,8 @@ from TG.helix.actors import HelixStage
 class ExpressGraphOp(object):
     cullStack = False
     def __init__(self, actor): pass
-    def bind(self, node, mgr): return []
-    def bindUnwind(self, node, mgr): return []
+    def bindPass(self, node, sgo): 
+        return None
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

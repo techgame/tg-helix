@@ -22,7 +22,7 @@ from .. import mesh
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class QTTextureLayerRenderOp(LayerRenderOp):
-    def render(self):
+    def render(self, sgo):
         res = self.res
 
         res.qtTextureUpdate()

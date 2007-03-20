@@ -28,7 +28,7 @@ from .. import mesh
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class TextLayerRenderOp(LayerRenderOp):
-    def render(self):
+    def render(self, sgo):
         res = self.res
         res.updateText()
 
@@ -48,11 +48,11 @@ class TextLayerResizeOp(ExpressGraphOp):
         self.box = actor.box
         self.fscale = actor.fscale
 
-    def bind(self, node, mgr):
-        return [self._partial(self.resize, mgr)]
-    def resize(self, mgr):
-        self.fscale.p0 = mgr.viewportSize
-        self.fscale.p1 = self.box.size/mgr.viewportSize
+    def bindPass(self, node, sgo):
+        return [self.resize], None
+    def resize(self, sgo):
+        self.fscale.p0 = sgo.viewportSize
+        self.fscale.p1 = self.box.size/sgo.viewportSize
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

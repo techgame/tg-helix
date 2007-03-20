@@ -18,10 +18,11 @@ from TG.metaObserving import obInstProperty
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ExpressResources():
+class ExpressResources(object):
+    _partial = partial
     def __init__(self, actor):
         pass
-    def load(self, node, mgr):
+    def load(self, node, sgo):
         pass
 
 ExpressResources.property = classmethod(obInstProperty)
