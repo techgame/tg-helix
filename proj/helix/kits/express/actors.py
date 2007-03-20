@@ -12,9 +12,11 @@
 
 from .layers.group import Group
 from .layers.base import Layer
+
 from .layers.background import BackgroundLayer
+
 from .layers.color import ColorLayer
 from .layers.image import ImageLayer
-from .layers.quicktime import QuickTimeLayer, QTMovieLayer
 from .layers.text import TextLayer
+from .layers.quicktime import QTLayer, QTMovieLayer
 

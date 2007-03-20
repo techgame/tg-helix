@@ -58,7 +58,7 @@ class QTTextureLayerResources(LayerResources):
         self.texcoords = self.mtexcoords.render
 
 
-class QuickTimeLayer(Layer):
+class QTLayer(Layer):
     """Displays geometry with a quicktime texture
     
     Picture layer
@@ -92,7 +92,7 @@ class QuickTimeLayer(Layer):
     def _updateBoxAspect(self, kvw, key):
         self.box.setAspectWithSize(self.aspect, self.hostBox.size, at=0.5)
 
-class QTMovieLayer(QuickTimeLayer):
+class QTMovieLayer(QTLayer):
     """Displays geometry with a quicktime movie texture
 
     Movie layer

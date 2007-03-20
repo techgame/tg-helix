@@ -13,6 +13,7 @@
 from functools import partial
 
 from TG.kvObserving import KVObject
+from TG.metaObserving import obInstProperty
 
 from TG.helix.actors import HelixActor
 from TG.helix.actors import HelixStage
@@ -21,9 +22,21 @@ from TG.helix.actors import HelixStage
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class ExpressResources(object):
+    _partial = staticmethod(partial)
+    def __init__(self, actor):
+        pass
+    def load(self, node, sgo):
+        pass
+
+ExpressResources.property = classmethod(obInstProperty)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class ExpressGraphOp(object):
     cullStack = False
-    def __init__(self, actor): pass
+    def __init__(self, actor): 
+        pass
     def bindPass(self, node, sgo): 
         return None
 
