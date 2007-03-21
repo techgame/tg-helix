@@ -12,7 +12,7 @@
 
 from functools import partial
 
-from TG.kvObserving import KVObject
+from TG.kvObserving import KVObject, KVProperty
 from TG.metaObserving import obInstProperty
 
 from TG.helix.actors import HelixActor
@@ -49,15 +49,37 @@ class ExpressActor(HelixActor, KVObject):
         self.kvpub.copyWithHost(self)
 
     def sceneGraphOpFor(self, sgOpKey, sgNode):
-        sgOpFactory = self.sceneGraphOps[sgOpKey]
+        sgOpFactory = self.sceneGraphOps.get(sgOpKey, None)
         if sgOpFactory is not None:
             return sgOpFactory(self, sgNode)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class ExpressStage(HelixStage, KVObject):
+    box = KVProperty()
+
     def onSceneSetup(self, scene):
-        pass
+        self._setupBackground(scene)
+
+    def _setupBackground(self, scene):
+        from . import actors
+
+        viewport = actors.Viewport()
+        scene['resize'] += viewport
+        scene['render'] += viewport
+
+        projection = actors.Projection()
+        scene['resize'] += projection
+        scene['render'] += projection
+
+        bgLayer = actors.BackgroundLayer()
+        self.box = bgLayer.box
+        scene['render'] += bgLayer
+
+        @projection.kvwatch('box.*')
+        def onProjectionBox(kvw, key, bgbox=bgLayer.box):
+            v = kvw.value.pv[..., :-1]
+            bgbox.pv = v
 
     def onSceneShutdown(self, scene):
         pass

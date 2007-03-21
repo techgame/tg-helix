@@ -13,6 +13,7 @@
 import PIL.Image
 
 from TG.kvObserving import KVProperty
+from TG.geomath.data.kvBox import KVBox
 
 from .base import Layer, LayerRenderOp, LayerResources
 from .. import mesh
@@ -54,10 +55,19 @@ class ImageLayer(Layer):
 
     image = KVProperty(None)
 
-    def __init__(self, image=None, color=None):
+    hostBox = KVBox.property([[-100, -100], [100, 100]])
+    aspect = KVProperty(1)
+
+    def __init__(self, image=None, color=None, hostBox=None):
+        self.kvwatch('hostBox.*')(self._updateBoxAspect)
+        self.kvwatch('aspect')(self._updateBoxAspect)
+
         if image is not None:
             self.load(image)
         Layer.__init__(self, color)
+
+        if hostBox is not None:
+            self.hostBox = hostBox
 
     openImage = staticmethod(PIL.Image.open)
     def load(self, image, size=None):
@@ -66,6 +76,10 @@ class ImageLayer(Layer):
         if size is not None:
             image = image.resize(size)
         self.image = image
-        self.box.setAspect(image.size, at=.5)
+        self.aspect = image.size[0].__truediv__(image.size[1])
+        #self.box.setAspect(image.size, at=.5)
         return image
+
+    def _updateBoxAspect(self, kvw, key):
+        self.box.atAspect[self.aspect, .5] = self.hostBox.size
 

@@ -52,4 +52,24 @@ class ExpressScene(HelixScene):
     def setupEvtSources(self, evtSources=[]):
         super(ExpressScene, self).setupEvtSources(evtSources)
         self.evtRoot.visit(SceneAnimationEventHandler(self))
+        self.timestamp = self.evtRoot.newTimestamp
+
+    meter = property(lambda self: self)
+    def start(self): 
+        tsStart = self.timestamp()
+        if not self.nframes:
+            self._tsStart = tsStart
+            self._tsCum = 0.0
+        return tsStart
+    def end(self, tsStart): 
+        tsEnd = self.timestamp()
+        self._tsCum += tsEnd - tsStart
+
+        n = self.nframes + 1
+        if not (n % 60):
+            ts = self._tsStart
+            print n/(tsEnd-ts), 60./self._tsCum
+            self._tsCum = 0.0
+        self.nframes = n
+    nframes = 0
 

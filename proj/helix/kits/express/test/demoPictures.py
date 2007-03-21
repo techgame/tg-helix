@@ -23,13 +23,10 @@ from TG.helix.kits.express.actors import *
 
 class DemoStage(stage.ExpressStage):
     def onSceneSetup(self, scene):
+        super(DemoStage, self).onSceneSetup(scene)
         renderRoot = scene['render']
 
-        bgLayer = BackgroundLayer()
-        scene['resize'] += bgLayer
-        renderRoot += bgLayer
-
-        renderRoot += ImageLayer(os.path.join(filePath, 'aPicture.png'))
+        renderRoot += ImageLayer(os.path.join(filePath, 'aPicture.png'), hostBox=self.box)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

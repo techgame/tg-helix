@@ -67,14 +67,14 @@ class QTLayer(Layer):
             Implement with shader?
     """
 
-    kvpub = Layer.kvpub.copy()
-
-    hostBox = KVBox.property([[-1, -1], [1, 1]])
     sceneGraphOps = dict(render=QTTextureLayerRenderOp)
     resData = QTTextureLayerResources.property()
 
-    aspect = KVProperty(1)
+    qtMedia = KVProperty(None)
 
+    hostBox = KVBox.property([[-100, -100], [100, 100]])
+    aspect = KVProperty(1)
+    
     def __init__(self, path=None, color=None, hostBox=None):
         self.kvwatch('hostBox.*')(self._updateBoxAspect)
         self.kvwatch('aspect')(self._updateBoxAspect)
@@ -90,7 +90,7 @@ class QTLayer(Layer):
         self.qtMedia.loadPath(path)
 
     def _updateBoxAspect(self, kvw, key):
-        self.box.setAspectWithSize(self.aspect, self.hostBox.size, at=0.5)
+        self.box.atAspect[self.aspect, .5] = self.hostBox.size
 
 class QTMovieLayer(QTLayer):
     """Displays geometry with a quicktime movie texture
