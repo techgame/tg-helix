@@ -12,7 +12,7 @@
 
 class ScenePassMeter(object):
     def start(self): pass
-    def end(self): pass
+    def end(self, token): pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

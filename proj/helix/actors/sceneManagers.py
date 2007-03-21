@@ -43,9 +43,9 @@ class ResizeManager(SceneGraphPassManager):
 
         viewport.setViewCurrent()
         
-        self.meter.start()
+        mtoken = self.meter.start()
         self.walkGraph(self.graphPass(), self.sgo)
-        self.meter.end()
+        self.meter.end(mtoken)
 
         return True
     __call__ = resize
@@ -63,9 +63,9 @@ class RenderManager(SceneGraphPassManager):
 
         sgo = self.sgo
 
-        self.meter.start()
+        mtoken = self.meter.start()
         self.walkGraph(self.graphPass(), self.sgo)
-        self.meter.end()
+        self.meter.end(mtoken)
 
         viewport.viewSwapBuffers()
         return True
@@ -91,9 +91,9 @@ class SelectManager(SceneGraphPassManager):
         self.selectPos = pos
         self.selection = []
 
-        self.meter.start()
+        mtoken = self.meter.start()
         self.walkGraph(self.graphPass(), self.sgo)
-        self.meter.end()
+        self.meter.end(mtoken)
 
         if self.debugView:
             viewport.viewSwapBuffers()
