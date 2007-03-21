@@ -24,7 +24,7 @@ def graphPassBoundFnsFrom(self, node, hasChildren):
     wind, unwind = passItem.bindPass(node, self.sgo)
     return (wind, unwind), (hasChildren and passItem.cullStack)
 
-def walkGraph(self, graphPassFns, sgo):
+def vectorDispatch(graphPassFns, sgo):
     # intended to be a replaceable method to call each method with a single
     # argument in a tight loop.
     for fn in graphPassFns:
@@ -35,7 +35,7 @@ def walkGraph(self, graphPassFns, sgo):
 class ResizeManager(SceneGraphPassManager):
     passItemKey = 'resizePass'
     graphPassItemsFrom = graphPassBoundFnsFrom
-    walkGraph = walkGraph
+    walkGraph = staticmethod(vectorDispatch)
     sgo = property(lambda self: self)
 
     def resize(self, viewport, viewportSize):
@@ -55,7 +55,7 @@ class ResizeManager(SceneGraphPassManager):
 class RenderManager(SceneGraphPassManager):
     passItemKey = 'renderPass'
     graphPassItemsFrom = graphPassBoundFnsFrom
-    walkGraph = walkGraph
+    walkGraph = staticmethod(vectorDispatch)
     sgo = property(lambda self: self)
 
     def render(self, viewport):
@@ -76,7 +76,7 @@ class RenderManager(SceneGraphPassManager):
 class SelectManager(SceneGraphPassManager):
     passItemKey = 'selectPass'
     graphPassItemsFrom = graphPassBoundFnsFrom
-    walkGraph = walkGraph
+    walkGraph = staticmethod(vectorDispatch)
     sgo = property(lambda self: self)
 
     debugView = False

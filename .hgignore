@@ -1,17 +1,44 @@
-syntax: regexp
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Project ignores
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+syntax: glob 
+
+syntax: regexp 
 ^sandbox/matuikit/quicktime/Curious George.m4b
 ^sandbox/matuikit/quicktime/masseffect_x06walkthru_HD720p.mov
 ^sandbox/matuikit/quicktime/milkgirls1080.mov
 ^proj/helix/kits/express/test/.*\.mov
+^proj/helix/actors/build
+^proj/helix/actors/.*.so
+^proj/helix/actors/.*.dll
 
-syntax: glob
-Icon?
-\.DS_Store
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Generally useful ignore configurations
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# auto-generated content
+syntax: glob 
 *.pyc
 *.pyo
-*.bpl
+
+# swap files of various origins
+syntax: glob 
+*.orig
 *~
 .*.swp
 .*.swo
+
+# Revision control dirs
+syntax: glob 
+\.hg/
+\.hg_archival.txt
 \.svn/
+CVS/
+
+# Various system generated files
+syntax: glob 
+Icon?
+Thumbs.db
+\.DS_Store
 
