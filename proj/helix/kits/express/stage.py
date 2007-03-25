@@ -73,13 +73,10 @@ class ExpressStage(HelixStage, KVObject):
         scene['render'] += projection
 
         bgLayer = actors.BackgroundLayer()
-        self.box = bgLayer.box
         scene['render'] += bgLayer
 
-        @projection.kvwatch('box.*')
-        def onProjectionBox(kvw, key, bgbox=bgLayer.box):
-            v = kvw.value.pv[..., :-1]
-            bgbox.pv = v
+        self.box = bgLayer.box
+        self.box.viewOf(projection.box, dim=2)
 
     def onSceneShutdown(self, scene):
         pass
