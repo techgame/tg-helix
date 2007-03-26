@@ -14,9 +14,9 @@ from functools import partial
 
 import numpy
 
-from TG.openGL import data as glData
 from TG.openGL.raw import gl
 from TG.openGL.data.bufferObjects import ArrayBuffer
+from TG.openGL.data.arrayViews import arrayView
 
 from TG.openGL.data.image import ImageTextureRect, ImageTexture2d
 
@@ -25,33 +25,34 @@ from TG.openGL.data.image import ImageTextureRect, ImageTexture2d
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class GLArrayMesh(object):
-    partial = staticmethod(partial)
-    def _bindArray(self, arr):
-        ainfo = arr.glinfo
-        glEnableArray = self.partial(ainfo.glEnableArray, ainfo.glKindId)
-
-        arrPtr = ainfo.glArrayPointer
-        #arrPtrType = arrPtr.api.argtypes[-1]
-        glArrayPointer = self.partial(arrPtr, arr.shape[-1], arr.glTypeId, 
-                arr.strides[-1]*arr.shape[-1], arr.ctypes)#.data_as(arrPtrType))
-        return glEnableArray, glArrayPointer
-
-    mesh = glData.VertexArray([], '2f')
+    meshKind = 'vertex'
+    meshView = None
+    mesh = None
     def bindMesh(self):
-        self.aoEnable, self.aoBindPtr = self._bindArray(self.mesh)
+        meshView = self.meshView
+        if meshView is None:
+            meshView = arrayView(self.meshKind)
+            self.meshView = meshView
+        meshView.bind(self.mesh)
 
     def render(self):
-        self.aoEnable()
-        self.aoBindPtr()
+        meshView = self.meshView
+        meshView.enable()
+        meshView.send()
 
 class GLVertexMesh(GLArrayMesh):
+    meshDraw = None
     def bindDraw(self):
+        meshDraw = self.meshDraw
+        if meshDraw is None:
+            meshDraw = arrayView('draw_array')
+            self.meshDraw = meshDraw
+
         mesh = self.mesh
-        count = mesh.size/mesh.shape[-1]
-        self.drawArray = self.partial(gl.glDrawArrays, gl.GL_QUADS, 0, count)
+        meshDraw.bind('quads', mesh.size/mesh.shape[-1])
 
 class BoxMesh(GLVertexMesh):
-    mesh = glData.VertexArray([[0., 0.], [1., 0.], [1., 1.], [0., 1.]], '2f')
+    mesh = numpy.array([[0., 0.], [1., 0.], [1., 1.], [0., 1.]], 'f')
 
     def __init__(self, box=None):
         self.mesh = self.mesh.copy()
@@ -65,18 +66,21 @@ class BoxMesh(GLVertexMesh):
         self.mesh[:] = box.geoXfrm('quads')
 
     def render(self):
-        self.aoEnable()
-        self.aoBindPtr()
-        self.drawArray()
+        meshView = self.meshView
+        meshView.enable()
+        meshView.send()
+        self.meshDraw.send()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class QTTextureCoordMesh(GLArrayMesh):
+    meshKind = 'texture_coord'
     def __init__(self, texCoords=None):
-        self.mesh = glData.TexCoordArray(texCoords)
+        self.mesh = numpy.array(texCoords)
         self.bindMesh()
 
 class ImageTextureCoordMesh(GLArrayMesh):
+    meshKind = 'texture_coord'
     def __init__(self, imageTexture=None):
         if imageTexture is not None:
             self.update(imageTexture)

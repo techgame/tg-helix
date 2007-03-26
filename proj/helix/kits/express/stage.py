@@ -58,6 +58,10 @@ class ExpressActor(HelixActor, KVObject):
 class ExpressStage(HelixStage, KVObject):
     box = KVProperty()
 
+    def __init__(self):
+        self.kvpub.copyWithHost(self)
+        HelixStage.__init__(self)
+
     def onSceneSetup(self, scene):
         self._setupBackground(scene)
 
@@ -73,10 +77,9 @@ class ExpressStage(HelixStage, KVObject):
         scene['render'] += projection
 
         bgLayer = actors.BackgroundLayer()
+        bgLayer.box.viewOf(projection.box, dim=2)
         scene['render'] += bgLayer
-
         self.box = bgLayer.box
-        self.box.viewOf(projection.box, dim=2)
 
     def onSceneShutdown(self, scene):
         pass
