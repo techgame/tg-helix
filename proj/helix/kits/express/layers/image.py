@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from operator import truediv
 import PIL.Image
 
 from TG.kvObserving import KVProperty
@@ -76,8 +77,7 @@ class ImageLayer(Layer):
         if size is not None:
             image = image.resize(size)
         self.image = image
-        self.aspect = image.size[0].__truediv__(image.size[1])
-        #self.box.setAspect(image.size, at=.5)
+        self.aspect = truediv(image.size[0], image.size[1])
         return image
 
     def _updateBoxAspect(self, kvw, key):
