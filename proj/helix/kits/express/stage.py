@@ -49,6 +49,14 @@ class ExpressActor(HelixActor, KVObject):
     def __init__(self):
         self.kvpub.copyWithHost(self)
 
+    def sceneNodeFor(self, nodeKey, node):
+        self.sceneGraphNodes[nodeKey] = node
+
+        sgpi = self.sceneGraphOpFor(nodeKey, node)
+        setattr(node, nodeKey+'Pass', sgpi)
+
+        return node
+
     def sceneGraphOpFor(self, sgOpKey, sgNode):
         sgOpFactory = self.sceneGraphOps.get(sgOpKey, None)
         if sgOpFactory is not None:

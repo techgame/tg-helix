@@ -28,13 +28,8 @@ class ExpressNode(HelixNode):
 
         nodeKey = klass.nodeKey
         node = item.sceneGraphNodes.get(nodeKey, None)
-        if not create or node is not None:
-            return node
-
-        node = klass()
-        item.sceneGraphNodes[nodeKey] = node
-        sgpi = item.sceneGraphOpFor(nodeKey, node)
-        setattr(node, nodeKey+'Pass', sgpi)
+        if node is None and create:
+            node = item.sceneNodeFor(nodeKey, klass.new())
         return node
 
 class RenderNode(ExpressNode):
