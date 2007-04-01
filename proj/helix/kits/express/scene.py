@@ -25,14 +25,16 @@ class ExpressNode(HelixNode):
     def itemAsNode(klass, item, create=True):
         if item.isNode():
             return item
-        node = klass._treeItemAsNodeCache.get(item, None)
+
+        nodeKey = klass.nodeKey
+        node = item.sceneGraphNodes.get(nodeKey, None)
         if not create or node is not None:
             return node
 
         node = klass()
-        sgpi = item.sceneGraphOpFor(klass.nodeKey, node)
-        setattr(node, klass.nodeKey+'Pass', sgpi)
-        klass._treeItemAsNodeCache[item] = node
+        item.sceneGraphNodes[nodeKey] = node
+        sgpi = item.sceneGraphOpFor(nodeKey, node)
+        setattr(node, nodeKey+'Pass', sgpi)
         return node
 
 class RenderNode(ExpressNode):

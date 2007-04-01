@@ -17,8 +17,6 @@ from .base import HelixObject
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixNode(HelixObject):
-    _treeItemAsNodeCache = None # dict(), created in flyweight()
-
     parents = None
     children = None
     
@@ -32,10 +30,7 @@ class HelixNode(HelixObject):
 
     @classmethod
     def flyweight(klass, **kwdata):
-        flyweightData = dict(
-                _treeItemAsNodeCache=dict())
-        flyweightData.update(kwdata)
-        return type(klass)(klass.__name__+'*', (klass,), flyweightData)
+        return type(klass)(klass.__name__+'*', (klass,), kwdata)
 
     @classmethod
     def createRootFor(klass, scene):
@@ -48,14 +43,14 @@ class HelixNode(HelixObject):
 
     @classmethod
     def itemAsNode(klass, item, create=True):
-        """Override to provide conversion utilities"""
+        """Override to provide conversion and creation utilities"""
         if item.isNode():
             return item
-        node = klass._treeItemAsNodeCache.get(item, None)
+
+        node = None 
         if not create or node is not None:
             return node
-
-        raise ValueError("Unable to create node from %r item" % (item.__class__,))
+        raise ValueError("Expected a HelixNode, but received %r" % (item.__class__,))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node and Node Tree  iteration
@@ -224,18 +219,6 @@ class HelixNode(HelixObject):
             node.onRemoveFromParent(self)
             nodeChanges.add(node)
         self.treeChanged([nodeChanges])
-
-    @classmethod
-    def clearAll(klass, clearItem=True):
-        nodesToClear = klass._treeItemAsNodeCache.itervalues()
-
-        if clearItem:
-            for n in nodesToClear:
-                n.delItem()
-                n.clear()
-        else:
-            for n in nodesToClear:
-                n.clear()
 
 Node = HelixNode
 
