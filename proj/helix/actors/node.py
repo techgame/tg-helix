@@ -26,6 +26,10 @@ class HelixNode(HelixObject):
         self.parents = []
         self.children = []
 
+    @classmethod
+    def new(klass):
+        return klass()
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
@@ -33,7 +37,7 @@ class HelixNode(HelixObject):
         return type(klass)(klass.__name__+'*', (klass,), kwdata)
 
     @classmethod
-    def createRootFor(klass, scene):
+    def createRootForScene(klass, scene):
         rootKlass = klass.flyweight(scene=scene)
         return rootKlass()
 
@@ -48,9 +52,10 @@ class HelixNode(HelixObject):
             return item
 
         node = None 
-        if not create or node is not None:
-            return node
-        raise ValueError("Expected a HelixNode, but received %r" % (item.__class__,))
+        if node is None and create:
+            raise ValueError("Expected a HelixNode, but received %r" % (item.__class__,))
+
+        return node
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node and Node Tree  iteration
@@ -153,9 +158,23 @@ class HelixNode(HelixObject):
     #~ Children collection
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def __len__(self):
+        return len(self.children)
+
+    def __iter__(self):
+        return iter(self.children)
+
+    def __getitem__(self, idx):
+        return self.children[idx]
+    def __delitem__(self, idx):
+        nodeList = self.children[idx]
+        del self.children[nodeList]
+        self._removeNodeList(children)
+
     def __contains__(self, other):
         node = self.itemAsNode(other, False)
         return node in self.children
+
     def __iadd__(self, other):
         self.add(other)
         return self
@@ -163,6 +182,8 @@ class HelixNode(HelixObject):
         self.remove(other)
         return self
 
+    def insertNew(self, idx):
+        return self.insert(idx, self.new())
     def insert(self, idx, item):
         node = self.itemAsNode(item)
         if node.onAddToParent(self):
@@ -181,12 +202,15 @@ class HelixNode(HelixObject):
         idx = self.children.index(nidx) + 1
         return self.insert(idx, item)
 
+    def addNew(self):
+        return self.add(self.new())
     def add(self, item):
         node = self.itemAsNode(item)
         if node.onAddToParent(self):
             self.children.append(node)
             self.treeChanged([node])
             return node
+    append = add
 
     def extend(self, iterable):
         itemAsNode = self.itemAsNode
@@ -205,19 +229,22 @@ class HelixNode(HelixObject):
         if node is None: 
             return
         if node.onRemoveFromParent(self):
-            while node in self.children:
-                self.children.remove(node)
+            self.children.remove(node)
             self.treeChanged([node])
             return node
 
     def clear(self):
         nodeList = self.children[:]
         del self.children[:]
+        self._removeNodeList(nodeList)
 
+    def _removeNodeList(self, nodeList):
+        if not isinstance(nodeList, list):
+            nodeList = [nodeList]
         nodeChanges = set()
         for node in nodeList:
-            node.onRemoveFromParent(self)
-            nodeChanges.add(node)
+            if node.onRemoveFromParent(self):
+                nodeChanges.add(node)
         self.treeChanged([nodeChanges])
 
 Node = HelixNode

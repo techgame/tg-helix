@@ -78,7 +78,7 @@ class HelixScene(base.HelixObject):
 
     def setupSceneGraph(self):
         for kind, (nodeType, managerFactory) in self.sgPassFactories.iteritems():
-            rootNode = nodeType.createRootFor(self)
+            rootNode = nodeType.createRootForScene(self)
             manager = managerFactory(self, rootNode)
             self.sgManagers[kind] = manager
 
