@@ -28,19 +28,15 @@ from TG.helix.kits.express.actors import *
 class DemoStage(stage.ExpressStage):
     def onSceneSetup(self, scene):
         super(DemoStage, self).onSceneSetup(scene)
-        renderRoot = scene['render']
-
-        grp = Group()
-        renderRoot += grp
 
         bigMovie = QTMovieLayer(os.path.join(filePath, 'milkgirls1080.mov'), hostBox=self.box)
         bigMovie.looping()
-        grp += bigMovie
+        self.root += bigMovie
         bigMovie.play()
 
         cameraMovie = QTMovieLayer(os.path.join(filePath, 'cercle.mov'), color='#ff:40', hostBox=self.box)
         cameraMovie.looping()
-        grp += cameraMovie
+        self.root += cameraMovie
         cameraMovie.play()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -24,9 +24,8 @@ from TG.helix.kits.express.actors import *
 class DemoStage(stage.ExpressStage):
     def onSceneSetup(self, scene):
         super(DemoStage, self).onSceneSetup(scene)
-        renderRoot = scene['render']
 
-        renderRoot += ImageLayer(os.path.join(filePath, 'aPicture.png'), hostBox=self.box)
+        self.root += ImageLayer(os.path.join(filePath, 'aPicture.png'), hostBox=self.box)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

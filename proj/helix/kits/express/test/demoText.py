@@ -20,16 +20,16 @@ from TG.helix.kits.express.actors import *
 
 class DemoStage(stage.ExpressStage):
     def onSceneSetup(self, scene):
-        renderRoot = scene['render']
+        super(DemoStage, self).onSceneSetup(scene)
 
         bgLayer = BackgroundLayer('#80')
         scene['resize'] += bgLayer
-        renderRoot += bgLayer
+        self.root += bgLayer
 
         textLayer = TextLayer('a test')
         textLayer.align = 0.5
         scene['resize'] += textLayer
-        renderRoot += textLayer
+        self.root += textLayer
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Main 

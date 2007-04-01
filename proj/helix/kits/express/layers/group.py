@@ -49,18 +49,33 @@ class Group(ExpressActor):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def __len__(self):
+        return len(self.node_layers)
+    def __iter__(self, idx):
+        return iter(self.node_layers)
+    def __getitem__(self, idx):
+        return self.node_layers[idx]
+    def __setitem__(self, idx, value):
+        self.node_layers[idx] = value
+    def __delitem__(self, idx):
+        del self.node_layers[idx]
+
     def add(self, layer):
         self.node_layers.append(layer)
         return layer
     def remove(self, layer):
         self.node_layers.remove(layer)
         return layer
+    def extend(self, layers):
+        self.node_layers.extend(layers)
 
     def clear(self):
         del self.node_layers[:]
 
     def __iadd__(self, layer):
-        self.add(layer)
+        if isinstance(layer, list):
+            self.extend(layer)
+        else: self.add(layer)
         return self
     def __isub__(self, layer):
         self.remove(layer)

@@ -21,18 +21,17 @@ from TG.helix.kits.express.actors import *
 class DemoStage(stage.ExpressStage):
     def onSceneSetup(self, scene):
         super(DemoStage, self).onSceneSetup(scene)
-        renderRoot = scene['render']
 
         layer = Layer('#00:80:00')
         layer.aspect = 1.6
-        renderRoot += layer
+        self.root += layer
 
         @self.kvwatch('box.*')
         def layerBox(kvw, key, layer=layer):
             layer.box.atAspect[layer.aspect, .5] = kvw.value.size
 
         l2 = Layer('#ff:80')
-        renderRoot += l2
+        self.root += l2
 
         @layer.kvwatch('box.*')
         def layerBox(kvw, key, l2=l2):

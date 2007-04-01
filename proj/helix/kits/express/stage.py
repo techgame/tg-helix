@@ -77,18 +77,24 @@ class ExpressStage(HelixStage, KVObject):
     def _setupBackground(self, scene):
         from . import actors
 
+        sgnResize = scene['resize']
+        sgnRender = scene['render']
+
         viewport = actors.Viewport()
-        scene['resize'] += viewport
-        scene['render'] += viewport
+        sgnResize += viewport
+        sgnRender += viewport
 
         projection = actors.Projection()
-        scene['resize'] += projection
-        scene['render'] += projection
+        sgnResize += projection
+        sgnRender += projection
 
         bgLayer = actors.BackgroundLayer()
         bgLayer.box.viewOf(projection.box, dim=2)
-        scene['render'] += bgLayer
+        sgnRender += bgLayer
         self.box = bgLayer.box
+
+        self.root = actors.Group()
+        sgnRender += self.root
 
     def onSceneShutdown(self, scene):
         pass

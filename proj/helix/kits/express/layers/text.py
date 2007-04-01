@@ -44,7 +44,7 @@ class TextLayerRenderOp(LayerRenderOp):
         gl.glPopMatrix()
 
 class TextLayerResizeOp(ExpressGraphOp):
-    def __init__(self, actor):
+    def __init__(self, actor, sgNode):
         self.box = actor.box
         self.fscale = actor.fscale
 
