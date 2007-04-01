@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.kvObserving import KVProperty
 from ..stage import ExpressActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,6 +26,43 @@ class Group(ExpressActor):
             Timeline "Animate" ops
         Does not own child Layers		
     """
+    node_layers = KVProperty(list)
+
     def isLayer(self): return False
     def isComposite(self): return True
+
+    def sceneNodeFor(self, nodeKey, node):
+        node = ExpressActor.sceneNodeFor(self, nodeKey, node)
+        if nodeKey == 'render':
+            self._setupNodeLayers(node.addNew())
+        return node
+
+    def _setupNodeLayers(self, node_layers):
+        # get existing node_layers *list* 
+        layers = self.node_layers
+
+        # put the layers list into the node children list
+        node_layers.extend(layers)
+
+        # and replace the node_layers with the node instance
+        self.node_layers = node_layers
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def add(self, layer):
+        self.node_layers.append(layer)
+        return layer
+    def remove(self, layer):
+        self.node_layers.remove(layer)
+        return layer
+
+    def clear(self):
+        del self.node_layers[:]
+
+    def __iadd__(self, layer):
+        self.add(layer)
+        return self
+    def __isub__(self, layer):
+        self.remove(layer)
+        return self
 

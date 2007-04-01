@@ -30,14 +30,17 @@ class DemoStage(stage.ExpressStage):
         super(DemoStage, self).onSceneSetup(scene)
         renderRoot = scene['render']
 
+        grp = Group()
+        renderRoot += grp
+
         bigMovie = QTMovieLayer(os.path.join(filePath, 'milkgirls1080.mov'), hostBox=self.box)
         bigMovie.looping()
-        renderRoot += bigMovie
+        grp += bigMovie
         bigMovie.play()
 
         cameraMovie = QTMovieLayer(os.path.join(filePath, 'cercle.mov'), color='#ff:40', hostBox=self.box)
         cameraMovie.looping()
-        renderRoot += cameraMovie
+        grp += cameraMovie
         cameraMovie.play()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
