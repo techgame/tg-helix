@@ -5,13 +5,10 @@
 syntax: glob 
 
 syntax: regexp 
-^sandbox/matuikit/quicktime/Curious George.m4b
-^sandbox/matuikit/quicktime/masseffect_x06walkthru_HD720p.mov
-^sandbox/matuikit/quicktime/milkgirls1080.mov
-^proj/helix/kits/express/test/.*\.mov
-^proj/helix/actors/build
-^proj/helix/actors/.*.so
-^proj/helix/actors/.*.dll
+^kits/express/test/.*\.mov
+^actors/build
+^actors/.*.so
+^actors/.*.dll
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Generally useful ignore configurations

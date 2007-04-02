@@ -29,7 +29,7 @@ class DemoStage(stage.ExpressStage):
     def onSceneSetup(self, scene):
         super(DemoStage, self).onSceneSetup(scene)
 
-        bigMovie = QTMovieLayer(os.path.join(filePath, 'milkgirls1080.mov'), hostBox=self.box)
+        bigMovie = QTMovieLayer(os.path.join(filePath, 'yohoyoho_720.mov'), hostBox=self.box)
         bigMovie.looping()
         self.root += bigMovie
         bigMovie.play()
