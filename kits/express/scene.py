@@ -47,9 +47,15 @@ class ExpressScene(HelixScene):
         }
 
     def setupEvtSources(self, evtSources=[]):
-        super(ExpressScene, self).setupEvtSources(evtSources)
-        self.evtRoot.visit(SceneAnimationEventHandler(self))
-        self.timestamp = self.evtRoot.newTimestamp
+        evtRoot = HelixScene.setupEvtSources(self, evtSources)
+        evtRoot.visit(SceneAnimationEventHandler(self))
+        return evtRoot
+
+    def setupSceneGraph(self):
+        for kind, (nodeType, managerFactory) in self.sgPassFactories.iteritems():
+            rootNode = nodeType.createRootForScene(self)
+            manager = managerFactory(self, rootNode)
+            self.sgManagers[kind] = manager
 
     meter = property(lambda self: self)
     def start(self): 

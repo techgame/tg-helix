@@ -31,12 +31,6 @@ class HelixScene(base.HelixObject):
     """
     stage = None
 
-    sgPassFactories = {
-        'render': (node.HelixNode, sceneManagers.RenderManager),
-        'resize': (node.HelixNode, sceneManagers.ResizeManager),
-        #'select': (node.HelixNode, sceneManagers.SelectManager),
-        }
-
     def isScene(self): return True
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,13 +68,13 @@ class HelixScene(base.HelixObject):
     def setupEvtSources(self, evtSources=[]):
         evtRoot = self.evtRoot
         evtRoot.visitGroup(evtSources)
+        self.timestamp = evtRoot.newTimestamp
+
         evtRoot.visit(SceneViewportEventHandler(self))
+        return evtRoot
 
     def setupSceneGraph(self):
-        for kind, (nodeType, managerFactory) in self.sgPassFactories.iteritems():
-            rootNode = nodeType.createRootForScene(self)
-            manager = managerFactory(self, rootNode)
-            self.sgManagers[kind] = manager
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
     def shutdown(self):
         self.stage.onSceneShutdown(self)
