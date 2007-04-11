@@ -80,8 +80,13 @@ class HelixScene(base.HelixObject):
         self.stage.onSceneShutdown(self)
         return True
 
-    def animate(self, info):
-        return self.stage.onSceneAnimate(self, info)
+    def _sgResize_(self, viewport, viewportSize):
+        return self.sgManagers['resize'](viewport, viewportSize)
+    def _sgRender_(self, viewport):
+        return self.sgManagers['render'](viewport)
+    def _sgAnimate_(self, viewport, info):
+        if self.stage.onSceneAnimate(self, info):
+            return self._sgRender_(viewport)
 
 Scene = HelixScene
 
@@ -91,25 +96,23 @@ Scene = HelixScene
 
 class SceneViewportEventHandler(ViewportEventHandler):
     def __init__(self, scene):
-        self.sgManagers = scene.sgManagers
+        self.scene = scene
 
     def resize(self, viewport, viewportSize):
-        return self.sgManagers['resize'](viewport, viewportSize)
+        return self.scene._sgResize_(viewport, viewportSize)
 
     def erase(self, viewport):
         return True
 
     def paint(self, viewport):
-        return self.sgManagers['render'](viewport)
+        return self.scene._sgRender_(viewport)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SceneAnimationEventHandler(TimerEventHandler):
     def __init__(self, scene):
         self.scene = scene
-        self.sgManagers = scene.sgManagers
 
     def timer(self, viewport, info):
-        if self.scene.animate(info):
-            return self.sgManagers['render'](viewport)
+        self.scene._sgAnimate_(viewport, info)
 

@@ -22,8 +22,8 @@ class HelixObject(object):
     def isStage(self): return False
     def isNode(self): return False
 
-    def asWeakRef(self, ref=weakref.ref):
-        return ref(self)
-    def asWeakProxy(self, proxy=weakref.proxy):
-        return proxy(self)
+    def asWeakRef(self, ref=weakref.ref, cb=None):
+        return ref(self, cb)
+    def asWeakProxy(self, proxy=weakref.proxy, cb=None):
+        return proxy(self, cb)
 

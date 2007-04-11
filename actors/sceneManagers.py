@@ -73,6 +73,17 @@ class RenderManager(SceneGraphPassManager):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class LoadManager(RenderManager):
+    passItemKey = 'loadPass'
+    def graphPass(self):
+        result = RenderManager.graphPass(self)
+
+        # clear the graph pass cache until the next time it needs compiled
+        self.graphPassCache = []
+        return result
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class SelectManager(SceneGraphPassManager):
     passItemKey = 'selectPass'
     graphPassItemsFrom = graphPassBoundFnsFrom
