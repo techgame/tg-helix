@@ -13,7 +13,6 @@ from TG.helix.actors.scene import HelixScene, SceneAnimationEventHandler
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiNode(HelixNode):
-    _sgOpRequired_ = {'render': None, 'resize': None, 'select':'render'}
     def __init__(self):
         self.parents = KVList()
         self.children = KVList()
@@ -25,7 +24,7 @@ class MatuiNode(HelixNode):
 
         node = item._sgNode_
         if node is None and create:
-            node = item._sgNewNode_(klass.new, klass._sgOpRequired_)
+            node = item._sgNewNode_(klass.new)
         return node
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,7 +32,8 @@ class MatuiNode(HelixNode):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiScene(HelixScene, KVObject):
-    _sgPassManagers_ = {
+    _sgPassFactories_ = {
+        'load': sceneManagers.LoadManager,
         'render': sceneManagers.RenderManager,
         'resize': sceneManagers.ResizeManager,
         'select': sceneManagers.SelectManager,
@@ -48,4 +48,9 @@ class MatuiScene(HelixScene, KVObject):
         rootNode = MatuiNode.createRootForScene(self)
         for sgPassKey, sgPassFactory in self._sgPassFactories_.items():
             self.sgManagers[sgPassKey] = sgPassFactory(self, rootNode)
+        self.rootNode = rootNode
+
+    def _sgRender_(self, viewport):
+        self.sgManagers['load'](viewport)
+        return self.sgManagers['render'](viewport)
 

@@ -21,55 +21,95 @@ from TG.helix.actors import HelixActor
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class Resources(object):
-    partial = staticmethod(partial)
-    def __init__(self, actor):
-        pass
-    def load(self, node, sgo):
-        pass
+class SceneGraphOp(KVObject):
+    _sgOp_ = None
 
-Resources.property = classmethod(obInstProperty)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class GraphOp(object):
     cullStack = False
     partial = staticmethod(partial)
-    def __init__(self, actor, node): 
+    def __init__(self, node, actor): 
+        KVObject.__init__(self)
+        self.init(node, actor)
+
+    def init(self, node, actor): 
         pass
     def bindPass(self, node, sgo): 
+        return None, None
+
+class SGResizeOp(SceneGraphOp):
+    def init(self, node, actor): 
+        self.res = node.res
+
+    def bindPass(self, node, sgo):
+        return [self.resize], None
+
+    def resize(self, sgo):
+        pass
+
+class SGRenderOp(SceneGraphOp):
+    def init(self, node, actor): 
+        self.res = node.res
+
+    def bindPass(self, node, sgo):
+        return [self.render], None
+
+    def render(self, sgo):
+        pass
+
+class SGLoadOp(SceneGraphOp):
+    actor = None
+    def init(self, node, actor): 
+        self.res = node.res
+        self.actor = actor.asWeakProxy()
         return None
 
+    def bindPass(self, node, sgo): 
+        del node.loadPass
+        return [self.load], None
+
+    def load(self, sgo):
+        pass
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Actor
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiActor(HelixActor, KVObject):
-    _sgOps_ = {'render': None, 'resize': None, 'select': None}
     _sgNode_ = KVProperty(None)
+    _sgOps_ = {
+        #'load': SGLoadOp, 
+        #'render': SGRenderOp, 
+        #'resize': None, 
+        #'select': None,
+        }
 
     def __init__(self):
         self.kvpub.copyWithHost(self)
 
-    def _sgNewNode_(self, nodeFactory, sgOpRequired):
+    def _sgNewNode_(self, nodeFactory):
         if self._sgNode_ is not None:
             raise RuntimeError("sgNewNode called multiple times for MatuiActor")
 
         node = nodeFactory()
         self._sgNode_ = node
-        self._sgOpSetup_(node, sgOpRequired)
+        self._sgNodeSetup_(node)
+        self._sgOpSetup_(node)
         return node
 
-    def _sgOpSetup_(self, node, sgOpRequired):
-        sgOpRequired = sgOpRequired.copy()
+    def _sgNodeSetup_(self, node):
+        node.actor = self
+        node.res = {}
 
-        for sgOpKey, sgOpFactory in self._sgOps_.items:
+    def _sgOpSetup_(self, node):
+        for sgOpKey, sgOpFactory in self._sgOps_.items():
             if sgOpFactory is not None: 
-                sgOp = sgOpFactory(self, node)
-                sgOpRequired.pop(sgOpRequired, None)
-                setattr(node, sgOpKey+'Pass', sgOp)
+                sgOp = sgOpFactory(node, self)
 
-        for sgOpKey, sgOpDefault in sgOpRequired.items():
-            sgOpKey += 'Pass'
-            if sgOpDefault:
-                setattr(node, sgOpKey, getattr(node, sgOpKey, None))
-            else: setattr(node, sgOpKey, None)
+                sgOpKey += 'Pass'
+                setattr(node, sgOpKey, sgOp)
+
+        if getattr(node, 'selectPass', None) is None:
+            renderPass = getattr(node, 'renderPass', None)
+            if renderPass is not None:
+                node.selectPass = renderPass
+
 
