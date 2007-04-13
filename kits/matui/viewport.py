@@ -24,3 +24,17 @@ class Viewport(actor.MatuiActor):
     _sgOps_ = {'resize': ViewportResizeOp}
     box = KVBox.property([0,0], [1,1], dtype='i')
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ ClearViewport
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ClearViewportRenderOp(actor.SGRenderOp):
+    mask = gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT
+    def render(self, sgo):
+        gl.glClear(self.mask)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ClearViewport(actor.MatuiActor):
+    _sgOps_ = {'render': ClearViewportRenderOp}
+
