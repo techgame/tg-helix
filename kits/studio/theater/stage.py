@@ -12,18 +12,13 @@
 
 from TG.kvObserving import KVProperty, kvobserve
 from TG.helix.kits.matui.stage import MatuiStage
-from TG.helix.kits.matui.viewport import Viewport
-
-from .scene import TheaterScene
-from .host import TheaterHost
+from TG.helix.kits.matui.viewport import Viewport, ClearViewport
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class TheaterStage(MatuiStage):
-    TheaterScene = TheaterScene
-    TheaterHost = TheaterHost
 
     studioManager = KVProperty(None)
     venue = KVProperty(None)
@@ -31,13 +26,14 @@ class TheaterStage(MatuiStage):
     def __init__(self, studioManager):
         MatuiStage.__init__(self)
         self.studioManager = studioManager
-        self.scene = self.TheaterScene(self)
-        self.host = self.TheaterHost(self)
+        self.scene = studioManager._fm_.TheaterScene(self)
+        self.host = studioManager._fm_.TheaterHost(self)
 
     def onSceneSetup(self, scene):
         self.viewport = Viewport()
+        self.blank = ClearViewport()
         self.kvo('venue', type(self).setupVenue)
-        self.setupVenue(self.venue)
+        self.venue = self.blank
 
     def setupVenue(self, venue):
         root = self.scene.rootNode
@@ -45,6 +41,7 @@ class TheaterStage(MatuiStage):
 
         root += self.viewport
 
-        if venue is not None:
-            root += venue
+        if venue is None:
+            root += self.blank
+        else: root += venue
 

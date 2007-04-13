@@ -12,5 +12,5 @@
 
 from .stage import TheaterStage
 from .scene import TheaterScene
-from .manager import TheaterManager
+from .host import TheaterHost
 

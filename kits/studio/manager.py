@@ -10,20 +10,26 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.metaObserving import OBFactoryMap
 from TG.kvObserving import KVObject, KVProperty, KVDict
 
 from .director import StudioDirector
 from .host import StudioHost
-from .theater import TheaterStage
+from .theater import TheaterStage, TheaterScene, TheaterHost
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StudioManager(KVObject):
-    StudioDirector = StudioDirector
-    StudioHost = StudioHost
-    TheaterStage = TheaterStage
+    _fm_ = OBFactoryMap(
+            StudioDirector = StudioDirector,
+            StudioHost = StudioHost,
+
+            TheaterStage = TheaterStage,
+            TheaterScene = TheaterScene,
+            TheaterHost = TheaterHost,
+            )
 
     director = KVProperty(None)
     host = KVProperty(None)
@@ -33,8 +39,8 @@ class StudioManager(KVObject):
         self.setup()
 
     def setup(self):
-        self.director = self.StudioDirector(self)
-        self.host = self.StudioHost(self)
+        self.director = self._fm_.StudioDirector(self)
+        self.host = self._fm_.StudioHost(self)
 
     def run(self):
         self.host.run()
@@ -42,7 +48,7 @@ class StudioManager(KVObject):
     def theater(self, key=None):
         t = self.theaters.get(key, None)
         if t is None:
-            t = self.TheaterStage(self)
+            t = self._fm_.TheaterStage(self)
             self.theaters[key] = t
         return t
 
