@@ -19,7 +19,5 @@ from TG.helix.actors import HelixStage
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiStage(HelixStage, KVObject):
-    def __init__(self):
-        self.kvpub.copyWithHost(self)
-        HelixStage.__init__(self)
+    pass
 

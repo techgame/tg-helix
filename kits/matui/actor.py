@@ -21,13 +21,12 @@ from TG.helix.actors import HelixActor
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneGraphOp(KVObject):
+class SceneGraphOp(object):
     _sgOp_ = None
 
     cullStack = False
     partial = staticmethod(partial)
     def __init__(self, node, actor): 
-        KVObject.__init__(self)
         self.init(node, actor)
 
     def init(self, node, actor): 
@@ -81,9 +80,6 @@ class MatuiActor(HelixActor, KVObject):
         #'resize': None, 
         #'select': None,
         }
-
-    def __init__(self):
-        self.kvpub.copyWithHost(self)
 
     def _sgNewNode_(self, nodeFactory):
         if self._sgNode_ is not None:

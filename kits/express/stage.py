@@ -46,9 +46,6 @@ class ExpressActor(HelixActor, KVObject):
     sceneGraphOps = {'render': None, 'resize': None}
     sceneGraphNodes = KVProperty(dict)
 
-    def __init__(self):
-        self.kvpub.copyWithHost(self)
-
     def sceneNodeFor(self, nodeKey, node):
         self.sceneGraphNodes[nodeKey] = node
 
@@ -66,10 +63,6 @@ class ExpressActor(HelixActor, KVObject):
 
 class ExpressStage(HelixStage, KVObject):
     box = KVProperty(None)
-
-    def __init__(self):
-        self.kvpub.copyWithHost(self)
-        HelixStage.__init__(self)
 
     def onSceneSetup(self, scene):
         self._setupBackground(scene)

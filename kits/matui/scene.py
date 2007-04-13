@@ -47,7 +47,11 @@ class MatuiScene(HelixScene, KVObject):
     def setupSceneGraph(self):
         rootNode = MatuiNode.createRootForScene(self)
         for sgPassKey, sgPassFactory in self._sgPassFactories_.items():
-            self.sgManagers[sgPassKey] = sgPassFactory(self, rootNode)
+            mgrNode = rootNode.new()
+            mgrNode.add(rootNode)
+
+            self.sgManagers[sgPassKey] = sgPassFactory(self, mgrNode)
+
         self.rootNode = rootNode
 
     def _sgRender_(self, viewport):
