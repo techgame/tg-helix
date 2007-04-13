@@ -23,7 +23,7 @@ from .timerEvents import wxTimerEventSource, wxIdleEventSource
 
 class wxHelixSceneHostViewLoader(object):
     @classmethod
-    def load(klass, glviewhost, stage, sceneFactory, **kwsetup):
+    def load(klass, glviewhost, stage, scene, **kwsetup):
         glviewhost.SetCurrent()
 
         # Reload the opengl raw api to support windows
@@ -31,7 +31,6 @@ class wxHelixSceneHostViewLoader(object):
 
         evtSources = klass.loadEvtSources(glviewhost, stage)
 
-        scene = sceneFactory(stage)
         scene.setup(evtSources=evtSources, **kwsetup)
 
         evtSources[0].sendSize(tuple(glviewhost.GetClientSize()))
