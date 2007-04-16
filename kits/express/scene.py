@@ -53,7 +53,7 @@ class ExpressScene(HelixScene):
 
     def setupSceneGraph(self):
         for kind, (nodeType, managerFactory) in self.sgPassFactories.iteritems():
-            rootNode = nodeType.createRootForScene(self)
+            rootNode = nodeType(scene=self)
             manager = managerFactory(self, rootNode)
             self.sgManagers[kind] = manager
 

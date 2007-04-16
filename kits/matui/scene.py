@@ -2,36 +2,20 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.kvObserving import KVObject, KVProperty, KVList
+from TG.metaObserving import OBFactoryMap
+from TG.kvObserving import KVObject
 
-from TG.helix.actors import HelixNode
 from TG.helix.actors import sceneManagers
 from TG.helix.actors.scene import HelixScene, SceneAnimationEventHandler
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Node
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class MatuiNode(HelixNode):
-    def __init__(self):
-        self.parents = KVList()
-        self.children = KVList()
-
-    @classmethod
-    def itemAsNode(klass, item, create=True):
-        if item.isNode():
-            return item
-
-        node = item._sgNode_
-        if node is None and create:
-            node = item._sgNewNode_(klass.new)
-        return node
+from .node import MatuiNode
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiScene(HelixScene, KVObject):
+    _fm_ = OBFactoryMap(Node=MatuiNode)
     _sgPassFactories_ = {
         'load': sceneManagers.LoadManager,
         'render': sceneManagers.RenderManager,
@@ -45,7 +29,7 @@ class MatuiScene(HelixScene, KVObject):
         return evtRoot
 
     def setupSceneGraph(self):
-        rootNode = MatuiNode.createRootForScene(self)
+        rootNode = self._fm_.Node(scene=self)
         for sgPassKey, sgPassFactory in self._sgPassFactories_.items():
             mgrNode = rootNode.new()
             mgrNode.add(rootNode)

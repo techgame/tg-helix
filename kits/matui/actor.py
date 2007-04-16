@@ -12,10 +12,12 @@
 
 from functools import partial
 
+from TG.metaObserving import obInstProperty, OBFactoryMap
 from TG.kvObserving import KVObject, KVProperty
-from TG.metaObserving import obInstProperty
 
 from TG.helix.actors import HelixActor
+
+from .node import MatuiNode
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -73,6 +75,7 @@ class SGLoadOp(SceneGraphOp):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiActor(HelixActor, KVObject):
+    _fm_ = OBFactoryMap(Node=MatuiNode)
     _sgNode_ = KVProperty(None)
     _sgOps_ = {
         #'load': SGLoadOp, 
@@ -81,11 +84,13 @@ class MatuiActor(HelixActor, KVObject):
         #'select': None,
         }
 
-    def _sgNewNode_(self, nodeFactory):
-        if self._sgNode_ is not None:
-            raise RuntimeError("sgNewNode called multiple times for MatuiActor")
+    def _sgNewNode_(self, **kw):
+        node = self._sgNode_
+        if node is not None:
+            if not kw.get('force', False):
+                return node
 
-        node = nodeFactory()
+        node = self._fm_.Node()
         self._sgNode_ = node
         self._sgNodeSetup_(node)
         self._sgOpSetup_(node)
