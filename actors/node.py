@@ -22,24 +22,16 @@ class HelixNode(HelixObject):
     
     def isNode(self): return True
 
-    def __init__(self):
+    def __init__(self, **kw):
+        for n,v in kw.items():
+            setattr(self, n, v)
+
         self.parents = []
         self.children = []
 
     @classmethod
-    def new(klass):
-        return klass()
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    @classmethod
-    def flyweight(klass, **kwdata):
-        return type(klass)(klass.__name__+'*', (klass,), kwdata)
-
-    @classmethod
-    def createRootForScene(klass, scene):
-        rootKlass = klass.flyweight(scene=scene)
-        return rootKlass()
+    def new(klass, **kw):
+        return klass(**kw)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Node coersion

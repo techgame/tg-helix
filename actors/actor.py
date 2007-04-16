@@ -10,8 +10,16 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .scene import HelixScene, Scene
-from .stage import HelixStage, Stage
-from .actor import HelixActor, Actor
-from .node import HelixNode, Node
+from .base import HelixObject
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Definitions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class HelixActor(HelixObject):
+    """An actor is simply a participant on the Stage"""
+
+    def isActor(self): return True
+
+Actor = HelixActor
 

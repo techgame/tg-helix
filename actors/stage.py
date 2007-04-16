@@ -16,15 +16,6 @@ from .base import HelixObject
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixActor(HelixObject):
-    """An actor is simply a participant on the Stage"""
-
-    def isActor(self): return True
-
-Actor = HelixActor
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class HelixStage(HelixObject):
     """The stage is the entry point for setup and interaction with the Scene mediator.
 
