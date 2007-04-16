@@ -10,6 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import os, sys
+
 from TG.metaObserving import OBFactoryMap
 from TG.kvObserving import KVObject, KVProperty, KVDict
 
@@ -18,13 +20,47 @@ from .host import StudioHost
 from .theater import TheaterStage, TheaterScene, TheaterHost
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Definitions 
+#~ Packages for Production Loading
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+module = type(sys)
+
+class Package(module):
+    def __init__(self, name=None, registry=True):
+        module.__init__(self, name or self.__name__)
+        self.__file__ = '<dynamic package>'
+        self.__path__ = []
+
+        if registry:
+            self._register_(registry)
+
+    def _register_(self, registry=True):
+        if registry in (None, True):
+            registry = sys.modules
+
+        registry[self.__name__] = self
+
+        parentName, _, pkgName = self.__name__.rpartition('.')
+        if parentName:
+            parent = registry[parentName]
+            setattr(parent, pkgName, self)
+
+    def addSite(self, path):
+        path = os.path.abspath(path)
+        self.__path__.append(path)
+
+class StudioPackage(Package):
+    __name__ = 'Studio'
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Studio Manager
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StudioManager(KVObject):
     _fm_ = OBFactoryMap(
             StudioDirector = StudioDirector,
             StudioHost = StudioHost,
+            StudioPackage = StudioPackage,
 
             TheaterStage = TheaterStage,
             TheaterScene = TheaterScene,
@@ -42,13 +78,19 @@ class StudioManager(KVObject):
         self.director = self._fm_.StudioDirector(self)
         self.host = self._fm_.StudioHost(self)
 
+        self.package = self._fm_.StudioPackage()
+
+    def addPackageSite(self, site):
+        self.package.addSite(site)
+
     def run(self):
         self.host.run()
 
-    def theater(self, key=None):
+    def getTheaterFor(self, key='default'):
         t = self.theaters.get(key, None)
         if t is None:
             t = self._fm_.TheaterStage(self)
             self.theaters[key] = t
         return t
 
+    
