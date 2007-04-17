@@ -17,7 +17,6 @@ from TG.kvObserving import KVObject, KVProperty, KVDict
 
 from .director import StudioDirector
 from .host import StudioHost
-from .theater import TheaterStage, TheaterScene, TheaterHost
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Packages for Production Loading
@@ -49,6 +48,8 @@ class Package(module):
         path = os.path.abspath(path)
         self.__path__.append(path)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class StudioPackage(Package):
     __name__ = 'Studio'
 
@@ -61,15 +62,10 @@ class StudioManager(KVObject):
             StudioDirector = StudioDirector,
             StudioHost = StudioHost,
             StudioPackage = StudioPackage,
-
-            TheaterStage = TheaterStage,
-            TheaterScene = TheaterScene,
-            TheaterHost = TheaterHost,
             )
 
     director = KVProperty(None)
     host = KVProperty(None)
-    theaters = KVProperty(KVDict)
 
     def __init__(self):
         self.setup()
@@ -86,11 +82,3 @@ class StudioManager(KVObject):
     def run(self):
         self.host.run()
 
-    def getTheaterFor(self, key='default'):
-        t = self.theaters.get(key, None)
-        if t is None:
-            t = self._fm_.TheaterStage(self)
-            self.theaters[key] = t
-        return t
-
-    
