@@ -158,10 +158,24 @@ class HelixNode(HelixObject):
 
     def __getitem__(self, idx):
         return self.children[idx]
+    def __setitem__(self, idx, value):
+        if isinstance(idx, slice):
+            if idx.step is not None:
+                raise NotImplementedError("Step is not implemented for setitem")
+
+            del self[idx]
+            self.extendAt(idx.start or 0,  value)
+        else: 
+            self.removeAt(idx)
+            self.insert(idx, v)
+
     def __delitem__(self, idx):
         nodeList = self.children[idx]
-        del self.children[nodeList]
-        self._removeNodeList(children)
+        del self.children[idx]
+        self._removeNodeList(nodeList)
+
+    def clear(self):
+        del self[:]
 
     def __contains__(self, other):
         node = self.itemAsNode(other, False)
@@ -215,6 +229,18 @@ class HelixNode(HelixObject):
                 children.append(node)
                 nodeChanges.add(node)
         self.treeChanged([nodeChanges])
+    def extendAt(self, idx, iterable):
+        itemAsNode = self.itemAsNode
+        newChildren = []
+
+        nodeChanges = set()
+        for each in iterable:
+            node = itemAsNode(each)
+            if node.onAddToParent(self):
+                newChildren.append(node)
+                nodeChanges.add(node)
+        self.children[idx:idx] = newChildren
+        self.treeChanged([nodeChanges])
 
     def remove(self, item):
         node = self.itemAsNode(item, False)
@@ -224,11 +250,12 @@ class HelixNode(HelixObject):
             self.children.remove(node)
             self.treeChanged([node])
             return node
-
-    def clear(self):
-        nodeList = self.children[:]
-        del self.children[:]
-        self._removeNodeList(nodeList)
+    def removeAt(self, idx):
+        node = self.children[idx]
+        if node.onRemoveFromParent(self):
+            del self.children[idx]
+            self.treeChanged([node])
+            return node
 
     def _removeNodeList(self, nodeList):
         if not isinstance(nodeList, list):
