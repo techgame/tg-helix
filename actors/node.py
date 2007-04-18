@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from operator import attrgetter
 from .base import HelixObject
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -17,6 +18,8 @@ from .base import HelixObject
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixNode(HelixObject):
+    order = 0
+
     parents = None
     children = None
     
@@ -180,6 +183,9 @@ class HelixNode(HelixObject):
     def __contains__(self, other):
         node = self.itemAsNode(other, False)
         return node in self.children
+
+    def sort(self, key=attrgetter('order')):
+        self.children.sort(key=key)
 
     def __iadd__(self, other):
         self.add(other)
