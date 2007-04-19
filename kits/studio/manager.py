@@ -66,6 +66,9 @@ class StudioManager(KVObject):
 
     director = KVProperty(None)
     host = KVProperty(None)
+    productions = KVProperty(KVDict)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __init__(self):
         self.setup()
@@ -81,4 +84,17 @@ class StudioManager(KVObject):
 
     def run(self):
         self.host.run()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def startProduction(self, prodModule):
+        prod = self.loadProduction(prodModule)
+        return prod.start()
+    def loadProduction(self, prodModule):
+        key = prodModule.productionKey
+        prod = self.productions.get(key)
+        if prod is None:
+            prod = prodModule.loadProduction(self)
+            self.productions[key] = prod
+        return prod
 
