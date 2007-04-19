@@ -23,28 +23,26 @@ from .timerEvents import wxTimerEventSource, wxIdleEventSource
 
 class wxHelixSceneHostViewLoader(object):
     @classmethod
-    def load(klass, glviewhost, stage, scene, **kwsetup):
+    def load(klass, glviewhost, options, scene, **kwsetup):
         glviewhost.SetCurrent()
 
         # Reload the opengl raw api to support windows
         TG.openGL.raw.apiReload()
 
-        evtSources = klass.loadEvtSources(glviewhost, stage)
-
+        evtSources = klass.loadEvtSources(glviewhost, options)
         scene.setup(evtSources=evtSources, **kwsetup)
-
-        evtSources[0].sendSize(tuple(glviewhost.GetClientSize()))
-        evtSources[0].sendPaint()
+        #evtSources[0].sendSize(tuple(glviewhost.GetClientSize()))
+        #evtSources[0].sendPaint()
         return scene
 
     @classmethod
-    def loadEvtSources(self, glviewhost, stage):
+    def loadEvtSources(self, glviewhost, options):
         return [
-            wxViewportEventSource(glviewhost, stage),
-            wxMouseEventSource(glviewhost, stage),
-            wxKeyboardEventSource(glviewhost, stage),
-            wxTimerEventSource(glviewhost, stage),
-            wxIdleEventSource(glviewhost, stage),
+            wxViewportEventSource(glviewhost, options),
+            wxMouseEventSource(glviewhost, options),
+            wxKeyboardEventSource(glviewhost, options),
+            wxTimerEventSource(glviewhost, options),
+            wxIdleEventSource(glviewhost, options),
             ]
 
 SceneHostViewLoader = wxHelixSceneHostViewLoader

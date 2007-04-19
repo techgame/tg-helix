@@ -77,13 +77,13 @@ class BasicRenderSkinModel(wxSkinModel):
     minSize = (200, 200)
     fullscreen = False
 
-    def setupStage(self, stage, sceneFactory):
-        self.stage = stage
-        self.sceneFactory = sceneFactory
+    def setupStage(self, options, scene):
+        self.options = options
+        self.scene = scene
 
     SceneHostViewLoader = viewLoader.SceneHostViewLoader
     def setupCanvas(self, canvasElem, canvasObj):
-        self.scene = self.SceneHostViewLoader.load(canvasObj, self.stage, self.sceneFactory)
+        self.SceneHostViewLoader.load(canvasObj, self.options, self.scene)
 
     def setupFrame(self, frame):
         self.frame = frame

@@ -19,7 +19,6 @@ import weakref
 class HelixObject(object):
     def isScene(self): return False
     def isActor(self): return False
-    def isStage(self): return False
     def isNode(self): return False
 
     def asWeakRef(self, ref=weakref.ref, cb=None):

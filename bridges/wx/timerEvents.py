@@ -21,12 +21,12 @@ from .common import wx, wxEventSourceMixin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxTimerEventSource(wxEventSourceMixin, TimerEventSource):
-    def __init__(self, glCanvas, stage):
-        frequency = getattr(stage, 'timerFrequency', 60.)
+    def __init__(self, glCanvas, options):
+        frequency = options.get('timerFrequency', 60.)
         TimerEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         self._timer = wx.Timer()
-        if getattr(stage, 'exitOnError', True):
+        if options.get('exitOnError', True):
             self._timer.Bind(wx.EVT_TIMER, self.onEvtTimer_exitError)
         else:
             self._timer.Bind(wx.EVT_TIMER, self.onEvtTimer)
@@ -74,7 +74,7 @@ class wxTimerEventSource(wxEventSourceMixin, TimerEventSource):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxIdleEventSource(wxEventSourceMixin, IdleEventSource):
-    def __init__(self, glCanvas, stage):
+    def __init__(self, glCanvas, options):
         IdleEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_IDLE, self.onEvtIdle)

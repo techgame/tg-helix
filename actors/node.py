@@ -214,6 +214,10 @@ class HelixNode(HelixObject):
         idx = self.children.index(nidx) + 1
         return self.insert(idx, item)
 
+    def newParent(self):
+        parentNode = self.new()
+        parentNode.add(self)
+        return self
     def addNew(self):
         return self.add(self.new())
     def add(self, item):
@@ -271,6 +275,4 @@ class HelixNode(HelixObject):
             if node.onRemoveFromParent(self):
                 nodeChanges.add(node)
         self.treeChanged([nodeChanges])
-
-Node = HelixNode
 

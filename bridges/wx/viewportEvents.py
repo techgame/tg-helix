@@ -21,11 +21,11 @@ from .common import wx, wxEventSourceMixin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxViewportEventSource(wxEventSourceMixin, ViewportEventSource):
-    def __init__(self, glCanvas, stage):
+    def __init__(self, glCanvas, options):
         ViewportEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
 
-        if getattr(stage, 'exitOnError', True):
+        if options.get('exitOnError', True):
             glCanvas.Bind(wx.EVT_SIZE, self.onEvtSize_exitError)
             glCanvas.Bind(wx.EVT_ERASE_BACKGROUND, self.onEvtEraseBackground_exitError)
             glCanvas.Bind(wx.EVT_PAINT, self.onEvtPaint_exitError)

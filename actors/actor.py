@@ -21,5 +21,3 @@ class HelixActor(HelixObject):
 
     def isActor(self): return True
 
-Actor = HelixActor
-

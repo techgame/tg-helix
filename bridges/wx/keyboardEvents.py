@@ -18,7 +18,7 @@ from .common import wx, wxEventSourceMixin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxKeyboardEventSource(wxEventSourceMixin, KeyboardEventSource):
-    def __init__(self, glCanvas, stage):
+    def __init__(self, glCanvas, options):
         KeyboardEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_KEY_DOWN, self.onEvtKey)

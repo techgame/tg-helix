@@ -30,7 +30,7 @@ class wxMouseEventSource(wxEventSourceMixin, MouseEventSource):
         0x8: 'meta',
         }
 
-    def __init__(self, glCanvas, stage):
+    def __init__(self, glCanvas, options):
         MouseEventSource.__init__(self)
         wxEventSourceMixin.__init__(self, glCanvas)
         glCanvas.Bind(wx.EVT_MOUSE_EVENTS, self.onEvtMouse)
