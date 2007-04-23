@@ -240,6 +240,10 @@ class HelixNode(HelixObject):
                 nodeChanges.add(node)
         self.treeChanged([nodeChanges])
     def extendAt(self, idx, iterable):
+        if isinstance(iterable, HelixObject):
+            self.insert(idx, iterable)
+            return
+
         itemAsNode = self.itemAsNode
         newChildren = []
 
