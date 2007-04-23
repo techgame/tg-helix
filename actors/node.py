@@ -188,10 +188,15 @@ class HelixNode(HelixObject):
         self.children.sort(key=key)
 
     def __iadd__(self, other):
-        self.add(other)
+        if isinstance(other, list):
+            self.extend(other)
+        else: self.add(other)
         return self
     def __isub__(self, other):
-        self.remove(other)
+        if isinstance(other, list):
+            for each in other:
+                self.remove(each)
+        else: self.remove(other)
         return self
 
     def insertNew(self, idx):
