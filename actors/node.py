@@ -217,7 +217,7 @@ class HelixNode(HelixObject):
     def newParent(self):
         parentNode = self.new()
         parentNode.add(self)
-        return self
+        return parentNode
     def addNew(self):
         return self.add(self.new())
     def add(self, item):
