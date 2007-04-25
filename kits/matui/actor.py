@@ -57,6 +57,7 @@ class SGRenderOp(SceneGraphOp):
         pass
 
 class SGLoadOp(SceneGraphOp):
+    loaded = False
     actor = None
     def init(self, node, actor): 
         self.res = node.res
@@ -64,9 +65,13 @@ class SGLoadOp(SceneGraphOp):
         return None
 
     def bindPass(self, node, sgo): 
-        del node.loadPass
-        return [self.load], None
+        if not self.loaded:
+            return [self.loadOp], None
+        else: return None, None
 
+    def loadOp(self, sgo):
+        self.load(sgo)
+        self.loaded = True
     def load(self, sgo):
         pass
 
