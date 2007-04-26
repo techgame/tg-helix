@@ -31,8 +31,6 @@ class wxHelixSceneHostViewLoader(object):
 
         evtSources = klass.loadEvtSources(glviewhost, options)
         scene.setup(evtSources=evtSources, **kwsetup)
-        #evtSources[0].sendSize(tuple(glviewhost.GetClientSize()))
-        #evtSources[0].sendPaint()
         return scene
 
     @classmethod
