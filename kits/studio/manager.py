@@ -15,53 +15,26 @@ import os, sys
 from TG.metaObserving import OBFactoryMap
 from TG.kvObserving import KVObject, KVProperty, KVDict
 
-from .director import StudioDirector
 from .host import StudioHost
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Packages for Production Loading
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-module = type(sys)
-
-class Package(module):
-    def __init__(self, name=None, registry=True):
-        module.__init__(self, name or self.__name__)
-        self.__file__ = '<dynamic package>'
-        self.__path__ = []
-
-        if registry:
-            self._register_(registry)
-
-    def _register_(self, registry=True):
-        if registry in (None, True):
-            registry = sys.modules
-
-        registry[self.__name__] = self
-
-        parentName, _, pkgName = self.__name__.rpartition('.')
-        if parentName:
-            parent = registry[parentName]
-            setattr(parent, pkgName, self)
-
-    def addSite(self, path):
-        path = os.path.abspath(path)
-        self.__path__.append(path)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class StudioPackage(Package):
-    __name__ = 'Studio'
+from .package import Package
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Studio Manager
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class StudioDirector(KVObject):
+    manager = KVProperty(None)
+
+    def __init__(self, manager):
+        self.manager = manager
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StudioManager(KVObject):
     _fm_ = OBFactoryMap(
             StudioDirector = StudioDirector,
             StudioHost = StudioHost,
-            StudioPackage = StudioPackage,
+            StudioPackage = Package,
             )
 
     director = KVProperty(None)
@@ -70,31 +43,15 @@ class StudioManager(KVObject):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def __init__(self):
-        self.setup()
+    def __init__(self, rootPkgName):
+        self.setup(rootPkgName)
 
-    def setup(self):
-        self.director = self._fm_.StudioDirector(self)
+    def setup(self, rootPkgName):
         self.host = self._fm_.StudioHost(self)
+        self.director = self._fm_.StudioDirector(self)
 
-        self.package = self._fm_.StudioPackage()
-
-    def addPackageSite(self, site):
-        self.package.addSite(site)
+        self.package = self._fm_.StudioPackage(rootPkgName)
 
     def run(self):
         self.host.run()
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def startProduction(self, prodModule):
-        prod = self.loadProduction(prodModule)
-        return prod.start()
-    def loadProduction(self, prodModule):
-        key = prodModule.productionKey
-        prod = self.productions.get(key)
-        if prod is None:
-            prod = prodModule.loadProduction(self)
-            self.productions[key] = prod
-        return prod
 
