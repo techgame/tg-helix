@@ -218,6 +218,7 @@ class HelixNode(HelixObject):
         parentNode = self.new()
         parentNode.add(self)
         return parentNode
+
     def addNew(self):
         return self.add(self.new())
     def add(self, item):
@@ -230,6 +231,10 @@ class HelixNode(HelixObject):
             self.treeChanged([node])
             return node
     append = add
+
+    def assign(self, item):
+        self.clear()
+        return self.add(item)
 
     def extend(self, iterable):
         itemAsNode = self.itemAsNode
