@@ -29,9 +29,5 @@ class MatuiNode(HelixNode):
     def itemAsNode(klass, item, create=True):
         if item.isNode():
             return item
-
-        node = item._sgNode_
-        if node is None and create:
-            node = item._sgNewNode_()
-        return node
+        return item._sgGetNode_(create)
 

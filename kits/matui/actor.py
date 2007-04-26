@@ -81,7 +81,6 @@ class SGLoadOp(SceneGraphOp):
 
 class MatuiActor(HelixActor, KVObject):
     _fm_ = OBFactoryMap(Node=MatuiNode)
-    _sgNode_ = KVProperty(None)
     _sgOps_ = {
         #'load': SGLoadOp, 
         #'render': SGRenderOp, 
@@ -89,16 +88,19 @@ class MatuiActor(HelixActor, KVObject):
         #'select': None,
         }
 
-    def _sgNewNode_(self, **kw):
-        node = self._sgNode_
-        if node is not None:
-            if not kw.get('force', False):
-                return node
+    _sgNode_ = KVProperty(None)
 
-        node = self._fm_.Node()
-        self._sgNode_ = node
-        self._sgNodeSetup_(node)
-        self._sgOpSetup_(node)
+    def _sgGetNode_(self, create=True, force=False):
+        node = self._sgNode_
+        if not create:
+            return node
+
+        if node is None or force:
+            node = self._fm_.Node()
+            self._sgNode_ = node
+            self._sgNodeSetup_(node)
+            self._sgOpSetup_(node)
+
         return node
 
     def _sgNodeSetup_(self, node):
