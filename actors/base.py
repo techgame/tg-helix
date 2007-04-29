@@ -19,10 +19,10 @@ import weakref
 class HelixObject(object):
     def isScene(self): return False
     def isActor(self): return False
-    def isNode(self): return False
+    def isNode(self, nodeKlass=None): return False
 
-    def asWeakRef(self, ref=weakref.ref, cb=None):
+    def asWeakRef(self, cb=None, ref=weakref.ref):
         return ref(self, cb)
-    def asWeakProxy(self, proxy=weakref.proxy, cb=None):
+    def asWeakProxy(self, cb=None, proxy=weakref.proxy):
         return proxy(self, cb)
 
