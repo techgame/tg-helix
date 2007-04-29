@@ -18,6 +18,7 @@ from TG.kvObserving import KVObject, KVProperty
 from TG.helix.actors import HelixActor
 
 from .node import MatuiNode
+from .layout import MatuiCell
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -28,11 +29,16 @@ class SceneGraphOp(object):
 
     cullStack = False
     partial = staticmethod(partial)
-    def __init__(self, node, actor): 
+    def __init__(self, node, actor, opKey): 
         self.init(node, actor)
+        self.bindOp(node, opKey)
 
     def init(self, node, actor): 
         pass
+
+    def bindOp(self, node, opKey):
+        setattr(node, opKey+'Pass', self)
+
     def bindPass(self, node, sgo): 
         return None, None
 
@@ -80,22 +86,20 @@ class SGLoadOp(SceneGraphOp):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiActor(HelixActor, KVObject):
-    _fm_ = OBFactoryMap(Node=MatuiNode)
-    _sgOps_ = {
-        #'load': SGLoadOp, 
-        #'render': SGRenderOp, 
-        #'resize': None, 
-        #'select': None,
-        }
+    _fm_ = OBFactoryMap(
+            Node=MatuiNode, 
+            Cell=MatuiCell)
+    _sgOps_ = {}
 
     _sgNode_ = KVProperty(None)
+    cell = KVProperty(None)
 
-    def _sgGetNode_(self, create=True, force=False):
+    def _sgGetNode_(self, create=True):
         node = self._sgNode_
         if not create:
             return node
 
-        if node is None or force:
+        if node is None:
             node = self._fm_.Node()
             self._sgNode_ = node
             self._sgNodeSetup_(node)
@@ -108,16 +112,18 @@ class MatuiActor(HelixActor, KVObject):
         node.res = {}
 
     def _sgOpSetup_(self, node):
-        for sgOpKey, sgOpFactory in self._sgOps_.items():
-            if sgOpFactory is not None: 
-                sgOp = sgOpFactory(node, self)
+        for sgOpKey, sgOpSetup in self._sgOps_.items():
+            if sgOpSetup is not None: 
+                sgOpSetup(node, self, sgOpKey)
 
-                sgOpKey += 'Pass'
-                setattr(node, sgOpKey, sgOp)
+    def getLayoutCell(self, create=True):
+        cell = self.cell
+        if not create:
+            return cell
 
-        if getattr(node, 'selectPass', None) is None:
-            renderPass = getattr(node, 'renderPass', None)
-            if renderPass is not None:
-                node.selectPass = renderPass
+        if cell is None:
+            cell = self._fm_.Cell(self.asWeakRef())
+            self.cell = cell
 
+        return cell
 
