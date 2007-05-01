@@ -100,33 +100,24 @@ class MatuiActor(HelixActor, KVObject):
 
         if node is None:
             node = self._fm_.Node()
-            self._sgNode_ = node
             self._sgNodeSetup_(node)
-            self._sgOpSetup_(node)
 
         return node
 
     def _sgNodeSetup_(self, node):
+        self._sgNode_ = node
         node.actor = self
         node.res = {}
+        self._sgCellSetup_(node)
+        self._sgOpSetup_(node)
+
+    def _sgCellSetup_(self, node):
+        Cell = getattr(self._fm_, 'Cell', None)
+        if Cell is not None:
+            self.cell = Cell(self.asWeakRef())
 
     def _sgOpSetup_(self, node):
         for sgOpKey, sgOpSetup in self._sgOps_.items():
             if sgOpSetup is not None: 
                 sgOpSetup(node, self, sgOpKey)
-
-    _cell = None
-    def getLayoutCell(self, create=True):
-        cell = self._cell
-        if not create:
-            return cell
-
-        if cell is None:
-            cell = self._fm_.Cell(self.asWeakRef())
-            self.setLayoutCell(cell)
-
-        return cell
-    def setLayoutCell(self, cell):
-        self._cell = cell
-    cell = property(getLayoutCell, setLayoutCell)
 

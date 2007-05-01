@@ -41,8 +41,9 @@ class MatuiCell(layouts.LayoutCell):
             setattr(self, n, v)
         return self
 
-    def getLayoutCell(self, create=False):
+    def getLayoutCell(self):
         return self
+    cell = property(getLayoutCell)
 
     def layoutInBox(self, lbox):
         host = self.host()
@@ -164,12 +165,12 @@ class MatuiLayout(HelixObject, KVObject):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def add(self, item):
-        itemCell = item.getLayoutCell()
+        itemCell = item.cell
         self.collection.append(itemCell)
         return itemCell
 
     def remove(self, item):
-        itemCell = item.getLayoutCell(False)
+        itemCell = item.cell
         if itemCell in self.collection:
             self.collection.remove(itemCell)
             return itemCell
@@ -179,3 +180,4 @@ class MatuiLayout(HelixObject, KVObject):
         self.collection[:] = []
 
 MatuiCell._fm_.update(Layout = MatuiLayout)
+
