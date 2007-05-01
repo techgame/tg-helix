@@ -91,8 +91,7 @@ class MatuiActor(HelixActor, KVObject):
             Cell=MatuiCell)
     _sgOps_ = {}
 
-    _sgNode_ = KVProperty(None)
-    cell = KVProperty(None)
+    _sgNode_ = None
 
     def _sgGetNode_(self, create=True):
         node = self._sgNode_
@@ -116,14 +115,18 @@ class MatuiActor(HelixActor, KVObject):
             if sgOpSetup is not None: 
                 sgOpSetup(node, self, sgOpKey)
 
+    _cell = None
     def getLayoutCell(self, create=True):
-        cell = self.cell
+        cell = self._cell
         if not create:
             return cell
 
         if cell is None:
             cell = self._fm_.Cell(self.asWeakRef())
-            self.cell = cell
+            self.setLayoutCell(cell)
 
         return cell
+    def setLayoutCell(self, cell):
+        self._cell = cell
+    cell = property(getLayoutCell, setLayoutCell)
 

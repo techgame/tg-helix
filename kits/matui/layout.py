@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.metaObserving import ObserverSet, OBFactoryMap
+from TG.metaObserving import OBSet, OBFactoryMap
 from TG.kvObserving import KVObject, KVProperty, KVList
 
 from TG.geomath.data.kvBox import KVBox
@@ -24,11 +24,15 @@ from TG.helix.actors.base import HelixObject
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiCell(layouts.LayoutCell):
-    oset = ObserverSet.property()
+    _fm_ = OBFactoryMap(Layout = None)
+    oset = OBSet.property()
     host = None
 
     weight = Vector.property([0,0], 'f')
     minSize = Vector.property([0,0], 'f')
+
+    def __init__(self, host):
+        self.host = host
 
     def set(self, *args, **kw):
         for n,v in args:
@@ -45,7 +49,8 @@ class MatuiCell(layouts.LayoutCell):
         placeFn = self.placeFn
         if placeFn is not None:
             placeFn(host, lbox)
-        else: host.box.pv = lbox.pv
+        else:
+            host.box = lbox.copy()
 
         self.oset.call_n1(lbox)
 
@@ -69,7 +74,7 @@ class MatuiCell(layouts.LayoutCell):
     def aspect(self, aspect, at=.5):
         @self.on
         def placeAspect(host, lbox):
-            host.box.aspectAt[at] = aspect
+            host.box.atAspect[aspect,at] = lbox
         return self
 
     def fill(self, inset=0):
@@ -78,6 +83,16 @@ class MatuiCell(layouts.LayoutCell):
             host.box.pv = lbox.pv
             host.box.inset(inset)
         return self
+
+    def newLayout(self, kind='abs'):
+        return self._fm_.Layout(kind)
+    def addLayout(self, kind='abs'):
+        layout = self.newLayout(kind)
+        layout.parentCell = self
+        return layout
+    def removeLayout(self, layout):
+        if layout.parentCell is self:
+            layout.parentCell = None
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Layout Object
@@ -103,29 +118,12 @@ class MatuiLayout(HelixObject, KVObject):
             Cell= MatuiCell,
             )
 
-    cell = KVProperty(None)
     strategy = KVProperty(None)
     collection = KVProperty(KVList)
-    box = KVProperty(KVBox) # using this form, 
+    box = KVBox.property()
 
     def __init__(self, kind='abs'):
         self.setKind(kind)
-
-        cell = self.getLayoutCell()
-        cell.oset.add(self.performLayout)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def getLayoutCell(self, create=True):
-        cell = self.cell
-        if not create:
-            return cell
-
-        if cell is None:
-            cell = self._fm_.Cell(self.asWeakRef())
-            self.cell = cell
-
-        return cell
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -140,23 +138,44 @@ class MatuiLayout(HelixObject, KVObject):
         self.strategy = factory()
     kind = property(getKind, setKind)
 
-    def performLayout(self, lbox=None):
-        self.strategy.layoutCells(self.collection, self.box)
+    def watchBox(self, box):
+        self.box.viewOf(box, dim=2)
+        self.kvo('box.*', lambda self, box: self.layout())
+
+    _parentCell = None
+    def getParentCell(self):
+        return self._parentCell
+    def setParentCell(self, parentCell):
+        lastParentCell = self.getParentCell()
+        if lastParentCell is not None:
+            lastParentCell.oset.discard(self)
+        self._parentCell = parentCell
+        if parentCell is not None:
+            parentCell.oset.add(self)
+    parentCell = property(getParentCell, setParentCell)
+
+    def layout(self, lbox=None):
+        if lbox is not None:
+            self.box.pv = lbox.pv[..., :2]
+
+        self.strategy(self.collection, self.box)
+    __call__ = layout
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def add(self, item):
-        cell = item.getLayoutCell()
-        self.collection.append(cell)
-        return cell
+        itemCell = item.getLayoutCell()
+        self.collection.append(itemCell)
+        return itemCell
 
     def remove(self, item):
-        cell = item.getLayoutCell(False)
-        if cell in self.collection:
-            self.collection.remove(cell)
-            return cell
+        itemCell = item.getLayoutCell(False)
+        if itemCell in self.collection:
+            self.collection.remove(itemCell)
+            return itemCell
         return None
 
     def clear(self, collection):
         self.collection[:] = []
 
+MatuiCell._fm_.update(Layout = MatuiLayout)
