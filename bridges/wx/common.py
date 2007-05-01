@@ -15,7 +15,7 @@ import time
 
 import wx
 
-from TG.helix.events.eventSource import HostViewEventSource
+from TG.helix.actors.events import HostViewEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 

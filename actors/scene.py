@@ -12,8 +12,7 @@
 
 from TG.metaObserving import OBFactoryMap
 
-from ..events import eventSource
-from . import base, node, sceneManagers
+from . import base, node, events, sceneManagers
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -27,7 +26,7 @@ class HelixScene(base.HelixObject):
 
     _fm_ = OBFactoryMap(
             Node = node.HelixNode,
-            EventRoot = eventSource.EventRoot,
+            EventRoot = events.EventRoot,
             )
 
     _sgPassFactories_ = {
