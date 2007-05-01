@@ -13,9 +13,6 @@
 from TG.metaObserving import OBFactoryMap
 
 from ..events import eventSource
-from ..events.viewportEvents import ViewportEventHandler
-from ..events.timerEvents import TimerEventHandler
-
 from . import base, node, sceneManagers
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,8 +60,10 @@ class HelixScene(base.HelixObject):
         evtRoot = self.evtRoot
         evtRoot.visitGroup(evtSources)
 
-        evtRoot.visit(SceneViewportEventHandler(self))
-        evtRoot.visit(SceneAnimationEventHandler(self))
+        evtRoot.add('viewport-size', self._sgResize_)
+        evtRoot.add('viewport-paint', self._sgRender_)
+        evtRoot.add('timer', self._sgAnimate_)
+
         return evtRoot
 
     def setupSceneGraph(self):
@@ -74,10 +73,10 @@ class HelixScene(base.HelixObject):
             sgPass = sgPassFactory(self, root.newParent())
             self.sgPass[sgPassKey] = sgPass
 
-    def _sgResize_(self, viewport, viewportSize):
+    def _sgResize_(self, viewport, info):
         self.sgPass['load'](viewport)
-        return self.sgPass['resize'](viewport, viewportSize)
-    def _sgRender_(self, viewport):
+        return self.sgPass['resize'](viewport, info['viewSize'])
+    def _sgRender_(self, viewport, info):
         self.sgPass['load'](viewport)
         return self.sgPass['render'](viewport)
 
@@ -85,30 +84,4 @@ class HelixScene(base.HelixObject):
     def _sgAnimate_(self, viewport, info):
         if self.animate:
             return self._sgRender_(viewport)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Scene Event adaptations 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class SceneViewportEventHandler(ViewportEventHandler):
-    def __init__(self, scene):
-        self.scene = scene
-
-    def resize(self, viewport, viewportSize):
-        return self.scene._sgResize_(viewport, viewportSize)
-
-    def erase(self, viewport):
-        return True
-
-    def paint(self, viewport):
-        return self.scene._sgRender_(viewport)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class SceneAnimationEventHandler(TimerEventHandler):
-    def __init__(self, scene):
-        self.scene = scene
-
-    def timer(self, viewport, info):
-        self.scene._sgAnimate_(viewport, info)
 

@@ -15,38 +15,62 @@ import time
 
 import wx
 
+from TG.helix.events.eventSource import HostViewEventSource
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxEventSourceMixin(object):
-    modifierByBit = {
-        0x1: 'alt',
-        0x2: 'control',
-        0x4: 'shift',
-        0x8: 'meta',
-        }
+class wxEventSourceMixin(HostViewEventSource):
+    channelKey = None
 
-    def __init__(self, glCanvas):
-        self.__glCanvas = glCanvas
-        self.timingLog = []
+    def __init__(self, glCanvas, options):
+        self.options = options
+        self.glCanvas = glCanvas
+
+    def evtRootSetup(self, evtRoot):
+        self.evtRoot = evtRoot
+        channels = evtRoot.getChannels()
+
+        if self.channelKey is not None:
+            self.channel = channels[self.channelKey]
+        else: self.channels = channels
+
+        self.bindHost(self.glCanvas, self.options)
 
     def __nonzero__(self):
-        return bool(self.__glCanvas)
+        return bool(self.glCanvas)
+
+    def bindHost(self, glCanvas, options):
+        pass
 
     def getViewSize(self):
-        return tuple(self.__glCanvas.GetClientSize())
+        return tuple(self.glCanvas.GetClientSize())
     def setViewCurrent(self):
-        return self.__glCanvas.SetCurrent()
+        return self.glCanvas.SetCurrent()
     def viewSwapBuffers(self):
-        return self.__glCanvas.SwapBuffers()
+        return self.glCanvas.SwapBuffers()
 
-    def _globalMouseInfo(self):
-        wxhost = self.__glCanvas
+    def getKeyMouseInfo(self, pos=None, evt=None):
+        wxhost = self.glCanvas
         eoHeight = wxhost.GetClientSize()[1]
-        mousePos = tuple(wxhost.ScreenToClient(wx.GetMousePosition()))
-        mousePos = (mousePos[0], eoHeight - mousePos[1])
+
+        if pos is None:
+            pos = tuple(wxhost.ScreenToClient(wx.GetMousePosition()))
+        pos = (pos[0], eoHeight - pos[1])
+
         mouseState = wx.GetMouseState()
-        mouseButtons=((mouseState.LeftDown() and 0x1) | (mouseState.RightDown() and 0x2) | (mouseState.MiddleDown() and 0x4))
-        return dict(pos=mousePos, buttons=mouseButtons)
+
+        if evt is None:
+            evt = mouseState
+
+        # mouseState is more accurate for combinations of buttons
+        modifiers = [evt.AltDown() and 'alt', evt.ControlDown() and 'control', evt.ShiftDown() and 'shift', evt.MetaDown() and 'meta']
+        modifiers = set(filter(None, modifiers))
+
+        buttons = [mouseState.LeftDown() and 'left', mouseState.RightDown() and 'right', mouseState.MiddleDown() and 'middle']
+        buttons = set(filter(None, buttons))
+
+        info = dict(pos=pos, buttons=buttons, modifiers=modifiers)
+        return info
 

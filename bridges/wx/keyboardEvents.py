@@ -10,17 +10,16 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.events.keyboardEvents import KeyboardEventSource
 from .common import wx, wxEventSourceMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxKeyboardEventSource(wxEventSourceMixin, KeyboardEventSource):
-    def __init__(self, glCanvas, options):
-        KeyboardEventSource.__init__(self)
-        wxEventSourceMixin.__init__(self, glCanvas)
+class wxKeyboardEventSource(wxEventSourceMixin):
+    channelKey = 'keyboard'
+
+    def bindHost(self, glCanvas, options):
         glCanvas.Bind(wx.EVT_KEY_DOWN, self.onEvtKey)
         glCanvas.Bind(wx.EVT_KEY_UP, self.onEvtKey)
         glCanvas.Bind(wx.EVT_CHAR, self.onEvtKey)
@@ -29,19 +28,17 @@ class wxKeyboardEventSource(wxEventSourceMixin, KeyboardEventSource):
         etype, = self.wxEtypeMap[evt.GetEventType()]
 
         unikey = evt.GetUnicodeKey()
-
-        info = self.newInfo(
-            etype=etype,
-            ukey=unikey,
-            uchar=(unichr(unikey) if unikey else u''),
-            modifiers=((evt.AltDown() and 0x1) | (evt.ControlDown() and 0x2) | (evt.ShiftDown() and 0x4) | (evt.MetaDown() and 0x8)),
-            )
-        info.update(self._globalMouseInfo())
+        info = self.newInfo( etype=etype, ukey=unikey,
+            uchar=(unichr(unikey) if unikey else u''))
 
         if etype == 'char':
             info['token'] = self.wxkTranslate.get(evt.GetKeyCode())
 
-        if not self.sendKey(info):
+        kminfo = self.getKeyMouseInfo(None, evt)
+        info.update(kminfo)
+
+        self.channel.call_n2(self, info)
+        if info.get('skip', False):
             evt.Skip()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

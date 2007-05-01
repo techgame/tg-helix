@@ -13,26 +13,25 @@
 import sys
 import traceback
 
-from TG.helix.events.timerEvents import TimerEventSource, IdleEventSource
 from .common import wx, wxEventSourceMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxTimerEventSource(wxEventSourceMixin, TimerEventSource):
-    def __init__(self, glCanvas, options):
+class wxTimerEventSource(wxEventSourceMixin):
+    channelKey = 'timer'
+
+    def bindHost(self, glCanvas, options):
         frequency = options.get('timerFrequency', 60.)
-        TimerEventSource.__init__(self)
-        wxEventSourceMixin.__init__(self, glCanvas)
         self._timer = wx.Timer()
+
         if options.get('exitOnError', True):
             self._timer.Bind(wx.EVT_TIMER, self.onEvtTimer_exitError)
-        else:
-            self._timer.Bind(wx.EVT_TIMER, self.onEvtTimer)
+        else: self._timer.Bind(wx.EVT_TIMER, self.onEvtTimer)
+
         self._timer.Start(int(1000/frequency), False)
 
-    _frequency = None
     def getFrequency(self):
         return 1000./self._timer.GetInterval()
     def setFrequency(self, frequency):
@@ -46,23 +45,12 @@ class wxTimerEventSource(wxEventSourceMixin, TimerEventSource):
             return
 
         info = self.newInfo()
-        info.update(self._globalMouseInfo())
+        info.update(self.getKeyMouseInfo())
 
-        if not self.sendTimer(info):
-            evt.Skip()
+        self.channel.call_n2(self, info)
 
     def onEvtTimer_exitError(self, evt):
-        if not self:
-            self._timer.Stop()
-            del self._timer
-            return
-
-        info = self.newInfo()
-        info.update(self._globalMouseInfo())
-
-        try:
-            if not self.sendTimer(info):
-                evt.Skip()
+        try: self.onEvtTimer(evt)
         except Exception, err:
             self.exitOnError(err)
 
@@ -73,16 +61,26 @@ class wxTimerEventSource(wxEventSourceMixin, TimerEventSource):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxIdleEventSource(wxEventSourceMixin, IdleEventSource):
-    def __init__(self, glCanvas, options):
-        IdleEventSource.__init__(self)
-        wxEventSourceMixin.__init__(self, glCanvas)
-        glCanvas.Bind(wx.EVT_IDLE, self.onEvtIdle)
+class wxIdleEventSource(wxEventSourceMixin):
+    channelKey = 'idle'
+
+    def bindHost(self, glCanvas, options):
+        if options.get('exitOnError', True):
+            glCanvas.Bind(wx.EVT_IDLE, self.onEvtIdle_exitError)
+        else: glCanvas.Bind(wx.EVT_IDLE, self.onEvtIdle)
 
     def onEvtIdle(self, evt):
         info = self.newInfo()
-        info.update(self._globalMouseInfo())
-        if not self.sendIdle(info):
+        info.update(self.getKeyMouseInfo())
+
+        self.channel.call_n2(self, info)
+
+        if info.get('skip', True):
             evt.Skip()
         else: evt.RequestMore()
+
+    def onEvtIdle_exitError(self, evt):
+        try: self.onEvtIdle(evt)
+        except Exception, err:
+            self.exitOnError(err)
 

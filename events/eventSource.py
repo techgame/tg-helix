@@ -13,6 +13,8 @@
 import sys
 import time
 
+from TG.metaObserving import OBChannelSet
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,11 +23,10 @@ class EventHandler(object):
     """Event handlers are part of the Chain of Responsibility pattern.  They
     are links in that chain that may or may not handle the event.
     """
-    eventKinds = []
-    root = None
+    evtRoot = None
 
-    def accept(self, visitor):
-        return visitor.visitEventHandler(self, self.eventKinds)
+    def evtRootSetup(self, evtRoot):
+        self.evtRoot = evtRoot
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -37,19 +38,17 @@ class EventSource(object):
     event roots, and then forward to that host.  The events should also be
     normalized at this layer.
     """
+    evtRoot = None
 
-    root = None
+    def evtRootSetup(self, evtRoot):
+        self.evtRoot = evtRoot
 
-    kind = None
-    def iterHandlers(self, kind=None):
-        if self.root is None:
-            return iter(())
-        if kind is None:
-            kind = self.kind
-        return self.root.iterHandlers(kind)
+    def newTimestamp(self):
+        return self.evtRoot.newTimestamp()
 
-    def accept(self, visitor):
-        return visitor.visitEventSource(self, [self.kind])
+    def newInfo(self, **kw):
+        kw.update(timestamp=self.newTimestamp())
+        return kw
 
 class HostViewEventSource(EventSource):
     def getViewSize(self):
@@ -62,80 +61,33 @@ class HostViewEventSource(EventSource):
         """viewSwapBuffers is provided by concrete implementations"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
-    def newInfo(self, **kw):
-        kw.update(timestamp=self.newTimestamp())
-        return kw
-
-    def newTimestamp(self):
-        return self.root.newTimestamp()
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Event Root to coordinate the EventSources with the event Handlers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class EventRoot(object):
+class EventRoot(OBChannelSet):
     """An event root is an object that represents an object that has events.
     Examples are mice, keyboards, joysticks.  These objects recreate state from
     the events they recieve from EventSource.
     """
 
-    sources = None
-    SourcesDict = dict
-    SourceList = list
-
-    handlersByKind = None
-    HandlersByKindDict = dict
-    HandlerList = list
-
-    def __init__(self):
-        self.sources = self.SourcesDict()
-        self.handlersByKind = self.HandlersByKindDict()
-
-    def iterHandlers(self, kind):
-        return iter(self.handlersByKind[kind])
+    def getChannels(self):
+        return self
 
     def __iadd__(self, item):
         self.visit(item)
         return self
 
     def visit(self, item):
-        accept = getattr(item, 'accept', None)
-        if accept is not None:
-            return accept(self)
+        evtRootSetup = getattr(item, 'evtRootSetup', None)
+        if evtRootSetup is None:
+            return self.visitGroup(item)
 
-        else: return self.visitGroup(item)
+        return evtRootSetup(self)
 
     def visitGroup(self, itemGroup):
         for subItem in itemGroup:
             self.visit(subItem)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def visitEventSource(self, evtSrc, eventKinds):
-        for kind in eventKinds:
-            if kind not in self.handlersByKind:
-                self.handlersByKind[kind] = self.HandlerList()
-            evtSrc.root = self
-
-            sources = self.sources.get(kind)
-            if sources is None:
-                sources = self.SourceList()
-                self.sources[kind] = sources
-            if evtSrc not in sources:
-                sources.append(evtSrc)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def visitEventHandler(self, evth, eventKinds):
-        for kind in eventKinds:
-            handlers = self.handlersByKind.get(kind)
-            if handlers is None:
-                handlers = self.HandlerList()
-                self.handlersByKind[kind] = handlers
-            evth.root = self
-
-            if evth not in handlers:
-                handlers.append(evth)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

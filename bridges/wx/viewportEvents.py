@@ -13,18 +13,14 @@
 import sys
 import traceback
 
-from TG.helix.events.viewportEvents import ViewportEventSource
 from .common import wx, wxEventSourceMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxViewportEventSource(wxEventSourceMixin, ViewportEventSource):
-    def __init__(self, glCanvas, options):
-        ViewportEventSource.__init__(self)
-        wxEventSourceMixin.__init__(self, glCanvas)
-
+class wxViewportEventSource(wxEventSourceMixin):
+    def bindHost(self, glCanvas, options):
         if options.get('exitOnError', True):
             glCanvas.Bind(wx.EVT_SIZE, self.onEvtSize_exitError)
             glCanvas.Bind(wx.EVT_ERASE_BACKGROUND, self.onEvtEraseBackground_exitError)
@@ -39,39 +35,35 @@ class wxViewportEventSource(wxEventSourceMixin, ViewportEventSource):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def onEvtSize(self, evt):
-        if not self.sendSize(tuple(evt.GetSize())):
+        info = self.newInfo(viewSize=tuple(evt.GetSize()))
+        self.channels.call_n2('viewport-size', self, info)
+        if info.get('skip', True):
             evt.Skip()
 
     def onEvtEraseBackground(self, evt):
-        if not self.sendErase():
-            evt.Skip()
+        evt.Skip()
 
     def onEvtPaint(self, evt):
         wx.PaintDC(evt.GetEventObject())
-        if not self.sendPaint():
+        info = self.newInfo(viewSize=tuple(self.glCanvas.GetSize()))
+        self.channels.call_n2('viewport-paint', self, info)
+        if info.get('skip', True):
             evt.Skip()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def onEvtSize_exitError(self, evt):
-        try:
-            if not self.sendSize(tuple(evt.GetSize())):
-                evt.Skip()
+        try: self.onEvtSize(evt)
         except Exception, err:
             self.exitOnError(err)
 
     def onEvtEraseBackground_exitError(self, evt):
-        try:
-            if not self.sendErase():
-                evt.Skip()
+        try: self.onEvtEraseBackground(evt)
         except Exception, err:
             self.exitOnError(err)
 
     def onEvtPaint_exitError(self, evt):
-        wx.PaintDC(evt.GetEventObject())
-        try:
-            if not self.sendPaint():
-                evt.Skip()
+        try: self.onEvtPaint(evt)
         except Exception, err:
             self.exitOnError(err)
 
