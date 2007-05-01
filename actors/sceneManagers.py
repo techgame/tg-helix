@@ -10,33 +10,35 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .sceneGraphPass import SceneGraphPassManager
+from .sceneGraphPass import SceneGraphPass, SceneGraphPassEx
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def graphPassBoundFnsFrom(self, node, hasChildren):
-    passItem = getattr(node, self.passItemKey, None)
-    if passItem is None:
-        return None, False
-
-    wind, unwind = passItem.bindPass(node, self.sgo)
-    return (wind, unwind), (hasChildren and passItem.cullStack)
-
-def vectorDispatch(graphPassFns, sgo):
-    # intended to be a replaceable method to call each method with a single
-    # argument in a tight loop.
-    for fn in graphPassFns:
-        fn(sgo)
+class ScenePassMeter(object):
+    def start(self): pass
+    def end(self, token): pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ResizeManager(SceneGraphPassManager):
-    passItemKey = 'resizePass'
-    graphPassItemsFrom = graphPassBoundFnsFrom
-    walkGraph = staticmethod(vectorDispatch)
+class BaseManager(object):
+    SGPassFactory = SceneGraphPassEx
+
+    meter = ScenePassMeter()
     sgo = property(lambda self: self)
+
+    def __init__(self, scene, root):
+        self.sgPass = self.SGPassFactory(root, self.passItemKey)
+
+        sceneMeter = getattr(scene, 'meter', None)
+        if sceneMeter is not None:
+            self.meter = sceneMeter
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class ResizeManager(BaseManager):
+    passItemKey = 'resizePass'
 
     def resize(self, viewport, viewportSize):
         self.viewportSize = viewportSize
@@ -44,7 +46,7 @@ class ResizeManager(SceneGraphPassManager):
         viewport.setViewCurrent()
         
         mtoken = self.meter.start()
-        self.walkGraph(self.graphPass(), self.sgo)
+        self.sgPass(self.sgo)
         self.meter.end(mtoken)
 
         return True
@@ -52,19 +54,14 @@ class ResizeManager(SceneGraphPassManager):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class RenderManager(SceneGraphPassManager):
+class RenderManager(BaseManager):
     passItemKey = 'renderPass'
-    graphPassItemsFrom = graphPassBoundFnsFrom
-    walkGraph = staticmethod(vectorDispatch)
-    sgo = property(lambda self: self)
 
     def render(self, viewport):
         viewport.setViewCurrent()
 
-        sgo = self.sgo
-
         mtoken = self.meter.start()
-        self.walkGraph(self.graphPass(), self.sgo)
+        self.sgPass(self.sgo)
         self.meter.end(mtoken)
 
         viewport.viewSwapBuffers()
@@ -74,21 +71,13 @@ class RenderManager(SceneGraphPassManager):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class LoadManager(RenderManager):
+    SGPassFactory = SceneGraphPass
     passItemKey = 'loadPass'
-    def graphPass(self):
-        result = RenderManager.graphPass(self)
-
-        # clear the graph pass cache until the next time it needs compiled
-        self.graphPassCache = []
-        return result
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SelectManager(SceneGraphPassManager):
+class SelectManager(BaseManager):
     passItemKey = 'selectPass'
-    graphPassItemsFrom = graphPassBoundFnsFrom
-    walkGraph = staticmethod(vectorDispatch)
-    sgo = property(lambda self: self)
 
     debugView = False
     selectPos = (0,0)
@@ -97,13 +86,11 @@ class SelectManager(SceneGraphPassManager):
     def select(self, viewport, pos):
         viewport.setViewCurrent()
 
-        sgo = self.sgo
-
         self.selectPos = pos
         self.selection = []
 
         mtoken = self.meter.start()
-        self.walkGraph(self.graphPass(), self.sgo)
+        self.sgPass(self.sgo)
         self.meter.end(mtoken)
 
         if self.debugView:

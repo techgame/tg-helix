@@ -7,6 +7,12 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Imports 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from TG.geomath.alg.graphPass import GraphPass
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -16,38 +22,23 @@ class ScenePassMeter(object):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneGraphPassManager(object):
-    meter = ScenePassMeter()
-
-    def __init__(self, scene, root):
-        self.root = root
-        root.onTreeChange = self.onTreeRootChange
-        sceneMeter = getattr(scene, 'meter', None)
-        if sceneMeter is not None:
-            self.meter = sceneMeter
+class SceneGraphPass(GraphPass):
+    def __init__(self, node, passItemKey):
+        self.node = node
+        node.onTreeChange = self.onTreeRootChange
+        self.passItemKey = passItemKey
 
     def onTreeRootChange(self, rootNode, treeChanges):
-        self.graphPassCache = None
+        return True
 
-    graphPassCache = None
-    def graphPass(self):
-        graphPass = self.graphPassCache
-        if graphPass is None:
-            # there are changes... recompile the graph
-            graphPass = self.compileGraphPass(self.root)
-            self.graphPassCache = graphPass
-        return graphPass
-
-    def compileGraphPass(self, root):
-        graphPassItemsFrom = self.graphPassItemsFrom
-
+    def compile(self, sgo):
         emptyUnwind = [] # a "constant" empty list
         passUnwindStack = [] # a stack of unwind op lists
         passResult = [] # a linearized graph pass -- will eventually contain
                         # the wind ops and all of the unwind op stack in 
                         # correct traversal order
 
-        itree = root.iterTreeStack()
+        itree = self.iterStack()
         for op, node in itree:
             if op < 0: 
                 # a pop operation -- add the unwind stack top to our pass
@@ -57,7 +48,7 @@ class SceneGraphPassManager(object):
             pushUnwind = (op > 0)
 
             # get sgNodeItems fromm our node using template method
-            sgNodeItems, cullStack = graphPassItemsFrom(node, pushUnwind)
+            sgNodeItems, cullStack = self.graphPassItemsFrom(sgo, node, pushUnwind)
 
             if pushUnwind and cullStack:
                 itree.send(True)
@@ -88,14 +79,32 @@ class SceneGraphPassManager(object):
         assert not passUnwindStack, passUnwindStack
         return passResult
 
-    def graphPassItemsFrom(self, node, hasChildren):
-        """Should return ((wind, unwind), cullStack) 
-        
-        where 'wind' and 'unwind' are list of pass items for node.  
-        
-        'cullStack' is a directive to the algorithm on whether to continue down
-        the DFS traversal of the scene graph, and the 'hasChildren' parameters
-        signifies that traversal will continue in DFS order unless cullStack is
-        false."""
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+    def perform(self, sgo):
+        graphPassFns = self.compile(sgo)
+        for fn in graphPassFns:
+            fn(sgo)
+    __call__ = perform
+
+    def graphPassItemsFrom(self, sgo, node, hasChildren):
+        passItem = getattr(node, self.passItemKey, None)
+        if passItem is None:
+            return None, False
+
+        wind, unwind = passItem.bindPass(node, sgo)
+        return (wind, unwind), (hasChildren and passItem.cullStack)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class SceneGraphPassEx(SceneGraphPass):
+    _graphPassFns = None
+    def onTreeRootChange(self, rootNode, treeChanges):
+        self._graphPassFns = None
+        return True
+
+    def compile(self, sgo):
+        r = self._graphPassFns
+        if r is None:
+            r = SceneGraphPass.compile(self, sgo)
+            self._graphPassFns = r
+        return r
 
