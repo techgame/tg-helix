@@ -63,7 +63,9 @@ class MatuiCell(layouts.LayoutCell):
         return placeFn
     on = onPlace
 
-    def align(self, at0=0.5, at1=None, offset=0):
+    def offset(self, offset=0):
+        return self.align(0, 0, offset)
+    def align(self, at0=0, at1=None, offset=0):
         if at1 is None: 
             at1 = at0
 
