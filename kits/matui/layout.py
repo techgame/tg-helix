@@ -53,7 +53,7 @@ class MatuiCell(layouts.LayoutCell):
         else:
             host.box = lbox.copy()
 
-        self.oset.call_n1(lbox)
+        self.oset.call_n1(getattr(host, 'box', lbox))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -149,10 +149,10 @@ class MatuiLayout(HelixObject, KVObject):
     def setParentCell(self, parentCell):
         lastParentCell = self.getParentCell()
         if lastParentCell is not None:
-            lastParentCell.oset.discard(self)
+            lastParentCell.oset.discard(self.layout)
         self._parentCell = parentCell
         if parentCell is not None:
-            parentCell.oset.add(self)
+            parentCell.oset.add(self.layout)
     parentCell = property(getParentCell, setParentCell)
 
     def layout(self, lbox=None):
