@@ -20,6 +20,7 @@ from .common import wx, wxEventSourceMixin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxViewportEventSource(wxEventSourceMixin):
+    channelKey = 'viewport'
     def bindHost(self, glCanvas, options):
         if options.get('exitOnError', True):
             glCanvas.Bind(wx.EVT_SIZE, self.onEvtSize_exitError)
@@ -36,7 +37,7 @@ class wxViewportEventSource(wxEventSourceMixin):
 
     def onEvtSize(self, evt):
         info = self.newInfo(viewSize=tuple(evt.GetSize()))
-        self.channels.call_n1('viewport-size', info)
+        self.evtRoot.call_n1(self.channelKey + '-size', info)
         if info.get('skip', True):
             evt.Skip()
 
@@ -46,7 +47,7 @@ class wxViewportEventSource(wxEventSourceMixin):
     def onEvtPaint(self, evt):
         wx.PaintDC(evt.GetEventObject())
         info = self.newInfo(viewSize=tuple(self.glCanvas.GetSize()))
-        self.channels.call_n1('viewport-paint', info)
+        self.evtRoot.call_n1(self.channelKey + '-paint', info)
         if info.get('skip', True):
             evt.Skip()
 

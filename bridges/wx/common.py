@@ -22,8 +22,6 @@ from TG.helix.actors.events import EventSource
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxEventSourceMixin(EventSource):
-    channelKey = None
-
     def __init__(self, glCanvas, options, scene):
         self.glCanvas = glCanvas
         self.evtRootSetup(scene.evtRoot)
@@ -32,16 +30,10 @@ class wxEventSourceMixin(EventSource):
     def __nonzero__(self):
         return bool(self.glCanvas)
 
-    def evtRootSetup(self, evtRoot):
-        self.evtRoot = evtRoot
-        if self.channelKey is not None:
-            self.channel = evtRoot[self.channelKey]
-        else: self.channels = evtRoot
-
     def bindHost(self, glCanvas, options):
         pass
 
-    def getKeyMouseInfo(self, pos=None, evt=None):
+    def addKeyMouseInfo(self, info, pos=None, evt=None):
         wxhost = self.glCanvas
         eoHeight = wxhost.GetClientSize()[1]
 
@@ -61,6 +53,6 @@ class wxEventSourceMixin(EventSource):
         buttons = [mouseState.LeftDown() and 'left', mouseState.RightDown() and 'right', mouseState.MiddleDown() and 'middle']
         buttons = set(filter(None, buttons))
 
-        info = dict(pos=pos, buttons=buttons, modifiers=modifiers)
+        info.update(pos=pos, buttons=buttons, modifiers=modifiers)
         return info
 

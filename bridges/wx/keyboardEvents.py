@@ -17,7 +17,7 @@ from .common import wx, wxEventSourceMixin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxKeyboardEventSource(wxEventSourceMixin):
-    channelKey = 'keyboard'
+    channelKey = 'key'
 
     def bindHost(self, glCanvas, options):
         glCanvas.Bind(wx.EVT_KEY_DOWN, self.onEvtKey)
@@ -25,28 +25,29 @@ class wxKeyboardEventSource(wxEventSourceMixin):
         glCanvas.Bind(wx.EVT_CHAR, self.onEvtKey)
 
     def onEvtKey(self, evt):
-        etype, = self.wxEtypeMap[evt.GetEventType()]
+        etype, ekind = self.wxEtypeMap[evt.GetEventType()]
 
         unikey = evt.GetUnicodeKey()
-        info = self.newInfo( etype=etype, ukey=unikey,
+        info = self.newInfo(etype=etype, ekind=ekind)
+
+        info.update(ukey=unikey,
             uchar=(unichr(unikey) if unikey else u''))
 
         if etype == 'char':
             info['token'] = self.wxkTranslate.get(evt.GetKeyCode())
 
-        kminfo = self.getKeyMouseInfo(None, evt)
-        info.update(kminfo)
+        self.addKeyMouseInfo(info, None, evt)
 
-        self.channel.call_n1(info)
-        if info.get('skip', False):
+        self.evtRoot.call_n1(self.channelKey, info)
+        if info.get('skip', True):
             evt.Skip()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     wxEtypeMap = {
-        wx.wxEVT_KEY_DOWN: ('down', ),
-        wx.wxEVT_KEY_UP: ('up', ),
-        wx.wxEVT_CHAR: ('char', ),
+        wx.wxEVT_KEY_DOWN: ('key', 'down', ),
+        wx.wxEVT_KEY_UP: ('key', 'up', ),
+        wx.wxEVT_CHAR: ('key', 'char', ),
     }
 
     wxkTranslate = {
