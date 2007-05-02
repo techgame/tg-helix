@@ -24,6 +24,9 @@ class HelixNode(GraphNode, HelixObject):
     def _getSubjectRepr(self):
         return hex(id(self))
 
+    def sgPassBind(self, ct, sgo):
+        pass
+
     def extendAt(self, idx, iterable):
         if isinstance(iterable, HelixObject):
             return self.insert(idx, iterable)

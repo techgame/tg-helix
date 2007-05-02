@@ -47,7 +47,7 @@ class wxTimerEventSource(wxEventSourceMixin):
         info = self.newInfo()
         info.update(self.getKeyMouseInfo())
 
-        self.channel.call_n2(self, info)
+        self.channel.call_n1(info)
 
     def onEvtTimer_exitError(self, evt):
         try: self.onEvtTimer(evt)
@@ -73,7 +73,7 @@ class wxIdleEventSource(wxEventSourceMixin):
         info = self.newInfo()
         info.update(self.getKeyMouseInfo())
 
-        self.channel.call_n2(self, info)
+        self.channel.call_n1(info)
 
         if info.get('skip', True):
             evt.Skip()

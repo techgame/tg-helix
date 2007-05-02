@@ -18,6 +18,16 @@ from . import base, node, events, sceneManagers
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class SceneRenderContext(object):
+    def getSize(self):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+    def select(self):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+    def swap(self):
+        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class HelixScene(base.HelixObject):
     """A Helix Scene is a mediator, tieing viewport, events, and managers together in an extensible way.
     
@@ -27,14 +37,14 @@ class HelixScene(base.HelixObject):
     _fm_ = OBFactoryMap(
             Node = node.HelixNode,
             EventRoot = events.EventRoot,
-            )
 
-    _sgPassFactories_ = {
-        'load': sceneManagers.LoadManager,
-        'render': sceneManagers.RenderManager,
-        'resize': sceneManagers.ResizeManager,
-        'select': sceneManagers.SelectManager,
-        }
+            sg_factories = {
+                'load': sceneManagers.LoadManager,
+                'render': sceneManagers.RenderManager,
+                'resize': sceneManagers.ResizeManager,
+                'select': sceneManagers.SelectManager,
+                },
+            )
 
     def isScene(self): return True
 
@@ -49,38 +59,17 @@ class HelixScene(base.HelixObject):
         self.evtRoot = self._fm_.EventRoot()
         self.timestamp = self.evtRoot.newTimestamp
 
-    def setup(self, evtSources=[], **kwinfo):
-        self.setupEvtSources(evtSources)
+    def setup(self, renderContext):
+        self.renderContext = renderContext
         self.setupSceneGraph()
+        self.setupEvtSources()
         return True
 
-    evtRoot = None
-    def setupEvtSources(self, evtSources=[]):
-        evtRoot = self.evtRoot
-        evtRoot.visitGroup(evtSources)
-
-        evtRoot.add('viewport-size', self._sgResize_)
-        evtRoot.add('viewport-paint', self._sgRender_)
-        evtRoot.add('timer', self._sgAnimate_)
-
-        return evtRoot
-
     def setupSceneGraph(self):
-        root = self.root
+        sg_factories = self._fm_.sg_factories
+        for key, factory in sg_factories.items():
+            self.sgPass[key] = factory(self)
 
-        for sgPassKey, sgPassFactory in self._sgPassFactories_.items():
-            sgPass = sgPassFactory(self, root.newParent())
-            self.sgPass[sgPassKey] = sgPass
-
-    def _sgResize_(self, viewport, info):
-        self.sgPass['load'](viewport)
-        return self.sgPass['resize'](viewport, info['viewSize'])
-    def _sgRender_(self, viewport, info):
-        self.sgPass['load'](viewport)
-        return self.sgPass['render'](viewport)
-
-    animate = False
-    def _sgAnimate_(self, viewport, info):
-        if self.animate:
-            return self._sgRender_(viewport)
+    def setupEvtSources(self):
+        pass
 

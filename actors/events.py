@@ -50,17 +50,6 @@ class EventSource(object):
         kw.update(timestamp=self.newTimestamp())
         return kw
 
-class HostViewEventSource(EventSource):
-    def getViewSize(self):
-        """getSize is provided by concrete implementations"""
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-    def setViewCurrent(self):
-        """setCurrent is provided by concrete implementations"""
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-    def viewSwapBuffers(self):
-        """viewSwapBuffers is provided by concrete implementations"""
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Event Root to coordinate the EventSources with the event Handlers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,26 +59,6 @@ class EventRoot(OBChannelSet):
     Examples are mice, keyboards, joysticks.  These objects recreate state from
     the events they recieve from EventSource.
     """
-
-    def getChannels(self):
-        return self
-
-    def __iadd__(self, item):
-        self.visit(item)
-        return self
-
-    def visit(self, item):
-        evtRootSetup = getattr(item, 'evtRootSetup', None)
-        if evtRootSetup is None:
-            return self.visitGroup(item)
-
-        return evtRootSetup(self)
-
-    def visitGroup(self, itemGroup):
-        for subItem in itemGroup:
-            self.visit(subItem)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     if sys.platform.startswith('win'):
         # time.clock is the fastest updating query on unix heritage platforms

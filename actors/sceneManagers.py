@@ -28,8 +28,11 @@ class BaseManager(object):
     meter = ScenePassMeter()
     sgo = property(lambda self: self)
 
-    def __init__(self, scene, root):
-        self.sgPass = self.SGPassFactory(root, self.passItemKey)
+    def __init__(self, scene):
+        self.renderContext = scene.renderContext
+
+        self.root = scene.root.newParent()
+        self.sgPass = self.SGPassFactory(self.root, self.passItemKey)
 
         sceneMeter = getattr(scene, 'meter', None)
         if sceneMeter is not None:
@@ -40,15 +43,16 @@ class BaseManager(object):
 class ResizeManager(BaseManager):
     passItemKey = 'resizePass'
 
-    def resize(self, viewport, viewportSize):
-        self.viewportSize = viewportSize
+    def resize(self, info):
+        rctx = self.renderContext
+        rctx.select()
 
-        viewport.setViewCurrent()
+        sgo = self.sgo
+        sgo.vpsize = rctx.getSize()
         
         mtoken = self.meter.start()
-        self.sgPass(self.sgo)
+        self.sgPass(sgo)
         self.meter.end(mtoken)
-
         return True
     __call__ = resize
 
@@ -57,14 +61,18 @@ class ResizeManager(BaseManager):
 class RenderManager(BaseManager):
     passItemKey = 'renderPass'
 
-    def render(self, viewport):
-        viewport.setViewCurrent()
+    def render(self, info):
+        rctx = self.renderContext
+        rctx.select()
+
+        sgo = self.sgo
+        sgo.vpsize = rctx.getSize()
 
         mtoken = self.meter.start()
-        self.sgPass(self.sgo)
+        self.sgPass(sgo)
         self.meter.end(mtoken)
 
-        viewport.viewSwapBuffers()
+        rctx.swap()
         return True
     __call__ = render
 
@@ -79,25 +87,28 @@ class LoadManager(RenderManager):
 class SelectManager(BaseManager):
     passItemKey = 'selectPass'
 
-    debugView = False
+    selectionDebug = False
     selectPos = (0,0)
     selectSize = (1,1)
 
-    def select(self, viewport, pos):
-        viewport.setViewCurrent()
+    def select(self, info):
+        rctx = self.renderContext
+        rctx.select()
 
-        self.selectPos = pos
-        self.selection = []
+        sgo = self.sgo
+        sgo.vpsize = rctx.getSize()
+        sgo.selectionDebug = False
+        sgo.selectPos = info['pos']
+        sgo.selection = []
 
         mtoken = self.meter.start()
-        self.sgPass(self.sgo)
+        self.sgPass(sgo)
         self.meter.end(mtoken)
 
-        if self.debugView:
-            viewport.viewSwapBuffers()
-            self.debugView = False
+        if sgo.selectionDebug:
+            rctx.swap()
 
-        return self.selection
+        return sgo.selection
     __call__ = select
 
     # these operations may be called by the graphOps.  Reference to the manager

@@ -17,28 +17,48 @@ from TG.geomath.alg.graphPass import GraphPass
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class CallTree(object):
+    def __init__(self, passKey):
+        self.passKey = passKey
+
+    def on(self, fn):
+        self.add(fn)
+        return fn
     def add(self, *fns):
         self._wind.extend(fns)
+
+    def onUnwind(self, fn):
+        self.addUnwind(fn)
+        return fn
     def addUnwind(self, *fns):
         self._unwind.extend(fns)
+
     def cull(self, bCull=True):
         self._cull = bCull
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class SceneGraphPass(GraphPass):
-    def __init__(self, node, passItemKey):
+    def __init__(self, node, passKey):
         self.node = node
-        node.onTreeChange = self.onTreeRootChange
-        self.passItemKey = passItemKey
+        node.onTreeChange = self._node_onTreeRootChange
+        self.passKey = passKey
+
+    def _node_onTreeRootChange(self, rootNode, treeChanges=None):
+        self._passList = None
+        return True
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     _passList = None
-    def compile(self, sgo):
+    def compile(self, sgo, passKey=None):
         result = self._passList
         if result is not None:
             return result
 
-        ct = CallTree()
+        if passKey is None:
+            passKey = self.passKey
+
+        ct = CallTree(passKey)
         ct._wind = []; ct._unwind = []; ct._stack = []
 
         itree = self.iterStack()
@@ -51,7 +71,7 @@ class SceneGraphPass(GraphPass):
                 del ct._unwind[:]
                 continue
 
-            self.visitNode(ct, node, sgo)
+            node.sgPassBind(ct, sgo)
 
             if op == 0 or ct._cull:
                 ct._wind.extend(ct._unwind)
@@ -70,17 +90,7 @@ class SceneGraphPass(GraphPass):
         self._passList = result
         return result
 
-    def visitNode(self, ct, node, sgo):
-        passItem = getattr(node, self.passItemKey, None)
-        if passItem is None:
-            return
-        passItem.bindPass(ct, node, sgo)
-
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def onTreeRootChange(self, rootNode, treeChanges):
-        self._passList = None
-        return True
 
     def perform(self, sgo):
         passlist = self.compile(sgo)

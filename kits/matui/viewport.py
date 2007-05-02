@@ -15,7 +15,7 @@ class ViewportResizeOp(actor.SGResizeOp):
         self.box = actor.box
     def resize(self, sgo):
         box = self.box
-        box.p1 = sgo.viewportSize
+        box.p1 = sgo.vpsize
         gl.glViewport(*box.toflatlist())
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

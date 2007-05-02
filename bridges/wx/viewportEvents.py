@@ -36,7 +36,7 @@ class wxViewportEventSource(wxEventSourceMixin):
 
     def onEvtSize(self, evt):
         info = self.newInfo(viewSize=tuple(evt.GetSize()))
-        self.channels.call_n2('viewport-size', self, info)
+        self.channels.call_n1('viewport-size', info)
         if info.get('skip', True):
             evt.Skip()
 
@@ -46,7 +46,7 @@ class wxViewportEventSource(wxEventSourceMixin):
     def onEvtPaint(self, evt):
         wx.PaintDC(evt.GetEventObject())
         info = self.newInfo(viewSize=tuple(self.glCanvas.GetSize()))
-        self.channels.call_n2('viewport-paint', self, info)
+        self.channels.call_n1('viewport-paint', info)
         if info.get('skip', True):
             evt.Skip()
 

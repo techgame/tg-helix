@@ -31,6 +31,11 @@ class MatuiNode(HelixNode):
         if actor is None: return ''
         return actor.__class__.__name__
 
+    def sgPassBind(self, ct, sgo):
+        passItem = getattr(self, ct.passKey, None)
+        if passItem is not None:
+            passItem.bindPass(ct, self, sgo)
+
     @classmethod
     def itemAsNode(klass, item, create=True):
         if item.isNode():

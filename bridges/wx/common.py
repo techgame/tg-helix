@@ -15,41 +15,31 @@ import time
 
 import wx
 
-from TG.helix.actors.events import HostViewEventSource
+from TG.helix.actors.events import EventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxEventSourceMixin(HostViewEventSource):
+class wxEventSourceMixin(EventSource):
     channelKey = None
 
-    def __init__(self, glCanvas, options):
-        self.options = options
+    def __init__(self, glCanvas, options, scene):
         self.glCanvas = glCanvas
-
-    def evtRootSetup(self, evtRoot):
-        self.evtRoot = evtRoot
-        channels = evtRoot.getChannels()
-
-        if self.channelKey is not None:
-            self.channel = channels[self.channelKey]
-        else: self.channels = channels
-
-        self.bindHost(self.glCanvas, self.options)
+        self.evtRootSetup(scene.evtRoot)
+        self.bindHost(glCanvas, options)
 
     def __nonzero__(self):
         return bool(self.glCanvas)
 
+    def evtRootSetup(self, evtRoot):
+        self.evtRoot = evtRoot
+        if self.channelKey is not None:
+            self.channel = evtRoot[self.channelKey]
+        else: self.channels = evtRoot
+
     def bindHost(self, glCanvas, options):
         pass
-
-    def getViewSize(self):
-        return tuple(self.glCanvas.GetClientSize())
-    def setViewCurrent(self):
-        return self.glCanvas.SetCurrent()
-    def viewSwapBuffers(self):
-        return self.glCanvas.SwapBuffers()
 
     def getKeyMouseInfo(self, pos=None, evt=None):
         wxhost = self.glCanvas
