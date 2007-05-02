@@ -25,6 +25,12 @@ class MatuiNode(HelixNode):
         self.parents = KVList()
         self.children = KVList()
 
+    actor = None
+    def _getSubjectRepr(self):
+        actor = self.actor
+        if actor is None: return ''
+        return actor.__class__.__name__
+
     @classmethod
     def itemAsNode(klass, item, create=True):
         if item.isNode():

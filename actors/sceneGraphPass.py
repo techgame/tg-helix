@@ -16,11 +16,13 @@ from TG.geomath.alg.graphPass import GraphPass
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class ScenePassMeter(object):
-    def start(self): pass
-    def end(self, token): pass
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class CallTree(object):
+    def add(self, *fns):
+        self._wind.extend(fns)
+    def addUnwind(self, *fns):
+        self._unwind.extend(fns)
+    def cull(self, bCull=True):
+        self._cull = bCull
 
 class SceneGraphPass(GraphPass):
     def __init__(self, node, passItemKey):
@@ -28,83 +30,72 @@ class SceneGraphPass(GraphPass):
         node.onTreeChange = self.onTreeRootChange
         self.passItemKey = passItemKey
 
-    def onTreeRootChange(self, rootNode, treeChanges):
-        return True
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    _passList = None
     def compile(self, sgo):
-        emptyUnwind = [] # a "constant" empty list
-        passUnwindStack = [] # a stack of unwind op lists
-        passResult = [] # a linearized graph pass -- will eventually contain
-                        # the wind ops and all of the unwind op stack in 
-                        # correct traversal order
+        result = self._passList
+        if result is not None:
+            return result
+
+        ct = CallTree()
+        ct._wind = []; ct._unwind = []; ct._stack = []
 
         itree = self.iterStack()
         for op, node in itree:
-            if op < 0: 
-                # a pop operation -- add the unwind stack top to our pass
-                # result and continue the iteration
-                passResult.extend(passUnwindStack.pop())
-                continue
-            pushUnwind = (op > 0)
+            ct._cull = False
 
-            # get sgNodeItems fromm our node using template method
-            sgNodeItems, cullStack = self.graphPassItemsFrom(sgo, node, pushUnwind)
-
-            if pushUnwind and cullStack:
-                itree.send(True)
-                pushUnwind = False
-
-            if sgNodeItems is None:
-                if pushUnwind:
-                    # push an empty unwind on the stack
-                    passUnwindStack.append(emptyUnwind)
+            if op < 0:
+                ct._wind.extend(ct._unwind)
+                ct._wind.extend(ct._stack.pop())
+                del ct._unwind[:]
                 continue
 
-            # unpack sgNodeItems
-            wind, unwind = sgNodeItems
+            self.visitNode(ct, node, sgo)
 
-            if wind:
-                # wind ops go directly on the result
-                passResult.extend(wind)
+            if op == 0 or ct._cull:
+                ct._wind.extend(ct._unwind)
+                del ct._unwind[:]
 
-            # if we are pushing and not culling...
-            if pushUnwind:
-                # push the unwind ops on the stack
-                passUnwindStack.append(unwind or emptyUnwind)
-            elif unwind:
-                # push(unwind); extend(pop) --> extend(unwind)
-                passResult.extend(unwind)
+                if op > 0: itree.send(True)
 
-        # make sure that all the pop operations came through to empty our unwind stack
-        assert not passUnwindStack, passUnwindStack
-        return passResult
+            else: # op > 0
+                ct._stack.append(ct._unwind)
+                ct._unwind = []
+
+        result = ct._wind
+        assert not ct._unwind, ('Unwind list not empty:', self._unwind)
+        assert not ct._stack, ('Unwind stack not empty:', self._stack)
+
+        self._passList = result
+        return result
+
+    def visitNode(self, ct, node, sgo):
+        passItem = getattr(node, self.passItemKey, None)
+        if passItem is None:
+            return
+        passItem.bindPass(ct, node, sgo)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def onTreeRootChange(self, rootNode, treeChanges):
+        self._passList = None
+        return True
 
     def perform(self, sgo):
-        graphPassFns = self.compile(sgo)
-        for fn in graphPassFns:
+        passlist = self.compile(sgo)
+        for fn in passlist:
             fn(sgo)
     __call__ = perform
 
-    def graphPassItemsFrom(self, sgo, node, hasChildren):
-        passItem = getattr(node, self.passItemKey, None)
-        if passItem is None:
-            return None, False
-
-        wind, unwind = passItem.bindPass(node, sgo)
-        return (wind, unwind), (hasChildren and passItem.cullStack)
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneGraphPassEx(SceneGraphPass):
-    _graphPassFns = None
-    def onTreeRootChange(self, rootNode, treeChanges):
-        self._graphPassFns = None
-        return True
-
-    def compile(self, sgo):
-        r = self._graphPassFns
-        if r is None:
-            r = SceneGraphPass.compile(self, sgo)
-            self._graphPassFns = r
-        return r
+class SceneGraphOnePass(SceneGraphPass):
+    def perform(self, sgo):
+        passlist = self.compile(sgo)
+        if passlist:
+            for fn in passlist:
+                fn(sgo)
+            self._passList = []
+    __call__ = perform
 

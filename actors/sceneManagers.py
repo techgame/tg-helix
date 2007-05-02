@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .sceneGraphPass import SceneGraphPass, SceneGraphPassEx
+from .sceneGraphPass import SceneGraphPass, SceneGraphOnePass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -23,7 +23,7 @@ class ScenePassMeter(object):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class BaseManager(object):
-    SGPassFactory = SceneGraphPassEx
+    SGPassFactory = SceneGraphPass
 
     meter = ScenePassMeter()
     sgo = property(lambda self: self)
@@ -71,7 +71,7 @@ class RenderManager(BaseManager):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class LoadManager(RenderManager):
-    SGPassFactory = SceneGraphPass
+    SGPassFactory = SceneGraphOnePass
     passItemKey = 'loadPass'
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

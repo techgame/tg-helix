@@ -18,6 +18,12 @@ from .base import HelixObject
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixNode(GraphNode, HelixObject):
+    def __repr__(self):
+        return '<%s %s>' % (self.__class__.__name__, self._getSubjectRepr())
+
+    def _getSubjectRepr(self):
+        return hex(id(self))
+
     def extendAt(self, idx, iterable):
         if isinstance(iterable, HelixObject):
             return self.insert(idx, iterable)
