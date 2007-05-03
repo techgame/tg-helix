@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.metaObserving import OBKeyedList
 from TG.kvObserving import KVList
 from TG.helix.actors import HelixNode
 
@@ -22,6 +23,7 @@ class MatuiNode(HelixNode):
         for n,v in kw.items():
             setattr(self, n, v)
 
+        self.bindPass = OBKeyedList()
         self.parents = KVList()
         self.children = KVList()
 
@@ -32,9 +34,9 @@ class MatuiNode(HelixNode):
         return actor.__class__.__name__
 
     def sgPassBind(self, ct, sgo):
-        passItem = getattr(self, ct.passKey, None)
-        if passItem is not None:
-            passItem.bindPass(ct, self, sgo)
+        self.bindPass.call_n3(ct.passKey, self, ct, sgo)
+
+    def isLayout(self): return False
 
     @classmethod
     def itemAsNode(klass, item, create=True):

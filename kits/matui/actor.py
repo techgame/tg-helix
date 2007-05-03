@@ -37,7 +37,8 @@ class SceneGraphOp(object):
         pass
 
     def bindOp(self, node, opKey):
-        setattr(node, opKey+'Pass', self)
+        node.bindPass.add(opKey+'Pass', self.bindPass)
+        #setattr(node, opKey+'Pass', self)
 
     def bindPass(self, ct, node, sgo): 
         pass
@@ -46,7 +47,7 @@ class SGResizeOp(SceneGraphOp):
     def init(self, node, actor): 
         self.res = node.res
 
-    def bindPass(self, ct, node, sgo):
+    def bindPass(self, node, ct, sgo):
         ct.add(self.resize)
 
     def resize(self, sgo):
@@ -56,7 +57,7 @@ class SGRenderOp(SceneGraphOp):
     def init(self, node, actor): 
         self.res = node.res
 
-    def bindPass(self, ct, node, sgo):
+    def bindPass(self, node, ct, sgo):
         ct.add(self.render)
 
     def render(self, sgo):
@@ -70,7 +71,7 @@ class SGLoadOp(SceneGraphOp):
         self.actor = actor.asWeakProxy()
         return None
 
-    def bindPass(self, ct, node, sgo):
+    def bindPass(self, node, ct, sgo):
         if not self.loaded:
             ct.add(self.loadOp)
 
@@ -91,6 +92,8 @@ class MatuiActor(HelixActor, KVObject):
     _sgOps_ = {}
 
     _sgNode_ = None
+
+    def isLayout(self): return False
 
     def _sgGetNode_(self, create=True):
         node = self._sgNode_
@@ -113,7 +116,7 @@ class MatuiActor(HelixActor, KVObject):
     def _sgCellSetup_(self, node):
         Cell = getattr(self._fm_, 'Cell', None)
         if Cell is not None:
-            self.cell = Cell(self.asWeakRef())
+            self.cell = Cell(self)
 
     def _sgOpSetup_(self, node):
         for sgOpKey, sgOpSetup in self._sgOps_.items():
