@@ -113,16 +113,15 @@ class MatuiActor(HelixActor, KVObject):
         self._sgNode_ = node
         node.actor = self
 
-        self._sgCellSetup_(node)
-        self._sgOpSetup_(node)
-
-    def _sgCellSetup_(self, node):
         Cell = getattr(self._fm_, 'Cell', None)
         if Cell is not None:
             self.cell = Cell(self)
 
-    def _sgOpSetup_(self, node):
-        sgOpsList = self._sgOps_
+        self._sgOpSetup_(self._sgOps_, node)
+
+    def _sgOpSetup_(self, sgOpsList, node=None):
+        if node is None: node = self._sgNode_
+
         if isinstance(sgOpsList, dict):
             sgOpsList = sgOpsList.items()
 
