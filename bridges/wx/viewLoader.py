@@ -10,8 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import TG.openGL.raw
-
 from TG.helix.actors.scene import SceneRenderContext
 from .viewportEvents import wxViewportEventSource
 from .keyboardEvents import wxKeyboardEventSource
@@ -39,9 +37,6 @@ class wxHelixSceneHostViewLoader(object):
     def load(klass, glCanvas, options, scene, **kwsetup):
         renderContext = wxSceneRenderContext(glCanvas)
         renderContext.select()
-
-        # Reload the opengl raw api to support windows
-        TG.openGL.raw.apiReload()
 
         scene.setup(renderContext)
 

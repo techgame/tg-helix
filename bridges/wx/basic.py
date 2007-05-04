@@ -11,7 +11,9 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import TG.openGL.raw
 from TG.skinning.toolkits.wx import wx, wxSkinModel, XMLSkin
+
 from . import viewLoader
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,6 +85,10 @@ class BasicRenderSkinModel(wxSkinModel):
 
     SceneHostViewLoader = viewLoader.SceneHostViewLoader
     def setupCanvas(self, canvasElem, canvasObj):
+        canvasObj.SetCurrent()
+        # Reload the opengl raw api to support windows
+        TG.openGL.raw.apiReload()
+
         self.SceneHostViewLoader.load(canvasObj, self.options, self.scene)
 
     def setupFrame(self, frame):
