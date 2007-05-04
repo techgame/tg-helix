@@ -28,14 +28,12 @@ class wxKeyboardEventSource(wxEventSourceMixin):
         etype, ekind = self.wxEtypeMap[evt.GetEventType()]
 
         unikey = evt.GetUnicodeKey()
+        keyCode = evt.GetKeyCode()
+        uchar = (unichr(unikey) if unikey else u'')
+        token = self.wxkTranslate.get(keyCode, uchar)
+
         info = self.newInfo(etype=etype, ekind=ekind)
-
-        info.update(ukey=unikey,
-            uchar=(unichr(unikey) if unikey else u''))
-
-        if etype == 'char':
-            info['token'] = self.wxkTranslate.get(evt.GetKeyCode())
-
+        info.update(ukey=unikey, uchar=uchar, token=token)
         self.addKeyMouseInfo(info, None, evt)
 
         self.evtRoot.call_n1(self.channelKey, info)
