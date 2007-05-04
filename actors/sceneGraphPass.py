@@ -10,102 +10,36 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.geomath.alg.graphPass import GraphPass
+from TG.geomath.alg.graphPass import CompiledGraphPass, CallTree
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class CallTree(object):
-    def __init__(self, passKey):
-        self.passKey = passKey
+class SceneGraphPass(CompiledGraphPass):
+    def __init__(self, scene, passKey=None, singlePass=False):
+        self.srm = scene.srm
+        node = scene.root.newParent()
+        CompiledGraphPass.__init__(self, node, passKey, singlePass)
 
-    def on(self, fn):
-        self.add(fn)
-        return fn
-    def add(self, *fns):
-        self._wind.extend(fns)
-
-    def onUnwind(self, fn):
-        self.addUnwind(fn)
-        return fn
-    def addUnwind(self, *fns):
-        self._unwind.extend(fns)
-
-    def cull(self, bCull=True):
-        self._cull = bCull
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class SceneGraphPass(GraphPass):
-    def __init__(self, node, passKey):
-        self.node = node
-        node.onTreeChange = self._node_onTreeRootChange
-        self.passKey = passKey
-
-    def _node_onTreeRootChange(self, rootNode, treeChanges=None):
-        self._passList = None
-        return True
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    _passList = None
-    def compile(self, sgo, passKey=None):
-        result = self._passList
-        if result is not None:
-            return result
-
-        if passKey is None:
-            passKey = self.passKey
-
+    def newCallTree(self, passKey):
         ct = CallTree(passKey)
-        ct._wind = []; ct._unwind = []; ct._stack = []
+        ct.srm = self.srm
+        return ct
 
-        itree = self.iterStack()
-        for op, node in itree:
-            ct._cull = False
+    def compileNodeTo(self, node, ct):
+        node.sgPassBind(ct, self.srm)
 
-            if op < 0:
-                ct._wind.extend(ct._unwind)
-                ct._wind.extend(ct._stack.pop())
-                del ct._unwind[:]
-                continue
-
-            node.sgPassBind(ct, sgo)
-
-            if op == 0 or ct._cull:
-                ct._wind.extend(ct._unwind)
-                del ct._unwind[:]
-
-                if op > 0: itree.send(True)
-
-            else: # op > 0
-                ct._stack.append(ct._unwind)
-                ct._unwind = []
-
-        result = ct._wind
-        assert not ct._unwind, ('Unwind list not empty:', self._unwind)
-        assert not ct._stack, ('Unwind stack not empty:', self._stack)
-
-        self._passList = result
-        return result
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def perform(self, sgo):
-        passlist = self.compile(sgo)
-        for fn in passlist:
-            fn(sgo)
+    def perform(self, info):
+        passList = self.compile()
+        if passList or not self.singlePass:
+            return self.performPass(passList, info)
     __call__ = perform
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class SceneGraphOnePass(SceneGraphPass):
-    def perform(self, sgo):
-        passlist = self.compile(sgo)
-        if passlist:
-            for fn in passlist:
-                fn(sgo)
-            self._passList = []
-    __call__ = perform
+    def performPass(self, passList, info):
+        srm = self.srm
+        srm.startPass(self, info)
+        for fn in passList:
+            fn(srm)
+        return srm.finishPass(self, info)
 

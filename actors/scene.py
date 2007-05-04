@@ -12,7 +12,7 @@
 
 from TG.metaObserving import OBFactoryMap
 
-from . import base, node, events, sceneManagers
+from . import base, node, events, sceneGraphPass, renderMgr
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -37,14 +37,11 @@ class HelixScene(base.HelixObject):
     _fm_ = OBFactoryMap(
             Node = node.HelixNode,
             EventRoot = events.EventRoot,
+            SceneRenderManager = renderMgr.SceneRenderManager,
 
-            sg_factories = {
-                'load': sceneManagers.LoadManager,
-                'render': sceneManagers.RenderManager,
-                'resize': sceneManagers.ResizeManager,
-                'select': sceneManagers.SelectManager,
-                },
+            SGPass = sceneGraphPass.SceneGraphPass,
             )
+    _sgPassTypes_ = []
 
     def isScene(self): return True
 
@@ -54,21 +51,24 @@ class HelixScene(base.HelixObject):
         self.init()
 
     def init(self):
-        self.sgPass = {}
+        self._sg_passes = {}
         self.root = self._fm_.Node(scene=self)
         self.evtRoot = self._fm_.EventRoot()
         self.timestamp = self.evtRoot.newTimestamp
 
     def setup(self, renderContext):
-        self.renderContext = renderContext
-        self.setupSceneGraph()
+        self.srm = self._fm_.SceneRenderManager(renderContext)
+        self.sgAddPasses(self._sgPassTypes_)
         self.setupEvtSources()
         return True
 
-    def setupSceneGraph(self):
-        sg_factories = self._fm_.sg_factories
-        for key, factory in sg_factories.items():
-            self.sgPass[key] = factory(self)
+    def sgAddPasses(self, sgPassTypes):
+        SGPass = self._fm_.SGPass
+        for key, singlePass in sgPassTypes:
+            self._sg_passes[key] = SGPass(self, key, singlePass)
+
+    def sg_pass(self, key, info):
+        return self._sg_passes[key].perform(info)
 
     def setupEvtSources(self):
         pass

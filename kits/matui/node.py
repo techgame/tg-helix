@@ -33,8 +33,8 @@ class MatuiNode(HelixNode):
         if actor is None: return ''
         return actor.__class__.__name__
 
-    def sgPassBind(self, ct, sgo):
-        self.bindPass.call_n3(ct.passKey, self, ct, sgo)
+    def sgPassBind(self, ct, srm):
+        self.bindPass.call_n3(ct.passKey, self, ct, srm)
 
     def isLayout(self): return False
 

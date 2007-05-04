@@ -1,5 +1,5 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
-##~ Copyright (C) 2002-2006  TechGame Networks, LLC.              ##
+##~ Copyright (C) 2002-2007  TechGame Networks, LLC.              ##
 ##~                                                               ##
 ##~ This library is free software; you can redistribute it        ##
 ##~ and/or modify it under the terms of the BSD style License as  ##
@@ -10,26 +10,21 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.geomath.alg.graphNode import GraphNode
-from .base import HelixObject
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixNode(GraphNode, HelixObject):
-    def __repr__(self):
-        return '<%s %s>' % (self.__class__.__name__, self._getSubjectRepr())
+class SceneRenderManager(object):
+    def __init__(self, renderContext):
+        self.renderContext = renderContext
 
-    def _getSubjectRepr(self):
-        return hex(id(self))
+    def startPass(self, sgpass, info):
+        rctx = self.renderContext
+        rctx.select()
+        self.vpsize = rctx.getSize()
+        self.result = {}
 
-    def sgPassBind(self, ct, srm):
-        pass
-
-    def extendAt(self, idx, iterable):
-        if isinstance(iterable, HelixObject):
-            return self.insert(idx, iterable)
-
-        return GraphNode.extendAt(self, idx, iterable)
+    def finishPass(self, sgpass, info):
+        self.renderContext.swap()
+        return self.result
 
