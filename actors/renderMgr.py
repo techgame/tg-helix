@@ -15,16 +15,25 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SceneRenderManager(object):
+    info = None
+    result = None
+
     def __init__(self, renderContext):
         self.renderContext = renderContext
 
     def startPass(self, sgpass, info):
         rctx = self.renderContext
         rctx.select()
+
+        self.info = info
         self.vpsize = rctx.getSize()
         self.result = {}
 
     def finishPass(self, sgpass, info):
         self.renderContext.swap()
-        return self.result
+
+        result = self.result
+        del self.result
+        del self.info
+        return result
 

@@ -52,13 +52,14 @@ class HelixScene(base.HelixObject):
 
     def init(self):
         self._sg_passes = {}
-        self.root = self._fm_.Node(scene=self)
+        self.root = self._fm_.Node(scene=self, info='scene root')
         self.evtRoot = self._fm_.EventRoot()
         self.timestamp = self.evtRoot.newTimestamp
 
     def setup(self, renderContext):
         self.srm = self._fm_.SceneRenderManager(renderContext)
         self.sgAddPasses(self._sgPassTypes_)
+        self.sgPassConfig(self._sg_passes)
         self.setupEvtSources()
         return True
 
@@ -67,8 +68,12 @@ class HelixScene(base.HelixObject):
         for key, singlePass in sgPassTypes:
             self._sg_passes[key] = SGPass(self, key, singlePass)
 
+    def sgPassConfig(self):
+        pass
+
     def sg_pass(self, key, info):
-        return self._sg_passes[key].perform(info)
+        sgp = self._sg_passes[key]
+        return sgp(info)
 
     def setupEvtSources(self):
         pass
