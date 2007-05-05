@@ -19,7 +19,8 @@ from TG.helix.actors import HelixActor
 from TG.geomath.data.kvBox import KVBox
 
 from .node import MatuiNode
-from .layout import MatuiCell
+
+from .cell import MatuiCell
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -30,7 +31,7 @@ class SceneGraphOp(object):
 
     cullStack = False
     partial = staticmethod(partial)
-    def __init__(self, node, actor, opKey): 
+    def __init__(self, actor, node, opKey): 
         self.init(node, actor)
         self.bindOp(node, opKey)
 
@@ -43,12 +44,19 @@ class SceneGraphOp(object):
     def bindOp(self, node, opKey):
         node.bindPass.add(opKey, self._sgBindPass_)
 
+    def _getNodeRes(self, node):
+        res = getattr(node, 'res', None)
+        if res is None:
+            res = {}
+            node.res = {}
+        return res
+
     def _sgBindPass_(self, node, ct, srm): 
         pass
 
 class SGResizeOp(SceneGraphOp):
     def init(self, node, actor): 
-        self.res = node.res
+        self.res = self._getNodeRes(node)
 
     def _sgBindPass_(self, node, ct, srm):
         ct.add(self.resize)
@@ -58,7 +66,7 @@ class SGResizeOp(SceneGraphOp):
 
 class SGRenderOp(SceneGraphOp):
     def init(self, node, actor): 
-        self.res = node.res
+        self.res = self._getNodeRes(node)
 
     def _sgBindPass_(self, node, ct, srm):
         ct.add(self.render)
@@ -70,7 +78,8 @@ class SGLoadOp(SceneGraphOp):
     loaded = False
     actor = None
     def init(self, node, actor): 
-        self.res = node.res
+        node.res = {}
+        self.res = self._getNodeRes(node)
         self.actor = actor.asWeakProxy()
         return None
 
@@ -91,7 +100,9 @@ class SGLoadOp(SceneGraphOp):
 class MatuiActor(HelixActor, KVObject):
     _fm_ = OBFactoryMap(
             Node=MatuiNode, 
-            Cell=MatuiCell)
+            Cell=MatuiCell,
+            sgOpPrefix='sg_',
+            )
     _sgOps_ = []
 
     _sgNode_ = None
@@ -113,29 +124,38 @@ class MatuiActor(HelixActor, KVObject):
         self._sgNode_ = node
         node.actor = self
 
-        Cell = getattr(self._fm_, 'Cell', None)
+        Cell = self._fm_.Cell
         if Cell is not None:
             self.cell = Cell(self)
 
-        self._sgOpSetup_(self._sgOps_, node)
+        self.sgSetupOps(self._sgOps_, node)
 
-    def _sgOpSetup_(self, sgOpsList, node=None):
+    def sgSetupOps(self, opsList, node=None):
         if node is None: node = self._sgNode_
 
-        if isinstance(sgOpsList, dict):
-            sgOpsList = sgOpsList.items()
+        if isinstance(opsList, dict):
+            opsList = sorted(opsList.items())
 
-        for sgOp in sgOpsList:
-            if isinstance(sgOp, str):
-                opKey = sgOp
-                opBind = 'sg_' + sgOp
-            else: opKey, opBind = sgOp
+        for op in opsList:
+            if isinstance(op, str):
+                opKey = op
+                opBind = None
+            else: opKey, opBind = op
+            self.sgAddOp(opKey, opBind, node)
 
-            if isinstance(opBind, str):
-                opFn = getattr(self, opBind)
-                def bindOpFn(node, ct, srm, opFn=opFn):
-                    ct.add(opFn)
-                node.bindPass.add(opKey, bindOpFn)
-            else:
-                opBind(node, self, opKey)
+
+    def sgAddOp(self, opKey, opBind=None, node=None):
+        if node is None: node = self._sgNode_
+
+        if opBind is None:
+            opBind = self._fm_.sgOpPrefix + opKey
+
+        if isinstance(opBind, str):
+            opFn = getattr(self, opBind)
+            def bindOpFn(node, ct, srm, opFn=opFn):
+                ct.add(opFn)
+            node.bindPass.add(opKey, bindOpFn)
+
+        else:
+            opBind(self, node, opKey)
 
