@@ -15,7 +15,7 @@ class MatuiSceneGraphPass(SceneGraphPass):
     def sgBindOp(self, hostNode, opKey):
         hostNode.bindPass.add(opKey, self._sgBindPass_)
 
-    def _sgBindPass_(self, node, ct, srm):
+    def _sgBindPass_(self, node, ct):
         ct.add(self.perform)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,7 +40,7 @@ class MatuiScene(HelixScene, KVObject):
         ('animate', False),
         ]
 
-    _sgPassTree_ = [
+    _sgPassTriggers_ = [
         ('render', ['load', 'pre-render'], []),
         ('resize', ['load'], []),
         ('select', ['load', 'pre-select'], []),
@@ -54,22 +54,6 @@ class MatuiScene(HelixScene, KVObject):
         evtRoot.add('viewport-size', self.sg_resize)
         evtRoot.add('viewport-paint', self.sg_render)
         evtRoot.add('timer', self.sg_animate)
-
-    def sgPassConfig(self, sg_passes):
-        for passKey, preKeys, postKeys in self._sgPassTree_:
-            sgp = sg_passes[passKey]
-
-            if preKeys:
-                hostNode = sgp.node.pre
-                for dk in preKeys:
-                    dp = sg_passes[dk] 
-                    dp.sgBindOp(hostNode, passKey)
-
-            if postKeys:
-                hostNode = sgp.node.pre
-                for dk in postKeys:
-                    dp = sg_passes[dk] 
-                    dp.sgBindOp(hostNode, passKey)
 
     def sg_resize(self, info=None):
         return self.sg_pass('resize', info)

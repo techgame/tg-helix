@@ -51,14 +51,14 @@ class SceneGraphOp(object):
             node.res = {}
         return res
 
-    def _sgBindPass_(self, node, ct, srm): 
+    def _sgBindPass_(self, node, ct): 
         pass
 
 class SGResizeOp(SceneGraphOp):
     def init(self, node, actor): 
         self.res = self._getNodeRes(node)
 
-    def _sgBindPass_(self, node, ct, srm):
+    def _sgBindPass_(self, node, ct):
         ct.add(self.resize)
 
     def resize(self, srm):
@@ -68,7 +68,7 @@ class SGRenderOp(SceneGraphOp):
     def init(self, node, actor): 
         self.res = self._getNodeRes(node)
 
-    def _sgBindPass_(self, node, ct, srm):
+    def _sgBindPass_(self, node, ct):
         ct.add(self.render)
 
     def render(self, srm):
@@ -83,7 +83,7 @@ class SGLoadOp(SceneGraphOp):
         self.actor = actor.asWeakProxy()
         return None
 
-    def _sgBindPass_(self, node, ct, srm):
+    def _sgBindPass_(self, node, ct):
         if not self.loaded:
             ct.add(self.loadOp)
 
@@ -128,9 +128,9 @@ class MatuiActor(HelixActor, KVObject):
         if Cell is not None:
             self.cell = Cell(self)
 
-        self.sgSetupOps(self._sgOps_, node)
+        self.sgAddOpList(self._sgOps_, node)
 
-    def sgSetupOps(self, opsList, node=None):
+    def sgAddOpList(self, opsList, node=None):
         if node is None: node = self._sgNode_
 
         if isinstance(opsList, dict):
@@ -152,7 +152,7 @@ class MatuiActor(HelixActor, KVObject):
 
         if isinstance(opBind, str):
             opFn = getattr(self, opBind)
-            def bindOpFn(node, ct, srm, opFn=opFn):
+            def bindOpFn(node, ct, opFn=opFn):
                 ct.add(opFn)
             node.bindPass.add(opKey, bindOpFn)
 

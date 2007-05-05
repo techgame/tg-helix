@@ -28,10 +28,6 @@ class SceneGraphPass(CompiledGraphPass):
     def _getNodeFromScene(self, scene):
         node = scene.root.newParent()
         node.info = 'sgp:' + self.passKey
-        node.pre = node.insertNew(0)
-        node.pre.info = 'sgp:pre-'+self.passKey
-        node.post = node.addNew()
-        node.post.info = 'sgp:post-'+self.passKey
         return node
 
     def newCallTree(self):
@@ -60,4 +56,8 @@ class SceneGraphPass(CompiledGraphPass):
         self.perform(srm, passList)
         return srm.finishPass(self, info)
     __call__ = performPass
+
+    def performSubpass(self, info):
+        passList = self.compile()
+        self.perform(self.srm, passList)
 

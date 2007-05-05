@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.metaObserving import OBKeyedList
 from TG.metaObserving import OBFactoryMap
 
 from . import base, node, events, sceneGraphPass, renderMgr
@@ -40,8 +41,10 @@ class HelixScene(base.HelixObject):
             SceneRenderManager = renderMgr.SceneRenderManager,
 
             SGPass = sceneGraphPass.SceneGraphPass,
+            SGPassEvents = OBKeyedList,
             )
     _sgPassTypes_ = []
+    _sgPassTriggers_ = []
 
     def isScene(self): return True
 
@@ -59,22 +62,38 @@ class HelixScene(base.HelixObject):
     def setup(self, renderContext):
         self.srm = self._fm_.SceneRenderManager(renderContext)
         self.sgAddPasses(self._sgPassTypes_)
-        self.sgPassConfig(self._sg_passes)
+        self.sgPassConfig(self._sgPassTriggers_)
         self.setupEvtSources()
         return True
 
     def sgAddPasses(self, sgPassTypes):
+        self.sgPassEvents = self._fm_.SGPassEvents()
+
         SGPass = self._fm_.SGPass
         for key, singlePass in sgPassTypes:
             self._sg_passes[key] = SGPass(self, key, singlePass)
 
-    def sgPassConfig(self):
-        pass
+    def sgPassConfig(self, sgPassTriggers):
+        sg_passes = self._sg_passes
+        sgPassEvents = self.sgPassEvents
+        for passKey, preKeys, postKeys in sgPassTriggers:
+            for dk in preKeys:
+                dp = sg_passes[dk] 
+                sgPassEvents.add(passKey+'-pre', dp.performSubpass)
+
+            for dk in postKeys:
+                dp = sg_passes[dk] 
+                sgPassEvents.add(passKey+'-post', dp.performSubpass)
 
     def sg_pass(self, key, info=None):
-        if info is None: info = {}
+        if info is None: 
+            info = {}
         sgp = self._sg_passes[key]
-        return sgp(info)
+
+        self.sgPassEvents.call_n1(key+'-pre', info)
+        result = sgp(info)
+        self.sgPassEvents.call_n1(key+'-post', info)
+        return result
 
     def setupEvtSources(self):
         pass
