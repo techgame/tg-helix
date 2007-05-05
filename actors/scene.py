@@ -71,7 +71,8 @@ class HelixScene(base.HelixObject):
     def sgPassConfig(self):
         pass
 
-    def sg_pass(self, key, info):
+    def sg_pass(self, key, info=None):
+        if info is None: info = {}
         sgp = self._sg_passes[key]
         return sgp(info)
 

@@ -12,15 +12,6 @@ from .node import MatuiNode
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiSceneGraphPass(SceneGraphPass):
-    def _getNodeFromScene(self, scene):
-        node = scene.root.newParent()
-        node.info = 'sgp:' + self.passKey
-        node.pre = node.insertNew(0)
-        node.pre.info = 'sgp:pre-'+self.passKey
-        node.post = node.addNew()
-        node.post.info = 'sgp:post-'+self.passKey
-        return node
-
     def sgBindOp(self, hostNode, opKey):
         hostNode.bindPass.add(opKey, self._sgBindPass_)
 
@@ -80,15 +71,15 @@ class MatuiScene(HelixScene, KVObject):
                     dp = sg_passes[dk] 
                     dp.sgBindOp(hostNode, passKey)
 
-    def sg_resize(self, info={}):
+    def sg_resize(self, info=None):
         return self.sg_pass('resize', info)
-    def sg_render(self, info={}):
+    def sg_render(self, info=None):
         return self.sg_pass('render', info)
-    def sg_select(self, info={}):
+    def sg_select(self, info=None):
         return self.sg_pass('select', info)
 
     animate = False
-    def sg_animate(self, info={}):
+    def sg_animate(self, info=None):
         if self.animate: 
             return self.sg_pass('animate', info)
 
