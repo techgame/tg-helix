@@ -61,6 +61,8 @@ class MatuiScene(HelixScene, KVObject):
         return self.sg_pass('render', info)
     def sg_select(self, info=None):
         return self.sg_pass('select', info)
+    def sg_load(self):
+        return self.sg_pass('load')
 
     animate = False
     def sg_animate(self, info=None):
