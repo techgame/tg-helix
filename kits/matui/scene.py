@@ -11,30 +11,18 @@ from .node import MatuiNode
 #~ Scene
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class MatuiSceneGraphPass(SceneGraphPass):
-    def sgBindOp(self, hostNode, opKey):
-        hostNode.bindPass.add(opKey, self._sgBindPass_)
-
-    def _sgBindPass_(self, node, ct):
-        ct.add(self.perform)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class MatuiScene(HelixScene, KVObject):
     _fm_ = HelixScene._fm_.copy()
-    _fm_.update(
-            Node = MatuiNode,
-            SGPass = MatuiSceneGraphPass,
-            )
+    _fm_.update(Node = MatuiNode,)
 
     _sgPassTypes_ = [
         ('load', True),
-        ('pre-render', False),
+        #('pre-render', False),
         ('render', False),
 
         ('resize', False),
 
-        ('pre-select', False),
+        #('pre-select', False),
         ('select', False),
 
         ('animate', False),
@@ -44,7 +32,7 @@ class MatuiScene(HelixScene, KVObject):
         ('render', ['load', 'pre-render'], []),
         ('resize', ['load'], []),
         ('select', ['load', 'pre-select'], []),
-        ('animate', [], ['render']),
+        ('animate', ['load'], []),
         ]
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,6 +42,12 @@ class MatuiScene(HelixScene, KVObject):
         evtRoot.add('viewport-size', self.sg_resize)
         evtRoot.add('viewport-paint', self.sg_render)
         evtRoot.add('timer', self.sg_animate)
+
+    refresh = False
+    def _sgOnTreeChange_(self, node, cause):
+        # called when the root node gets an onTreeChange call
+        self.refresh = True
+        return False
 
     def sg_resize(self, info=None):
         return self.sg_pass('resize', info)
@@ -67,5 +61,11 @@ class MatuiScene(HelixScene, KVObject):
     animate = False
     def sg_animate(self, info=None):
         if self.animate: 
-            return self.sg_pass('animate', info)
+            self.sg_pass('animate', info)
+
+        elif not self.refresh:
+            return
+
+        self.refresh = False
+        return self.sg_pass('render', info)
 

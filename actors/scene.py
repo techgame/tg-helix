@@ -56,6 +56,7 @@ class HelixScene(base.HelixObject):
     def init(self):
         self._sg_passes = {}
         self.root = self._fm_.Node(scene=self, info='scene root')
+        self.root.onTreeChange = self._sgOnTreeChange_
         self.evtRoot = self._fm_.EventRoot()
         self.timestamp = self.evtRoot.newTimestamp
 
@@ -78,12 +79,17 @@ class HelixScene(base.HelixObject):
         sgPassEvents = self.sgPassEvents
         for passKey, preKeys, postKeys in sgPassTriggers:
             for dk in preKeys:
-                dp = sg_passes[dk] 
-                sgPassEvents.add(passKey+'-pre', dp.performSubpass)
+                dp = sg_passes.get(dk) 
+                if dp is not None:
+                    sgPassEvents.add(passKey+'-pre', dp.performSubpass)
 
             for dk in postKeys:
-                dp = sg_passes[dk] 
-                sgPassEvents.add(passKey+'-post', dp.performSubpass)
+                dp = sg_passes.get(dk) 
+                if dp is not None:
+                    sgPassEvents.add(passKey+'-post', dp.performSubpass)
+
+    def _sgOnTreeChange_(self, node, cause):
+        return False
 
     def sg_pass(self, key, info=None):
         if info is None: 

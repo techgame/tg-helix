@@ -27,6 +27,8 @@ class MatuiNode(HelixNode):
         self.parents = KVList()
         self.children = KVList()
 
+    def isLayout(self): return False
+
     info = None
     actor = None
     def _getSubjectRepr(self):
@@ -40,7 +42,13 @@ class MatuiNode(HelixNode):
     def sgPassBind(self, ct):
         self.bindPass.call_n2(ct.passKey, self, ct)
 
-    def isLayout(self): return False
+    def onPass(self, passKey, fn=None):
+        if fn is None:
+            fn = passKey
+            passKey = fn.__name__.lstrip('sg_')
+
+        self.bindPass.add(passKey, 
+                lambda n, ct: ct.add(fn))
 
     @classmethod
     def itemAsNode(klass, item, create=True):

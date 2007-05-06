@@ -151,10 +151,7 @@ class MatuiActor(HelixActor, KVObject):
             opBind = self._fm_.sgOpPrefix + opKey
 
         if isinstance(opBind, str):
-            opFn = getattr(self, opBind)
-            def bindOpFn(node, ct, opFn=opFn):
-                ct.add(opFn)
-            node.bindPass.add(opKey, bindOpFn)
+            node.onPass(opKey, getattr(self, opBind))
 
         else:
             opBind(self, node, opKey)

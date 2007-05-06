@@ -48,7 +48,10 @@ class MatuiCell(HelixObject, LayoutCell):
     cell = property(getLayoutCell)
 
     def watchBox(self, box):
-        box.kvo('*', self.layoutInBox)
+        box.kvo('*', self.layoutInWatchBox)
+
+    def layoutInWatchBox(self, lbox, k='*'):
+        self.layoutInBox(lbox)
 
     def layoutInBox(self, lbox, k='*'):
         lbox = lbox.copy(dim=2)
