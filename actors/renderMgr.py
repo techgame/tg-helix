@@ -27,12 +27,13 @@ class SceneRenderManager(object):
 
         self.info = info
         self.vpsize = rctx.getSize()
-        self.result = {}
+        self.result = None
 
     def finishPass(self, sgpass, info):
-        self.renderContext.swap()
-
         result = self.result
+        if result is None:
+            self.renderContext.swap()
+
         del self.result
         del self.info
         return result

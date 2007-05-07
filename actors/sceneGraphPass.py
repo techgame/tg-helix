@@ -16,6 +16,28 @@ from TG.geomath.alg.compiledGraphPass import CompiledGraphPass, CallTree
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class SceneGraphCallTree(CallTree):
+    def __init__(self, srm, passKey):
+        self.srm = srm
+        self.passKeyStack = [passKey]
+        self.passKey = passKey
+
+    _op_next = CallTree._op_
+    def _op_(self, op, node, itree, compileNodeTo):
+        self.ov.append('-^v'[op])
+        self._op_next(op, node, itree, compileNodeTo)
+
+    _compile_next = CallTree._compile_
+    def _compile_(self, itree, compileNodeTo):
+        self.ov = []
+        r = self._compile_next(itree, compileNodeTo)
+
+        ov = ''.join(self.ov)
+        print '%10s = %s | %d ops %d fn' % (self.passKey, ov, len(ov), len(r))
+        return r
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class SceneGraphPass(CompiledGraphPass):
     def __init__(self, scene, passKey=None, singlePass=False):
         if passKey is not None:
@@ -31,10 +53,7 @@ class SceneGraphPass(CompiledGraphPass):
         return node
 
     def newCallTree(self):
-        ct = CallTree()
-        ct.srm = self.srm
-        ct.passKey = self.passKey
-        return ct
+        return SceneGraphCallTree(self.srm, self.passKey)
 
     def compileNodeTo(self, node, ct):
         node.sgPassBind(ct)

@@ -67,5 +67,5 @@ class MatuiScene(HelixScene, KVObject):
             return
 
         self.refresh = False
-        return self.sg_pass('render', info)
+        return self.sg_render(info)
 

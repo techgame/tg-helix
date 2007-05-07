@@ -47,8 +47,8 @@ class wxMouseEventSource(wxEventSourceMixin):
         wx.wxEVT_ENTER_WINDOW: ('hover', 'enter', None),
         wx.wxEVT_LEAVE_WINDOW: ('hover', 'leave', None),
 
-        wx.wxEVT_MOTION: ('movement', 'motion', None),
-        wx.wxEVT_MOUSEWHEEL: ('movement', 'wheel', None),
+        wx.wxEVT_MOTION: ('motion', 'pos', None),
+        wx.wxEVT_MOUSEWHEEL: ('motion', 'wheel', None),
 
         wx.wxEVT_LEFT_UP: ('button', 'up', 'left'),
         wx.wxEVT_LEFT_DOWN: ('button', 'down', 'left'),

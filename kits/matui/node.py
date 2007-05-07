@@ -33,20 +33,24 @@ class MatuiNode(HelixNode):
     def sgPassBind(self, ct):
         self.bindPass.call_n2(ct.passKey, self, ct)
 
-    def onPass(self, passKey, fn=None, unwind=None):
+    def onPass(self, passKey, fn=None):
         if fn is None:
             fn = passKey
             passKey = fn.__name__
+            if passKey.startswith('sg_'):
+                passKey = passKey[3:]
 
-            passKey = passKey.lstrip('sg_')
-            if passKey.endswith('_unwind'):
-                passKey = passKey.rstrip('_unwind')
-                unwind = True
+        if passKey.endswith('_unwind'):
+            passKey = passKey[:-7]
+            unwind = True
+        else: unwind = False
 
         fn = asWeakMethod(fn)
 
-        if unwind: binder = lambda n, ct: ct.addUnwind(fn)
-        else: binder = lambda n, ct: ct.add(fn)
+        if unwind: 
+            binder = lambda n, ct: ct.addUnwind(fn)
+        else: 
+            binder = lambda n, ct: ct.add(fn)
 
         self.bindPass.add(passKey, binder)
 
