@@ -28,17 +28,31 @@ class Package(module):
             self._register_(registry)
 
     def _register_(self, registry=True):
+        self._registerAs_(self, self.__name__, registry)
+
+    @classmethod
+    def _registerAlias_(klass, module, alias, registry=True):
+        key = module.__name__
+        assert '.' in key
+        key = key.rsplit('.', 1)[0]
+        klass._registerAs_(module, key + '.' + alias)
+
+    @classmethod
+    def _registerAs_(klass, module, key, registry=True):
         if registry in (None, True):
             registry = sys.modules
 
-        registry[self.__name__] = self
+        registry[key] = module
 
-        parentName, _, pkgName = self.__name__.rpartition('.')
+        parentName, _, pkgName = key.rpartition('.')
         if parentName:
             parent = registry[parentName]
-            setattr(parent, pkgName, self)
+            setattr(parent, pkgName, module)
 
     def addSite(self, path):
         path = os.path.abspath(path)
         self.__path__.append(path)
+
+registerAs = Package._registerAs_
+registerAlias = Package._registerAlias_
 
