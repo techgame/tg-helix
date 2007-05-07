@@ -122,13 +122,21 @@ class MatuiActor(HelixActor, KVObject):
 
     def _sgNodeSetup_(self, node):
         self._sgNode_ = node
-        node.actor = self
-
+        node.info = self.__class__.__name__
         Cell = self._fm_.Cell
         if Cell is not None:
-            self.cell = Cell(self)
+            self.cell = Cell(self.asWeakProxy())
 
         self.sgAddOpList(self._sgOps_, node)
+
+
+        node.actor_ref = self.asStrongRef()
+        def cleanup(wr, nr=node.asWeakRef()): 
+            node = nr()
+            if node is not None: 
+                node.clear()
+        self._wr_cleanup = self.asWeakRef(cleanup)
+
 
     def sgAddOpList(self, opsList, node=None):
         if node is None: node = self._sgNode_

@@ -21,6 +21,10 @@ class HelixObject(object):
     def isActor(self): return False
     def isNode(self, nodeKlass=None): return False
 
+    def asStrongRef(self):
+        return lambda self=self: self
+    def asStrongProxy(self):
+        return self
     def asWeakRef(self, cb=None, ref=weakref.ref):
         return ref(self, cb)
     def asWeakProxy(self, cb=None, proxy=weakref.proxy):

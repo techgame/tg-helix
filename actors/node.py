@@ -21,7 +21,11 @@ class HelixNode(GraphNode, HelixObject):
     def __repr__(self):
         return '<%s %s>' % (self.__class__.__name__, self._getSubjectRepr())
 
+    info = None
     def _getSubjectRepr(self):
+        info = self.info 
+        if info: 
+            return self.info
         return hex(id(self))
 
     def sgPassBind(self, ct, srm):
