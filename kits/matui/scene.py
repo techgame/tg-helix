@@ -4,7 +4,6 @@
 
 from TG.kvObserving import KVObject
 from TG.helix.actors.scene import HelixScene
-from TG.helix.actors.sceneGraphPass import SceneGraphPass
 from .node import MatuiNode
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,12 +42,6 @@ class MatuiScene(HelixScene, KVObject):
         evtRoot.add('viewport-paint', self.sg_render)
         evtRoot.add('timer', self.sg_animate)
 
-    refresh = False
-    def _sgOnTreeChange_(self, node, cause):
-        # called when the root node gets an onTreeChange call
-        self.refresh = True
-        return False
-
     def sg_resize(self, info=None):
         return self.sg_pass('resize', info)
     def sg_render(self, info=None):
@@ -63,9 +56,6 @@ class MatuiScene(HelixScene, KVObject):
         if self.animate: 
             self.sg_pass('animate', info)
 
-        elif not self.refresh:
-            return
-
-        self.refresh = False
-        return self.sg_render(info)
+        if self.srm.invalidated:
+            return self.sg_render(info)
 

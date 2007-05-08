@@ -10,73 +10,109 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.geomath.alg.compiledGraphPass import CompiledGraphPass, CallTree
+from functools import partial
+from TG.geomath.alg.compiledGraphPass import CompiledGraphPass, CompileStack
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneGraphCallTree(CallTree):
-    def __init__(self, srm, passKey):
-        self.srm = srm
-        self.passKeyStack = [passKey]
+class SceneGraphCallTree(CompileStack):
+    def __init__(self, root, passKey):
+        self.root = root
         self.passKey = passKey
 
-    _op_next = CallTree._op_
-    def _op_(self, op, node, itree, compileNodeTo):
-        self.ov.append('-^v'[op])
-        self._op_next(op, node, itree, compileNodeTo)
+    def addFn(self, fn, *args):
+        if args:
+            fn = partial(fn, *args)
+        self._result.append(fn)
+    def addUnwindFn(self, fn, *args):
+        if args:
+            fn = partial(fn, *args)
+        self._unwind.append(fn)
 
-    _compile_next = CallTree._compile_
+class DebugSceneGraphCallTree(SceneGraphCallTree):
+    _pop_next = SceneGraphCallTree._pop_
+    def _pop_(self, op, cnode):
+        self.ov.append('v')
+        return self._pop_next(op, cnode)
+
+    _step_next = SceneGraphCallTree._step_
+    def _step_(self, op, cnode):
+        self.ov.append('-^'[op])
+        return self._step_next(op, cnode)
+
+    _compile_next = SceneGraphCallTree._compile_
     def _compile_(self, itree, compileNodeTo):
         self.ov = []
         r = self._compile_next(itree, compileNodeTo)
 
         ov = ''.join(self.ov)
-        print '%10s = %s | %d ops %d fn' % (self.passKey, ov, len(ov), len(r))
+        nl = getattr(self.root, 'scene', None) is not None
+        if nl: print
+        print '%30s:%8s %2d/%2d | %s' % (self.root._getSubjectRepr(), self.passKey, len(r), len(ov), ov)
         return r
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneGraphPass(CompiledGraphPass):
-    def __init__(self, scene, passKey=None, singlePass=False):
-        if passKey is not None:
-            self.passKey = passKey
-        self.srm = scene.srm
+class SceneGraphNodePass(CompiledGraphPass):
+    singlePass = False
+    if 0: SGCallTree = SceneGraphCallTree
+    else: SGCallTree = DebugSceneGraphCallTree
 
-        node = self._getNodeFromScene(scene)
-        CompiledGraphPass.__init__(self, node, singlePass)
+    def newCompileStack(self, passKey, root):
+        return self.SGCallTree(root, passKey)
 
-    def _getNodeFromScene(self, scene):
-        node = scene.root.newParent()
-        node.info = 'sgp:' + self.passKey
-        return node
+    def _getCached(self, key, root):
+        return root._sgPassCache.get(key, None)
+    def _setCached(self, key, root, result):
+        if self.singlePass:
+            root._sgPassCache[key] = []
+        else: root._sgPassCache[key] = result
 
-    def newCallTree(self):
-        return SceneGraphCallTree(self.srm, self.passKey)
+    def compileNodeTo(self, cnode, ct):
+        cache = cnode._sgPassCache
+        if cache is None or cnode is ct.root:
+            return cnode.sgPassBind(ct)
 
-    def compileNodeTo(self, node, ct):
-        node.sgPassBind(ct)
+        ct.addFn(self.sg_pass, ct.passKey, cnode)
+        ct.cull()
 
-    def perform(self, srm, passList=None):
-        if passList is None:
-            passList = self.compile()
-
+    def sg_pass(self, passKey, root, srm):
+        passList = self.compile(passKey, root)
         for fn in passList:
             fn(srm)
 
-    def performPass(self, info):
-        passList = self.compile()
-        if not passList and self.singlePass:
-            return
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        srm = self.srm
+class SceneGraphPass(SceneGraphNodePass):
+    def __init__(self, root, passKey, singlePass):
+        self.passKey = passKey
+        if singlePass:
+            self.singlePass = singlePass
+        SceneGraphNodePass.__init__(self, root)
+
+    def performSubpass(self, info, passKey=None):
+        if passKey is None: 
+            passKey = self.passKey
+
+        srm = self.root.srm
+
+        passList = self.compile(passKey)
+        for fn in passList:
+            fn(srm)
+
+    def performPass(self, info, passKey=None):
+        if passKey is None:
+            passKey = self.passKey
+
+        srm = self.root.srm
         srm.startPass(self, info)
-        self.perform(srm, passList)
+
+        passList = self.compile(passKey)
+        for fn in passList:
+            fn(srm)
+
         return srm.finishPass(self, info)
     __call__ = performPass
-
-    def performSubpass(self, info):
-        passList = self.compile()
-        self.perform(self.srm, passList)
 

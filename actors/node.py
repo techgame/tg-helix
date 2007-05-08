@@ -18,17 +18,24 @@ from .base import HelixObject
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixNode(GraphNode, HelixObject):
+    def __init__(self, **kw):
+        for n,v in kw.items():
+            setattr(self, n, v)
+        GraphNode.__init__(self)
+
     def __repr__(self):
-        return '<%s %s>' % (self.__class__.__name__, self._getSubjectRepr())
+        r = [self._getSubjectRepr(), self._getPassRepr()]
+        if r: r = ' ' + ' | '.join(r)
+        else: r = ''
+        return '<%s%s>' % (self.__class__.__name__, r)
 
     info = None
     def _getSubjectRepr(self):
-        info = self.info 
-        if info: 
-            return self.info
-        return hex(id(self))
+        return self.info or '*%d' % (len(self._children),)
+    def _getPassRepr(self, sep=' '):
+        return None
 
-    def sgPassBind(self, ct, srm):
+    def sgPassBind(self, ct):
         pass
 
     def extendAt(self, idx, iterable):
@@ -36,4 +43,24 @@ class HelixNode(GraphNode, HelixObject):
             return self.insert(idx, iterable)
 
         return GraphNode.extendAt(self, idx, iterable)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    _sgPassCache = None
+    def asSGPassNode(self):
+        if self._sgPassCache is not None:
+            return self
+
+        self._sgPassCache = {}
+        self.onTreeChange = self._onPassTreeChange_
+        return self
+
+    srm = None
+    def _onPassTreeChange_(self, node, cause=None):
+        for p in self.iterParents():
+            if p.srm is not None:
+                p.srm.invalidate()
+                
+        self._sgPassCache.clear()
+        return False
 

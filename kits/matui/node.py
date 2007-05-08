@@ -30,11 +30,8 @@ class MatuiNode(HelixNode):
 
     def isLayout(self): return False
 
-    info = None
-    def _getSubjectRepr(self):
-        r = HelixNode._getSubjectRepr(self)
-        r += ' | ' + ' '.join(k for k in self.bindPass.iterkeys())
-        return r
+    def _getPassRepr(self, sep=' '):
+        return sep.join(sorted(self.bindPass.keys()))
 
     def sgPassBind(self, ct):
         self.bindPass.call_n2(ct.passKey, self, ct)
