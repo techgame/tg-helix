@@ -53,7 +53,7 @@ class MatuiCell(HelixObject, LayoutCell):
     def layoutInWatchBox(self, lbox, k='*'):
         self.layoutInBox(lbox)
 
-    def layoutInBox(self, lbox, k='*'):
+    def layoutInBox(self, lbox):
         lbox = lbox.copy(dim=2)
         host = self.host
         placeFn = self.placeFn
@@ -63,6 +63,9 @@ class MatuiCell(HelixObject, LayoutCell):
             host.box = lbox.copy()
 
         self.oset.call_n2(self, getattr(host, 'box', lbox))
+
+    def layout(self):
+        self.layoutInBox(self.host.box)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
