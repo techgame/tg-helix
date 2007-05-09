@@ -105,12 +105,12 @@ class MatuiActor(HelixActor, KVObject):
             )
     _sgOps_ = []
 
-    _sgNode_ = None
+    node = None
 
     def isLayout(self): return False
 
     def _sgGetNode_(self, create=True):
-        node = self._sgNode_
+        node = self.node
         if not create:
             return node
 
@@ -121,7 +121,7 @@ class MatuiActor(HelixActor, KVObject):
         return node
 
     def _sgNodeSetup_(self, node):
-        self._sgNode_ = node
+        self.node = node
         node.info = self.__class__.__name__
         Cell = self._fm_.Cell
         if Cell is not None:
@@ -139,7 +139,7 @@ class MatuiActor(HelixActor, KVObject):
 
 
     def sgAddOpList(self, opsList, node=None):
-        if node is None: node = self._sgNode_
+        if node is None: node = self.node
 
         if isinstance(opsList, dict):
             opsList = sorted(opsList.items())
@@ -153,7 +153,7 @@ class MatuiActor(HelixActor, KVObject):
 
 
     def sgAddOp(self, opKey, opBind=None, node=None):
-        if node is None: node = self._sgNode_
+        if node is None: node = self.node
 
         if opBind is None:
             opBind = self._fm_.sgOpPrefix + opKey

@@ -18,7 +18,6 @@ class SceneRenderManager(object):
     invalidated = False
     info = None
     result = None
-    debugCallTree = False
 
     def __init__(self, renderContext):
         self.renderContext = renderContext
@@ -40,7 +39,4 @@ class SceneRenderManager(object):
         del self.result
         del self.info
         return result
-
-    def invalidate(self, value=True):
-        self.invalidated = value
 

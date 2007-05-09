@@ -61,7 +61,6 @@ class HelixScene(base.HelixObject):
 
     def setup(self, renderContext):
         self.srm = self._fm_.SceneRenderManager(renderContext)
-        self.root.srm = self.srm
 
         self.sgAddPasses(self._sgPassTypes_)
         self.sgPassConfig(self._sgPassTriggers_)
@@ -99,6 +98,9 @@ class HelixScene(base.HelixObject):
         result = sgp(info, key)
         self.sgPassEvents.call_n1(key+'-post', info)
         return result
+
+    def sg_invalidate(self):
+        self.srm.invalidated = True
 
     def setupEvtSources(self):
         pass

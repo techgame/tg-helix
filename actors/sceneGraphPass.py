@@ -57,21 +57,20 @@ class DebugSceneGraphCallTree(SceneGraphCallTree):
 
 class SceneGraphNodePass(CompiledGraphPass):
     singlePass = False
-    if 0: SGCallTree = SceneGraphCallTree
-    else: SGCallTree = DebugSceneGraphCallTree
+    SGCallTree = SceneGraphCallTree
 
     def newCompileStack(self, passKey, root):
         return self.SGCallTree(root, passKey)
 
     def _getCached(self, key, root):
-        return root._sgPassCache.get(key, None)
+        return root.sg_passCache.get(key, None)
     def _setCached(self, key, root, result):
         if self.singlePass:
-            root._sgPassCache[key] = []
-        else: root._sgPassCache[key] = result
+            root.sg_passCache[key] = []
+        else: root.sg_passCache[key] = result
 
     def compileNodeTo(self, cnode, ct):
-        cache = cnode._sgPassCache
+        cache = cnode.sg_passCache
         if cache is None or cnode is ct.root:
             return cnode.sgPassBind(ct)
 
@@ -88,6 +87,8 @@ class SceneGraphNodePass(CompiledGraphPass):
 class SceneGraphPass(SceneGraphNodePass):
     def __init__(self, root, passKey, singlePass):
         self.passKey = passKey
+        if getattr(root.scene, 'debugCallTree', False):
+            self.SGCallTree = DebugSceneGraphCallTree
         if singlePass:
             self.singlePass = singlePass
         SceneGraphNodePass.__init__(self, root)
@@ -96,7 +97,7 @@ class SceneGraphPass(SceneGraphNodePass):
         if passKey is None: 
             passKey = self.passKey
 
-        srm = self.root.srm
+        srm = self.root.scene.srm
 
         passList = self.compile(passKey)
         for fn in passList:
@@ -106,7 +107,7 @@ class SceneGraphPass(SceneGraphNodePass):
         if passKey is None:
             passKey = self.passKey
 
-        srm = self.root.srm
+        srm = self.root.scene.srm
         srm.startPass(self, info)
 
         passList = self.compile(passKey)

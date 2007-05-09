@@ -23,6 +23,10 @@ class HelixNode(GraphNode, HelixObject):
             setattr(self, n, v)
         GraphNode.__init__(self)
 
+    @classmethod
+    def new(klass, **kw):
+        return klass(**kw)
+
     def __repr__(self):
         r = [self._getSubjectRepr(), self._getPassRepr()]
         if r: r = ' ' + ' | '.join(r)
@@ -46,21 +50,29 @@ class HelixNode(GraphNode, HelixObject):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    _sgPassCache = None
+    scene = None
+    def sg_invalidate(self):
+        for p in self.iterParents():
+            if p.scene is not None:
+                p.scene.sg_invalidate()
+
+    sg_passCache = None
     def asSGPassNode(self):
-        if self._sgPassCache is not None:
+        if self.sg_passCache is not None:
             return self
 
-        self._sgPassCache = {}
+        self.sg_passCache = {}
         self.onTreeChange = self._onPassTreeChange_
         return self
 
-    srm = None
     def _onPassTreeChange_(self, node, cause=None):
+        self.sg_passCache.clear()
+        self.sg_invalidate()
+        return True
+
+    def sg_clearPassKey(self, key):
         for p in self.iterParents():
-            if p.srm is not None:
-                p.srm.invalidate()
-                
-        self._sgPassCache.clear()
-        return False
+            cache = p.sg_passCache
+            if cache is not None:
+                cache.pop(key, None)
 
