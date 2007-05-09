@@ -3,16 +3,24 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.kvObserving import KVObject
-from TG.helix.actors.scene import HelixScene
+from TG.helix.actors.scene import HelixScene, SceneRenderManager
 from .node import MatuiNode
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+class MatuiSceneRenderManager(SceneRenderManager):
+    pass
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class MatuiScene(HelixScene, KVObject):
     _fm_ = HelixScene._fm_.copy()
-    _fm_.update(Node = MatuiNode,)
+    _fm_.update(
+            Node = MatuiNode,
+            SceneRenderManager = MatuiSceneRenderManager
+            )
 
     _sgPassTypes_ = [
         ('load', True),

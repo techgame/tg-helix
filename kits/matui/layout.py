@@ -98,6 +98,7 @@ class MatuiLayout(HelixObject, KVObject):
     def fit(self):
         box = self.alg.fit(self.collection, self.box)
         self.box.size = box.size
+        return box
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

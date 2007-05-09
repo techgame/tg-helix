@@ -87,11 +87,16 @@ class SceneGraphNodePass(CompiledGraphPass):
 class SceneGraphPass(SceneGraphNodePass):
     def __init__(self, root, passKey, singlePass):
         self.passKey = passKey
-        if getattr(root.scene, 'debugCallTree', False):
-            self.SGCallTree = DebugSceneGraphCallTree
+
         if singlePass:
             self.singlePass = singlePass
         SceneGraphNodePass.__init__(self, root)
+        self.debugCallTrees = self.root.scene.srm.debugCallTrees
+
+    def newCompileStack(self, passKey, root):
+        if passKey in self.debugCallTrees:
+            return DebugSceneGraphCallTree(root, passKey)
+        return self.SGCallTree(root, passKey)
 
     def performSubpass(self, info, passKey=None):
         if passKey is None: 

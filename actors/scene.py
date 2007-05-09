@@ -13,7 +13,11 @@
 from TG.metaObserving import OBKeyedList
 from TG.metaObserving import OBFactoryMap
 
-from . import base, node, events, sceneGraphPass, renderMgr
+from . import base
+from .node import HelixNode
+from .events import EventRoot
+from .renderMgr import SceneRenderManager
+from .sceneGraphPass import SceneGraphPass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -36,11 +40,11 @@ class HelixScene(base.HelixObject):
     selection operations over the scene's nodes."""
 
     _fm_ = OBFactoryMap(
-            Node = node.HelixNode,
-            EventRoot = events.EventRoot,
-            SceneRenderManager = renderMgr.SceneRenderManager,
+            Node = HelixNode,
+            EventRoot = EventRoot,
+            SceneRenderManager = SceneRenderManager,
 
-            SGPass = sceneGraphPass.SceneGraphPass,
+            SGPass = SceneGraphPass,
             SGPassEvents = OBKeyedList,
             )
     _sgPassTypes_ = []

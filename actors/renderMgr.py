@@ -21,6 +21,7 @@ class SceneRenderManager(object):
 
     def __init__(self, renderContext):
         self.renderContext = renderContext
+        self.debugCallTrees = set()
 
     def startPass(self, sgpass, info):
         rctx = self.renderContext
