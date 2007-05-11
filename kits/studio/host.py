@@ -31,7 +31,7 @@ class StudioHost(wxSkinModel, KVObject):
     xmlSkin = xmlSkin
     runSkin = False
 
-    def __init__(self, manager, bSkinModel=True):
+    def __init__(self, mgr, bSkinModel=True):
         KVObject.__init__(self)
         wxSkinModel.__init__(self)
 

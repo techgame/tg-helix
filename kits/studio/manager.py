@@ -23,10 +23,13 @@ from .package import Package
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StudioDirector(KVObject):
-    manager = KVProperty(None)
+    mgr = KVProperty(None)
 
-    def __init__(self, manager):
-        self.manager = manager
+    def __init__(self, mgr):
+        self.mgr = mgr
+
+    def init(self):
+        pass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -44,13 +47,12 @@ class StudioManager(KVObject):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __init__(self, rootPkgName):
-        self.setup(rootPkgName)
-
-    def setup(self, rootPkgName):
-        self.host = self._fm_.StudioHost(self)
+        self.package = self._fm_.StudioPackage(rootPkgName)
         self.director = self._fm_.StudioDirector(self)
 
-        self.package = self._fm_.StudioPackage(rootPkgName)
+    def init(self):
+        self.host = self._fm_.StudioHost(self)
+        self.director.init()
 
     def run(self):
         self.host.run()
