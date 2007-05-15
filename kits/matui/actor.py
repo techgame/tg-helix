@@ -164,3 +164,6 @@ class MatuiActor(HelixActor, KVObject):
         else:
             opBind(self, node, opKey)
 
+    def sgClearOp(self, opKey):
+        self.node.bindPass.clear(opKey)
+
