@@ -19,7 +19,6 @@ from TG.helix.actors import HelixNode
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiNode(HelixNode):
-    autoclean = True
     actor_ref = None
 
     def __init__(self, **kw):
@@ -80,17 +79,16 @@ class MatuiNode(HelixNode):
     def onRemoveFromParent(self, parent):
         r = HelixNode.onRemoveFromParent(self, parent)
         
-        if self.autoclean:
-            if not self._parents:
-                if self.actor_ref is not None:
-                    actor = self.actor_ref()
-                    if actor is not None:
-                        self.actor_ref = actor.asWeakRef()
-                    else:
-                        del self.actor_ref
-                        self.clear()
+        if not self._parents:
+            if self.actor_ref is not None:
+                actor = self.actor_ref()
+                if actor is not None:
+                    self.actor_ref = actor.asWeakRef()
                 else:
+                    del self.actor_ref
                     self.clear()
+            else:
+                self.clear()
 
         return r
 
