@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from __future__ import with_statement
 from TG.metaObserving import OBSet, OBFactoryMap
 
 from TG.geomath.data.vector import Vector
@@ -91,6 +92,14 @@ class MatuiCell(HelixObject, LayoutCell):
         def placeAspect(host, lbox):
             host.box.atAspect[aspect,at] = lbox
         return self
+
+    def aspectFill(self, at=.5, grow=True):
+        @self.on
+        def placeFill(host, lbox):
+            size = lbox.size
+            with host.box.kvpub:
+                host.box.at[at] = lbox.at[at]
+                host.box.setAspectWith((host.box.size, grow), size)
 
     def fill(self, inset=0):
         @self.on
