@@ -18,6 +18,7 @@ class SceneRenderManager(object):
     invalidated = False
     info = None
     result = None
+    swapKeys = set(['render'])
 
     def __init__(self, renderContext):
         self.renderContext = renderContext
@@ -33,7 +34,7 @@ class SceneRenderManager(object):
 
     def finishPass(self, sgpass, info):
         result = self.result
-        if result is None:
+        if sgpass.passKey in self.swapKeys:
             self.renderContext.swap()
             self.invalidated = False
 
