@@ -42,7 +42,7 @@ class SceneGraphOp(object):
         pass
 
     def bindOp(self, node, opKey):
-        node.bindPass.add(opKey, self._sgBindPass_)
+        node.addPass(opKey, self._sgBindPass_)
 
     def _getNodeRes(self, node):
         res = getattr(node, 'res', None)
@@ -165,5 +165,5 @@ class MatuiActor(HelixActor, KVObject):
             opBind(self, node, opKey)
 
     def sgClearOp(self, opKey):
-        self.node.bindPass.clear(opKey)
+        self.node.clearPass(opKey)
 

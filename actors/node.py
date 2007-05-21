@@ -70,9 +70,10 @@ class HelixNode(GraphNode, HelixObject):
         self.sg_invalidate()
         return True
 
-    def sg_clearPassKey(self, key):
+    def sg_clearPassKey(self, key, all):
         for p in self.iterParents():
             cache = p.sg_passCache
             if cache is not None:
                 cache.pop(key, None)
+                if not all: break
 

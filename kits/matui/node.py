@@ -25,17 +25,26 @@ class MatuiNode(HelixNode):
         for n,v in kw.items():
             setattr(self, n, v)
 
-        self.bindPass = OBKeyedList()
+        self._bindPass = OBKeyedList()
         self._parents = KVList()
         self._children = KVList()
 
     def isLayout(self): return False
 
     def _getPassRepr(self, sep=' '):
-        return sep.join(sorted(self.bindPass.keys()))
+        return sep.join(sorted(self._bindPass.keys()))
 
     def sgPassBind(self, ct):
-        self.bindPass.call_n2(ct.passKey, self, ct)
+        self._bindPass.call_n2(ct.passKey, self, ct)
+
+    def addPass(self, passKey, passBindFn):
+        self._bindPass.add(passKey, passBindFn)
+        self.sg_clearPassKey(passKey, False)
+        return passBindFn
+
+    def clearPass(self, passKey):
+        self._bindPass.clear(passKey)
+        self.sg_clearPassKey(passKey, False)
 
     def onPass(self, passKey, fn=None):
         if fn is None:
@@ -52,11 +61,11 @@ class MatuiNode(HelixNode):
         fn = asWeakMethod(fn)
 
         if unwind: 
-            binder = lambda n, ct: ct.addUnwind(fn)
+            passBindFn = lambda n, ct: ct.addUnwind(fn)
         else: 
-            binder = lambda n, ct: ct.add(fn)
+            passBindFn = lambda n, ct: ct.add(fn)
 
-        self.bindPass.add(passKey, binder)
+        return self.addPass(passKey, passBindFn)
 
     @classmethod
     def itemAsNode(klass, item, create=True):
@@ -74,7 +83,7 @@ class MatuiNode(HelixNode):
             else: 
                 del self.actor_ref
 
-        self.sg_clearPassKey('load')
+        self.sg_clearPassKey('load', True)
         return r
     def onRemoveFromParent(self, parent):
         r = HelixNode.onRemoveFromParent(self, parent)
