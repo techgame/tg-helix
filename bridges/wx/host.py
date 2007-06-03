@@ -1,11 +1,10 @@
-#!/usr/local/bin/python2.5
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##~ Copyright (C) 2002-2004  TechGame Networks, LLC.
-##~ 
-##~ This library is free software; you can redistribute it and/or
-##~ modify it under the terms of the BSD style License as found in the 
-##~ LICENSE file included with this distribution.
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+##~ Copyright (C) 2002-2007  TechGame Networks, LLC.              ##
+##~                                                               ##
+##~ This library is free software; you can redistribute it        ##
+##~ and/or modify it under the terms of the BSD style License as  ##
+##~ found in the LICENSE file included with this distribution.    ##
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Imports 
@@ -23,7 +22,7 @@ from . import viewLoader
 xmlSkin = XMLSkin("""<?xml version='1.0'?>
 <skin xmlns='TG.skinning.toolkits.wx'>
     <style>
-        frame {frame-main:1; locking:0; show: True}
+        frame {title: "Helix Host"; frame-main:1; locking:0; show: False}
         frame>layout {layout-cfg:1,EXPAND}
         frame>layout>panel {layout-cfg:1,EXPAND}
 
@@ -33,7 +32,7 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
             }
     </style>
 
-    <frame>
+    <frame ctxobj='model.frame'>
         <menubar>
             <menu text='View'>
                 <item text='Full Screen\tCtrl-F' help='Shows My Frame on the entire screen'>
@@ -46,23 +45,25 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
                     <event type='EVT_UPDATE_UI'>
                         if ctx.frame.IsFullScreen():
                             obj.SetText('Restore from Full Screen\tCtrl-F')
-                        else:
-                            obj.SetText('Full Screen\tCtrl-F')
+                        else: obj.SetText('Full Screen\tCtrl-F')
                     </event>
                 </item>
             </menu>
         </menubar>
 
+        ctx.model.adjPosition()
+        if wx.Platform == '__WXMSW__':
+            obj.Show(True)
+
         <layout>
             <panel>
                 <layout>
-                    <opengl-canvas size='100,100'>
+                    <opengl-canvas gl-context='ctx.model.getGLContext()'>
                         ctx.model.setupCanvas(elem, obj)
                     </opengl-canvas>
                 </layout>
             </panel>
         </layout>
-        ctx.model.setupFrame(obj)
     </frame>
 </skin>
 """)
@@ -71,41 +72,45 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class BasicRenderSkinModel(wxSkinModel):
+class HelixHost(wxSkinModel):
     xmlSkin = xmlSkin
+    runSkin = False
 
-    frameTitle = 'Basic wxPython HelixUI Render Skin'
-    clientSize = (800, 800)
-    minSize = (200, 200)
-    fullscreen = False
-
-    def setupStage(self, options, scene):
-        self.options = options
+    def __init__(self, scene, options=None):
         self.scene = scene
+
+        r = {}
+        if options is not None:
+            r.update(options)
+        self.options = r
+
+        wxSkinModel.__init__(self)
+        self.skinModel()
 
     SceneHostViewLoader = viewLoader.SceneHostViewLoader
     def setupCanvas(self, canvasElem, canvasObj):
+        self.setGLContext(canvasObj.GetContext())
         canvasObj.SetCurrent()
         # Reload the opengl raw api to support windows
         TG.openGL.raw.apiReload()
 
-        self.SceneHostViewLoader.load(canvasObj, self.options, self.scene)
+        if self.scene is not None:
+            self.SceneHostViewLoader.load(canvasObj, self.options, self.scene)
 
-    def setupFrame(self, frame):
-        self.frame = frame
-        if self.frameTitle:
-            frame.SetTitle(self.frameTitle)
-        if self.clientSize:
-            frame.SetClientSize(self.clientSize)
-        if self.minSize:
-            frame.SetMinSize(self.minSize)
+    _glcontext = None
+    @classmethod
+    def getGLContext(klass):
+        glcontext = klass._glcontext
+        if glcontext:
+            return glcontext
+    @classmethod
+    def setGLContext(klass, glcontext):
+        klass._glcontext = glcontext
 
-        if self.fullscreen:
-            frame.ShowFullScreen(True)
+    def show(self, visible=True):
+        self.frame.Show(visible)
 
-    def close(self):
-        self.frame.Close()
-
-    def showAndRun(self):
-        self.skinModel()
+    def adjPosition(self):
+        self.frame.SetClientSize(self.options.get('size', (1024, 768)))
+        self.frame.Center()
 
