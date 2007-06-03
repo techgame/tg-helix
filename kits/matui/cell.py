@@ -32,52 +32,40 @@ class MatuiCell(HelixObject, LayoutCell):
     weight = Vector.property([0,0], 'f')
     minSize = Vector.property([0,0], 'f')
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     def __init__(self, host):
         self.host = host
 
     def isLayout(self): return True
 
-    def set(self, *args, **kw):
-        for n,v in args:
-            setattr(self, n, v)
-        for n,v in kw.items():
-            setattr(self, n, v)
-        return self
-
-    def getLayoutCell(self):
-        return self
-    cell = property(getLayoutCell)
-
-    def watchBox(self, box):
-        box.kvo('*', self.layoutInWatchBox)
-
-    def layoutInWatchBox(self, lbox, k='*'):
-        self.layoutInBox(lbox)
-
+    def layout(self):
+        self.layoutInBox(self.host.box)
     def layoutInBox(self, lbox):
         lbox = lbox.copy(dim=2)
         host = self.host
-        placeFn = self.placeFn
-        if placeFn is not None:
-            placeFn(host, lbox)
-        else:
-            host.box = lbox.copy()
-
+        self._placeFn(host, lbox)
         self.oset.call_n2(self, getattr(host, 'box', lbox))
 
-    def layout(self):
-        self.layoutInBox(self.host.box)
+    def watchBox(self, box):
+        box.kvo('*', lambda lbox, k: self.layoutInBox(lbox))
+    def watchHostBox(self, host):
+        host.kvo('box.*', lambda host, lbox: self.layoutInBox(lbox))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Placement methods
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    placeFn = None
-    def onPlace(self, placeFn):
-        self.placeFn = placeFn
-        return placeFn
-    on = onPlace
+    @staticmethod
+    def _placeAssign(host, lbox):
+        host.box = lbox.copy()
+    def assign(self):
+        self.on(self._placeAssign)
+        return self
 
     def offset(self, offset=0):
         return self.align(0, 0, offset)
+
     def align(self, at0=0, at1=None, offset=0):
         if at1 is None: 
             at1 = at0
@@ -100,6 +88,7 @@ class MatuiCell(HelixObject, LayoutCell):
             with host.box.kvpub:
                 host.box.at[at] = lbox.at[at]
                 host.box.setAspectWith((host.box.size, grow), size)
+        return self
 
     def fill(self, inset=0):
         @self.on
@@ -108,11 +97,21 @@ class MatuiCell(HelixObject, LayoutCell):
             host.box.inset(inset)
         return self
 
+    _placeFn = _placeAssign
+    def onPlace(self, placeFn):
+        self._placeFn = placeFn
+        return placeFn
+    on = onPlace
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Layout creation
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     def newLayout(self, kind='abs', node=None, cell=True):
         return self._fm_.Layout(kind, node, cell)
     def addLayout(self, kind='abs', node=None, cell=None):
         layout = self.newLayout(kind, node, cell)
-        layout.watchCell(self)
+        layout.watchCell(self, True)
         return layout
     def removeLayout(self, layout):
         layout.watchCell(self, False)

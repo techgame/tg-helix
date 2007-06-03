@@ -76,24 +76,28 @@ class MatuiLayout(HelixObject, KVObject):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    _cell = None
+    def getCell(self):
+        return self._cell
     def setCell(self, cell):
         if cell is True:
             cell = self._fm_.Cell(self)
 
+        self._cell = cell
         self.watchCell(cell)
-        self.cell = cell
+    cell = property(getCell, setCell)
 
     def watchCell(self, cell, watch=True):
-        cell.oset.change(watch, self.onWatchedCellNotify)
-
-    def onWatchedCellNotify(self, wcell, lbox):
-        self.layout(lbox)
+        cell.oset.change(watch, lambda cell, lbox: self.layout(lbox))
+    def watchHostBox(self, host):
+        host.kvo('box.*', lambda host, lbox: self.layout(lbox))
 
     def layout(self, lbox=None):
+        box = self.box
         if lbox is not None:
-            self.box.pv = lbox.pv[..., :2]
+            box.pv = lbox.pv[..., :box.shape[-1]]
 
-        self.alg(self.collection, self.box)
+        self.alg(self.collection, box)
 
     def fit(self):
         box = self.alg.fit(self.collection, self.box)
@@ -101,6 +105,13 @@ class MatuiLayout(HelixObject, KVObject):
         return box
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def __iadd__(self, other):
+        self.add(other)
+        return self
+    def __isub__(self, other):
+        self.remove(other)
+        return self
 
     def add(self, item):
         if not item.isLayout() and self._node is not None:
