@@ -51,6 +51,7 @@ class MatuiScene(HelixScene, KVObject):
         evtRoot.add('timer', self.sg_animate)
 
     def sg_resize(self, info=None):
+        self.srm.invalidated = True
         return self.sg_pass('resize', info)
     def sg_render(self, info=None):
         return self.sg_pass('render', info)

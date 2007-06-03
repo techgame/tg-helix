@@ -18,6 +18,7 @@ class SceneRenderManager(object):
     invalidated = False
     info = None
     result = None
+    vpsize = (0,0)
     swapKeys = set(['render'])
 
     def __init__(self, renderContext):
