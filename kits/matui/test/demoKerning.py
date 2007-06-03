@@ -71,13 +71,13 @@ if __name__=='__main__':
 
     text = Text()
     text.arena = MosaicPageArena(mosaicSize)
-    text.sorts = ts.sorts
+    text.update(ts)
 
     layout.add(text).align(0, (0, 1), (10, -10 - size))
 
     text1 = Text()
     text1.arena = text.arena
-    text1.sorts = ts1.sorts
+    text1.update(ts1)
     layout.add(text1).align(0, (0, 1), (10, -10 - 2*size))
 
     host = HelixHost(scene)

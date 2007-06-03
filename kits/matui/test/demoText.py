@@ -30,7 +30,7 @@ if __name__=='__main__':
 
     mosaicSize = (1<<10, 1<<10)
 
-    ts = TypeSetter(color = 'black')
+    ts = TypeSetter(color = 'black', wrapMode='line')
     
     ts.face = chalkboard
     ts.color = 'black'
@@ -45,8 +45,10 @@ if __name__=='__main__':
 
     ts.face = chalkboardBold
     ts.color = 'green'
-    print >> ts, 'proportions',
+    print >> ts, 'proportions'
     ts.color = 'black'
+
+    print >> ts, 'shane is watching'
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -67,9 +69,15 @@ if __name__=='__main__':
 
     text = Text()
     text.arena = MosaicPageArena(mosaicSize)
-    text.sorts = ts.sorts
+    text.update(ts)
+    
+    layout.add(text).align(.5)
 
-    layout.add(text).align(.5, .5, (0, size))
+    pnlr = Panel()
+    pnlr.box = text.box
+    pnlr.color = '#ff:00:00:40'
+    node += pnlr
+
 
     host = HelixHost(scene)
     host.show()

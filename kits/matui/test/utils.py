@@ -128,10 +128,8 @@ class Text(MatuiActor):
     def __init__(self):
         self._sgGetNode_()
 
-    _sorts = None
-    def getSorts(self):
-        return self._sorts
-    def setSorts(self, sorts):
+    def update(self, typeset):
+        sorts = typeset.sorts
         self._sorts = sorts
 
         if sorts is None: count = 1
@@ -140,31 +138,49 @@ class Text(MatuiActor):
         self.texMesh = numpy.zeros((count, 4, 2), 'f')
         self.colorMesh = numpy.zeros((count, 4, 4), 'B')
 
-        if sorts is not None:
-            offset = sorts['offset']
-            self.colorMesh[:] = sorts['color']
-            self.page = self.arena.texCoords(sorts, self.texMesh)
-            self.box.size = offset[-1]-offset[0]
-        else:
+        if sorts is None:
             self.page = None
             self.box.size = 0
+            return
+
+        self._wrapSlices = list(typeset.wrapSlices())
+        self.colorMesh[:] = sorts['color']
+
+        self.page = self.arena.texCoords(sorts, self.texMesh)
+
+
+        am = sorts['lineSize'].argmax(0)[1]
+        self._maxLineSize  = sorts['lineSize'][am]
+        self._firstLine = sorts['ascenders'][am, 0]
+
+        A = sorts['advance']
+        O = sorts['offset']
+        w = [(O[sl.stop-1]-O[sl.start]+A[sl.stop-1]) for sl in self._wrapSlices]
+        self.box.size = numpy.max(w, 0) + (self._maxLineSize * len(w))
 
         if self.res is not None:
             self.rebind()
-    sorts = property(None, setSorts)
 
     @kvobserve('box.*')
     def onBoxUpdate(self, box):
         res = self.res
         if res is None: return
 
-        sorts = self.getSorts()
+        sorts = self._sorts
         if sorts is None: return
 
-        t0 = self.box.p0
-        self.mesh[:] = t0
-        self.mesh[:] += sorts['quad']
-        self.mesh[:] += sorts['offset']
+        quads = sorts['quad']
+        offsets = sorts['offset']
+
+        lh = self._maxLineSize
+        t0 = self.box.at[0,1] - (0,1)*self._firstLine
+        for i, sl in enumerate(self._wrapSlices):
+            offsl = offsets[sl]
+            pos0 = t0 - i*lh - offsl[0]
+
+            self.mesh[sl] = pos0
+            self.mesh[sl] += quads[sl]
+            self.mesh[sl] += offsl
 
     res = None
     def sg_load(self, srm):
