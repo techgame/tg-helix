@@ -124,6 +124,7 @@ class Text(MatuiActor):
     _sgOps_ = [ 'load', 'render' ]
 
     box = KVBox.property([0,0], [0,0], dtype='l')
+    textBox = KVBox.property([0,0], [0,0], dtype='l')
 
     def __init__(self):
         self._sgGetNode_()
@@ -155,7 +156,9 @@ class Text(MatuiActor):
 
         A = sorts['advance']
         O = sorts['offset']
-        w = [(O[sl.stop-1]-O[sl.start]+A[sl.stop-1]) for sl in self._wrapSlices]
+        w = []
+        for sl in self._wrapSlices:
+            w.append(O[sl.stop-1]-O[sl.start]+A[sl.stop-1])
         self.box.size = numpy.max(w, 0) + (self._maxLineSize * len(w))
 
         if self.res is not None:
@@ -174,13 +177,20 @@ class Text(MatuiActor):
 
         lh = self._maxLineSize
         t0 = self.box.at[0,1] - (0,1)*self._firstLine
+        self.mesh[:] = t0
         for i, sl in enumerate(self._wrapSlices):
             offsl = offsets[sl]
-            pos0 = t0 - i*lh - offsl[0]
+            if len(offsl) == 0: continue
 
-            self.mesh[sl] = pos0
+            linOff = i*lh + offsl[0]
+            self.mesh[sl] -= linOff
             self.mesh[sl] += quads[sl]
             self.mesh[sl] += offsl
+
+        if 1:
+            b0 = self.mesh[:, 0, :].min(0)
+            b1 = self.mesh[:, 2, :].max(0)
+            self.textBox[:] = [b0, b1]
 
     res = None
     def sg_load(self, srm):
