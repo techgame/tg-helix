@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 ##~ Copyright (C) 2002-2007  TechGame Networks, LLC.              ##
 ##~                                                               ##
@@ -144,7 +143,7 @@ class Text(MatuiActor):
             self.box.size = 0
             return
 
-        self._wrapSlices = list(typeset.wrapSlices())
+        self._wrapSlices = list(typeset.wrap()[-1])
         self.colorMesh[:] = sorts['color']
 
         self.page = self.arena.texCoords(sorts, self.texMesh)
