@@ -38,38 +38,49 @@ if __name__=='__main__':
     bold = FTTypeface('/Library/Fonts/Times New Roman#bold', size)
     funFont = FTTypeface('/Library/Fonts/MarkerFelt.dfont', size)
 
-    ts.face = normal
-    ts.color = 'black'
-    print >> ts, 'A font',
+    if 1:
+        ts.add('A font ', face=normal, color='black')
+        ts.add('test ', face=bold, color='red')
+        ts.add('of fun ', face=italic, color='blue')
+        ts.add('proportions\n', face=normal, color='green')
+        ts.add('Now, wasn\'t that ', face=funFont, color='black')
+        ts.add('fun?\n')
 
-    ts.face = bold
-    ts.color = 'red'
-    print >> ts, 'test',
+        ts.add(u'\u03a8\u03c8\u03b2\n', face=liSung)
+        ts.add(u'\u6a19\u6e96\u8a9e\n')
+        ts.add(u'\u6a19\u6e96\u8a9e\n', color='orange', face=liSungVert)
+    else:
+        ts.face = normal
+        ts.color = 'black'
+        print >> ts, 'A font',
 
-    ts.face = italic
-    ts.color = 'blue'
-    print >> ts, 'of fun',
-    ts.face = normal
+        ts.face = bold
+        ts.color = 'red'
+        print >> ts, 'test',
 
-    #ts.face = zapfino
-    ts.color = 'green'
-    print >> ts, 'proportions'
-    ts.color = 'black'
-    ts.face = normal
+        ts.attr(face=italic, color='blue')
+        print >> ts, 'of fun',
 
-    print >> ts, 'Now, wasn\'t that',
-    ts.face = funFont
-    print >> ts, 'fun?'
+        ts.face = normal
+        #ts.face = zapfino
+        ts.color = 'green'
+        print >> ts, 'proportions'
+        ts.color = 'black'
+        ts.face = normal
 
-    ts.face = liSung
-    print >> ts, u'\u03a8\u03c8\u03b2'
+        print >> ts, 'Now, wasn\'t that',
+        ts.face = funFont
+        print >> ts, 'fun?'
 
-    ts.face = liSung
-    print >> ts, u'\u6a19\u6e96\u8a9e'
+        ts.face = liSung
+        print >> ts, u'\u03a8\u03c8\u03b2'
 
-    ts.color = 'orange'
-    ts.face = liSungVert
-    print >> ts, u'\u6a19\u6e96\u8a9e'
+        ts.face = liSung
+        print >> ts, u'\u6a19\u6e96\u8a9e'
+
+        ts.color = 'orange'
+        ts.face = liSungVert
+        print >> ts, u'\u6a19\u6e96\u8a9e'
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
