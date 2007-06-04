@@ -13,7 +13,7 @@
 
 from TG.geomath.typeset.mosaic import MosaicPageArena
 from TG.geomath.typeset.typesetter import TypeSetter
-from TG.geomath.typeset.typeface import FTTypeface
+from TG.geomath.typeset.typeface import FTFixedTypeface
 
 from utils import *
 
@@ -78,19 +78,17 @@ class TSFormatter(Formatter):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if __name__=='__main__':
-    size = 11
+    size = 12
     mosaicSize = (1<<9, 1<<9)
-    #fn = '/Library/Fonts/Andale Mono'
+    fn = '/Library/Fonts/Andale Mono'
     #fn = '/Library/Fonts/Courier New'
     #fn = '/System/Library/Fonts/Courier.dfont'
-    fn = '/System/Library/Fonts/Monaco.dfont'
+    #fn = '/System/Library/Fonts/Monaco.dfont'
 
-    fixedAdv = None
-    fixedAdv = (size*7//10, 0)
     faceSet = {
-        'bold': FTTypeface(fn+'#bold', size, fixedAdv=fixedAdv),
-        'italic': FTTypeface(fn+'#italic', size, fixedAdv=fixedAdv),
-        'regular': FTTypeface(fn+'#regular', size, fixedAdv=fixedAdv),
+        'bold': FTFixedTypeface(fn+'#bold', size),
+        'italic': FTFixedTypeface(fn+'#italic', size),
+        'regular': FTFixedTypeface(fn+'#regular', size),
     }
 
     ts = TypeSetter(color='black', wrapMode='line', face=faceSet['regular'], faceSet=faceSet)
