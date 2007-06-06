@@ -51,10 +51,15 @@ class HelixNode(GraphNode, HelixObject):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     scene = None
-    def sg_invalidate(self):
+    def findScene(self):
         for p in self.iterParents():
             if p.scene is not None:
-                p.scene.sg_invalidate()
+                yield p.scene
+                return
+
+    def sg_invalidate(self):
+        for scene in self.findScene():
+            scene.sg_invalidate()
 
     sg_passCache = None
     def asSGPassNode(self):
