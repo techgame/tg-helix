@@ -44,4 +44,5 @@ class SceneRenderManager(object):
         return result
 
     def invalidate(self):
-        self.invalidated = invalidated
+        self.invalidated = True
+
