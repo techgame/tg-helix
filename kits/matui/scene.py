@@ -1,3 +1,11 @@
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+##~ Copyright (C) 2002-2007  TechGame Networks, LLC.              ##
+##~                                                               ##
+##~ This library is free software; you can redistribute it        ##
+##~ and/or modify it under the terms of the BSD style License as  ##
+##~ found in the LICENSE file included with this distribution.    ##
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,12 +32,13 @@ class MatuiScene(HelixScene, KVObject):
 
     _sgPassTypes_ = [
         ('load', True),
-        #('pre-render', False),
+
+        ('pre-render', False),
         ('render', False),
 
         ('resize', False),
 
-        #('pre-select', False),
+        ('pre-select', False),
         ('select', False),
 
         ('animate', False),
@@ -51,7 +60,7 @@ class MatuiScene(HelixScene, KVObject):
         evtRoot.add('timer', self.sg_animate)
 
     def sg_resize(self, info=None):
-        self.srm.invalidated = True
+        self.srm.invalidate()
         return self.sg_pass('resize', info)
     def sg_render(self, info=None):
         return self.sg_pass('render', info)

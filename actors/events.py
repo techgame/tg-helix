@@ -19,17 +19,6 @@ from TG.metaObserving import OBChannelSet
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class EventHandler(object):
-    """Event handlers are part of the Chain of Responsibility pattern.  They
-    are links in that chain that may or may not handle the event.
-    """
-    evtRoot = None
-
-    def evtRootSetup(self, evtRoot):
-        self.evtRoot = evtRoot
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class EventSource(object):
     """An event source demux captures events from the system and recategorizes
     them into event roots like mice, and keyboards.

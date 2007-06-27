@@ -104,7 +104,7 @@ class HelixScene(base.HelixObject):
         return result
 
     def sg_invalidate(self):
-        self.srm.invalidated = True
+        self.srm.invalidate()
 
     def setupEvtSources(self):
         pass
