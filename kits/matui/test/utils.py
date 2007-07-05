@@ -139,14 +139,15 @@ class Text(MatuiActor):
         self.colorMesh = numpy.zeros((count, 4, 4), 'B')
 
         if sorts is None:
-            self.page = None
+            self.textPages = None
             self.box.size = 0
             return
 
         self._wrapSlices = list(typeset.wrap()[-1])
+        self._blocks = typeset.blocks()
         self.colorMesh[:] = sorts['color']
 
-        self.page = self.arena.texCoords(sorts, self.texMesh)
+        self.textPages = self.arena.texCoords(sorts, self.texMesh)
 
 
         am = sorts['lineSize'].argmax(0)[1]
@@ -218,7 +219,7 @@ class Text(MatuiActor):
 
         self.res = res
         self.rebind()
-    page = None
+    textPages = None
 
     def rebind(self):
         res = self.res
@@ -229,18 +230,21 @@ class Text(MatuiActor):
         res['avVertex'].bind(mesh)
         res['avDraw'].bind('quads', mesh.size/mesh.shape[-1])
 
-        page = self.page
-        if page is not None:
-            tex = res['texture']
-            tex.select()
-            size = tex.asValidSize(page.size)
-            data = tex.data2d(size=size, format=gl.GL_ALPHA, dataType=gl.GL_UNSIGNED_BYTE)
-            data.texArray(page.data, dict(alignment=1,))
+        textPages = self.textPages
+        if textPages is not None:
+            for page in textPages:
+                if page is None: continue
 
-            if any(page.size != tex.texSize):
-                data.setImageOn(tex)
-            else: data.setSubImageOn(tex)
-            tex.deselect()
+                tex = res['texture']
+                tex.select()
+                size = tex.asValidSize(page.size)
+                data = tex.data2d(size=size, format=gl.GL_ALPHA, dataType=gl.GL_UNSIGNED_BYTE)
+                data.texArray(page.data, dict(alignment=1,))
+
+                if any(page.size != tex.texSize):
+                    data.setImageOn(tex)
+                else: data.setSubImageOn(tex)
+                tex.deselect()
 
     def sg_render(self, srm):
         res = self.res

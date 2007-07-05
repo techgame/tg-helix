@@ -39,16 +39,17 @@ if __name__=='__main__':
     funFont = FTTypeface('/Library/Fonts/MarkerFelt.dfont', size)
 
     if 1:
-        ts.add('A font ', face=normal, color='black')
-        ts.add('test ', face=bold, color='red')
-        ts.add('of fun ', face=italic, color='blue')
-        ts.add('proportions\n', face=normal, color='green')
-        ts.add('Now, wasn\'t that ', face=funFont, color='black')
-        ts.add('fun?\n')
+        ts.write('A font ', face=normal, color='black')
+        ts.write('test ', face=bold, color='red')
+        ts.write('of fun ', face=italic, color='blue')
+        ts.write('proportions\n', face=normal, color='green')
+        ts.write('Now, wasn\'t that ', face=funFont, color='black')
+        ts.write('fun?\n')
+        ts.write(u'R\u00e9sum\u00c9\n')
 
-        ts.add(u'\u03a8\u03c8\u03b2\n', face=liSung)
-        ts.add(u'\u6a19\u6e96\u8a9e\n')
-        ts.add(u'\u6a19\u6e96\u8a9e\n', color='orange', face=liSungVert)
+        ts.write(u'\u03a8\u03c8\u03b2\n', face=liSung)
+        ts.write(u'\u6a19\u6e96\u8a9e\n')
+        ts.write(u'\u6a19\u6e96\u8a9e\n', color='orange', face=liSungVert)
     else:
         ts.face = normal
         ts.color = 'black'
@@ -56,7 +57,7 @@ if __name__=='__main__':
 
         ts.face = bold
         ts.color = 'red'
-        print >> ts, 'test',
+        print >> ts, u'test',
 
         ts.attr(face=italic, color='blue')
         print >> ts, 'of fun',

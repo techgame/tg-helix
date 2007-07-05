@@ -43,7 +43,7 @@ if __name__=='__main__':
 
     mosaicSize = (1<<10, 1<<10)
 
-    ts = TypeSetter(color = 'black')
+    ts = TypeSetter(color = 'black', kern=True)
     ts1 = TypeSetter(color = 'black', kern=False)
     
     ts.face = kernedFont

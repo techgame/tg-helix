@@ -50,6 +50,11 @@ class HelixNode(GraphNode, HelixObject):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def getSceneRenderManager(self):
+        for scene in self.findScene():
+            return scene.srm
+    srm = property(getSceneRenderManager)
+
     scene = None
     def findScene(self):
         for p in self.iterParents():
