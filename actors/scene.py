@@ -60,7 +60,7 @@ class HelixScene(base.HelixObject):
     def init(self):
         self._sg_passes = {}
         self.root = self._fm_.Node(scene=self, info='SceneRoot')
-        self.evtRoot = self._fm_.EventRoot()
+        self.evtRoot = self._fm_.EventRoot(self.asWeakProxy())
         self.timestamp = self.evtRoot.newTimestamp
 
     def setup(self, renderContext):
