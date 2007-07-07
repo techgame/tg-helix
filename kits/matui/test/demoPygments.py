@@ -79,7 +79,6 @@ class TSFormatter(Formatter):
 
 if __name__=='__main__':
     size = 12
-    mosaicSize = (1<<9, 1<<9)
     fn = '/Library/Fonts/Andale Mono'
     #fn = '/Library/Fonts/Courier New'
     #fn = '/System/Library/Fonts/Courier.dfont'
@@ -114,7 +113,6 @@ if __name__=='__main__':
     layout.add(pnl)
 
     text = Text()
-    text.arena = MosaicPageArena(mosaicSize)
     text.update(ts)
     
     layout.add(text).align((0, 1))

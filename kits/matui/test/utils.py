@@ -120,77 +120,29 @@ class Panel(MatuiActor):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class Text(MatuiActor):
-    _sgOps_ = [ 'load', 'render' ]
+    _sgOps_ = ['load', 'render']
 
     box = KVBox.property([0,0], [0,0], dtype='l')
-    textBox = KVBox.property([0,0], [0,0], dtype='l')
-
     def __init__(self):
         self._sgGetNode_()
 
+    textBlock = None
     def update(self, typeset):
-        sorts = typeset.sorts
-        self._sorts = sorts
+        self.textBlock = typeset.flush()
+        self.textBlock.box = self.box
+        self.textBlock.compile()
 
-        if sorts is None: count = 1
-        else: count = len(sorts)
-        self.mesh = numpy.zeros((count, 4, 2), 'l')
-        self.texMesh = numpy.zeros((count, 4, 2), 'f')
-        self.colorMesh = numpy.zeros((count, 4, 4), 'B')
+        self.dirty = True
 
-        if sorts is None:
-            self.textPages = None
-            self.box.size = 0
-            return
+    dirty = False
 
-        self._wrapSlices = list(typeset.wrap()[-1])
-        self._blocks = typeset.blocks()
-        self.colorMesh[:] = sorts['color']
-
-        self.textPages = self.arena.texCoords(sorts, self.texMesh)
-
-
-        am = sorts['lineSize'].argmax(0)[1]
-        self._maxLineSize  = sorts['lineSize'][am]
-        self._firstLine = sorts['ascenders'][am, 0]
-
-        A = sorts['advance']
-        O = sorts['offset']
-        w = []
-        for sl in self._wrapSlices:
-            w.append(O[sl.stop-1]-O[sl.start]+A[sl.stop-1])
-        self.box.size = numpy.max(w, 0) + (self._maxLineSize * len(w))
-
-        if self.res is not None:
-            self.rebind()
+    @property
+    def lines(self):
+        return self.textBlock.lines
 
     @kvobserve('box.*')
     def onBoxUpdate(self, box):
-        res = self.res
-        if res is None: return
-
-        sorts = self._sorts
-        if sorts is None: return
-
-        quads = sorts['quad']
-        offsets = sorts['offset']
-
-        lh = self._maxLineSize
-        t0 = self.box.at[0,1] - (0,1)*self._firstLine
-        self.mesh[:] = t0
-        for i, sl in enumerate(self._wrapSlices):
-            offsl = offsets[sl]
-            if len(offsl) == 0: continue
-
-            linOff = i*lh + offsl[0]
-            self.mesh[sl] -= linOff
-            self.mesh[sl] += quads[sl]
-            self.mesh[sl] += offsl
-
-        if 1:
-            b0 = self.mesh[:, 0, :].min(0)
-            b1 = self.mesh[:, 2, :].max(0)
-            self.textBox[:] = [b0, b1]
+        self.textBlock.layout()
 
     res = None
     def sg_load(self, srm):
@@ -200,68 +152,90 @@ class Text(MatuiActor):
 
         res = {}
         res['avColor'] = arrayView('color')
-        res['avTexCoords'] = arrayView('texture_coord')
+        res['avTexture'] = arrayView('texture_coord')
         res['avVertex'] = arrayView('vertex')
-        res['avDraw'] = arrayView('draw_array')
-
-        tex = Texture()
-        tex.texParams += [
-            ('target', 'rect'), 
-            ('format', 'a'), 
-            ('wrap', gl.GL_CLAMP),
-            # Nearest provides EXACT font rendering, without aliasing.  However it does not scale as well.
-            ('magFilter', gl.GL_NEAREST), ('minFilter', gl.GL_NEAREST),
-
-            # Linear provides nearly exact font rendering.  It scales better than nearest.
-            #('magFilter', gl.GL_LINEAR), ('minFilter', gl.GL_LINEAR),
-            ]
-        res['texture'] = tex
-
         self.res = res
-        self.rebind()
-    textPages = None
 
-    def rebind(self):
+        self.dirty = True
+        #if self.dirty:
+        #    self.bind()
+
+    def bind(self):
         res = self.res
-        res['avColor'].bind(self.colorMesh)
-        res['avTexCoords'].bind(self.texMesh)
+        if res is None: return
 
-        mesh = self.mesh
-        res['avVertex'].bind(mesh)
-        res['avDraw'].bind('quads', mesh.size/mesh.shape[-1])
+        meshes = self.textBlock.meshes
+        res['avColor'].bind(meshes['color'])
+        res['avTexture'].bind(meshes['texture'])
+        res['avVertex'].bind(meshes['vertex'])
+        res['draw'] = self.bindPages(meshes['pageMap'])
+        self.dirty = False
 
-        textPages = self.textPages
-        if textPages is not None:
-            for page in textPages:
-                if page is None: continue
+    def bindPages(self, pageMap):
+        texPages = []
+        add = texPages.append
+        pageTexture = self.pageTexture
 
-                tex = res['texture']
-                tex.select()
-                size = tex.asValidSize(page.size)
-                data = tex.data2d(size=size, format=gl.GL_ALPHA, dataType=gl.GL_UNSIGNED_BYTE)
-                data.texArray(page.data, dict(alignment=1,))
-
-                if any(page.size != tex.texSize):
-                    data.setImageOn(tex)
-                else: data.setSubImageOn(tex)
-                tex.deselect()
+        for page, rng in pageMap.items():
+            if page is not None:
+                add((rng.start*4, (rng.stop-rng.start)*4, pageTexture(page)))
+        return texPages
 
     def sg_render(self, srm):
         res = self.res
-        res['texture'].select()
+        if res is None: return
+        if self.dirty:
+            self.bind()
 
         res['avColor'].enable()
         res['avColor'].send()
-        res['avTexCoords'].enable()
-        res['avTexCoords'].send()
+        res['avTexture'].enable()
+        res['avTexture'].send()
         res['avVertex'].enable()
         res['avVertex'].send()
 
-        res['avDraw'].send()
+        glDrawArrays = gl.glDrawArrays
+        GL_QUADS = gl.GL_QUADS
+
+        for i0, i1, tex in res['draw']:
+            tex.select()
+            glDrawArrays(GL_QUADS, i0, i1)
+        tex.deselect()
 
         res['avColor'].disable()
-        res['avTexCoords'].disable()
+        res['avTexture'].disable()
         res['avVertex'].disable()
 
-        res['texture'].deselect()
+    def pageTexture(self, page=None):
+        if page is None:
+            return None
+
+        tex = getattr(page, 'texture', None)
+        if tex is None:
+            tex = Texture()
+            page.texture = tex
+            tex.page = page
+            tex.entryCount = None
+
+            tex.texParams += [
+                ('target', 'rect'), ('format', 'a'), 
+                #('genMipmaps', True),
+                ('wrap', gl.GL_CLAMP),
+                #('magFilter', gl.GL_NEAREST), ('minFilter', gl.GL_NEAREST),
+                ('magFilter', gl.GL_LINEAR), ('minFilter', gl.GL_NEAREST),
+                ]
+    
+        if page.entryCount > tex.entryCount:
+            tex.select()
+            size = tex.asValidSize(page.size)
+            data = tex.data2d(size=size, format=gl.GL_ALPHA, dataType=gl.GL_UNSIGNED_BYTE)
+            data.texArray(page.data, dict(alignment=1,))
+
+            if any(page.size != tex.texSize):
+                data.setImageOn(tex)
+            else: data.setSubImageOn(tex)
+            tex.deselect()
+            tex.entryCount = page.entryCount
+
+        return tex
 
