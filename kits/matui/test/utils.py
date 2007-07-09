@@ -197,10 +197,12 @@ class Text(MatuiActor):
         glDrawArrays = gl.glDrawArrays
         GL_QUADS = gl.GL_QUADS
 
-        for i0, i1, tex in res['draw']:
+        tex = None
+        for idx, count, tex in res['draw']:
             tex.select()
-            glDrawArrays(GL_QUADS, i0, i1)
-        tex.deselect()
+            glDrawArrays(GL_QUADS, idx, count)
+        if tex is not None:
+            tex.deselect()
 
         res['avColor'].disable()
         res['avTexture'].disable()

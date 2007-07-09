@@ -59,6 +59,10 @@ if __name__=='__main__':
 
     if 0:
         ts.face = zapfino
+        ts.write('')
+
+    elif 0:
+        ts.face = zapfino
         ts.write('ABCDEFGHIJKLMNOPQRSTUVWXYZ\n')
         ts.write('abcdefghijklmnopqrstuvwxyz\n')
 
@@ -135,16 +139,17 @@ if __name__=='__main__':
     text = Text()
     text.update(ts)
     
-    layout.add(text).fill()#.align((0,1))
+    layout.add(text).fill(inset=50)
 
-    if 0:
+    if 1:
         pnlBox = Panel()
         pnlBox.box = text.box
-        pnlBox.color = '#f:0:0:1'
+        pnlBox.color = '#f:0:0:2'
         node += pnlBox
 
     host = HelixHost(scene)
     host.show()
+    ts.block.arena.save()
     host.run()
 
 
