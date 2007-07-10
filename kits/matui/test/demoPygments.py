@@ -115,9 +115,13 @@ if __name__=='__main__':
     text = Text()
     text.update(ts)
     
-    layout.add(text).align((0, 1))
+    layout.add(text).fill(50)
 
-    #text.arena.pages[0].asImage(None, 'page_demoPygments.png')
+    if 1:
+        pnlBox = Panel()
+        pnlBox.box = text.box
+        pnlBox.color = '#0:1'
+        node += pnlBox
 
     host = HelixHost(scene)
     host.show()

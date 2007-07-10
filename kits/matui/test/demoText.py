@@ -35,7 +35,7 @@ Nunc et magna. Aenean vel metus. Duis in tortor. Proin commodo orci in odio. Int
 '''
 
 if __name__=='__main__':
-    size = 64
+    size = 48
     ts = TypeSetter(color='black', wrapMode='line', wrapSize=(800,0))
 
     if 0:
@@ -62,7 +62,7 @@ if __name__=='__main__':
         ts.write('')
 
     elif 0:
-        ts.face = zapfino
+        ts.face = funFont
         ts.write('ABCDEFGHIJKLMNOPQRSTUVWXYZ\n')
         ts.write('abcdefghijklmnopqrstuvwxyz\n')
 
@@ -146,7 +146,7 @@ if __name__=='__main__':
     if 1:
         pnlBox = Panel()
         pnlBox.box = text.box
-        pnlBox.color = '#f:0:0:2'
+        pnlBox.color = '#0:1'
         node += pnlBox
 
     host = HelixHost(scene)

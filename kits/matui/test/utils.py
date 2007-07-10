@@ -19,6 +19,7 @@ from TG.geomath.data.color import Color
 
 from TG.openGL.raw import gl
 from TG.openGL.data.arrayViews import arrayView
+from TG.openGL.data.drawArrayViews import DrawElementArrayView
 from TG.openGL.data.texture import Texture
 
 from TG.helix.bridges.wx.host import HelixHost
@@ -133,9 +134,8 @@ class Text(MatuiActor):
         self.textBlock.box = self.box
         self.textBlock.update(typeset)
 
-        self.dirty = True
-
-    dirty = False
+        self._meshesDirty = True
+    _meshesDirty = False
 
     @property
     def lines(self):
@@ -158,36 +158,40 @@ class Text(MatuiActor):
         res['avVertex'] = arrayView('vertex')
         self.res = res
 
-        self.dirty = True
-        #if self.dirty:
-        #    self.bind()
-
-    def bind(self):
+    def _bindMeshes(self):
         res = self.res
-        if res is None: return
+        if res is None:
+            return res
 
         meshes = self.textBlock.meshes
         res['avColor'].bind(meshes['color'])
-        res['avTexture'].bind(meshes['texture'])
+        res['avTexture'].bind(meshes['texCoords'])
         res['avVertex'].bind(meshes['vertex'])
-        res['draw'] = self.bindPages(meshes['pageMap'])
-        self.dirty = False
+        res['draw'] = self._bindPages(meshes['pageIdxMap'])
 
-    def bindPages(self, pageMap):
+        return res
+
+    _arng4 = numpy.arange(4, dtype='H')
+    def _bindPages(self, pageIdxMap):
         texPages = []
-        add = texPages.append
         pageTexture = self.pageTexture
 
-        for page, rng in pageMap.items():
+        arng4 = self._arng4
+        addOuter = numpy.add.outer
+        for page, pim in pageIdxMap.items():
             if page is not None:
-                add((rng.start*4, (rng.stop-rng.start)*4, pageTexture(page)))
+                av = DrawElementArrayView()
+                av.bind('quads', pim)
+                texPages.append((av, pageTexture(page)))
         return texPages
 
     def sg_render(self, srm):
         res = self.res
         if res is None: return
-        if self.dirty:
-            self.bind()
+
+        if self._meshesDirty:
+            self._bindMeshes()
+            self._meshesDirty = False
 
         self.textBlock.apply()
 
@@ -198,13 +202,10 @@ class Text(MatuiActor):
         res['avVertex'].enable()
         res['avVertex'].send()
 
-        glDrawArrays = gl.glDrawArrays
-        GL_QUADS = gl.GL_QUADS
-
         tex = None
-        for idx, count, tex in res['draw']:
+        for av, tex in res['draw']:
             tex.select()
-            glDrawArrays(GL_QUADS, idx, count)
+            av.send()
         if tex is not None:
             tex.deselect()
 

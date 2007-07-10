@@ -33,8 +33,8 @@ if __name__=='__main__':
         #'/Library/Fonts/Impact',
         #'/Library/Fonts/MarkerFelt.dfont',
         #'/Library/Fonts/PlantagenetCherokee.ttf',
-        #'/Library/Fonts/Snell Roundhand',
-        '/Library/Fonts/Times New Roman',
+        '/Library/Fonts/Snell Roundhand',
+        #'/Library/Fonts/Times New Roman',
         #'/Library/Fonts/Trebuchet MS',
         #'/Library/Fonts/Verdana'
         ]
