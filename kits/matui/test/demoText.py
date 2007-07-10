@@ -68,19 +68,21 @@ if __name__=='__main__':
 
     elif 0:
         ts.face = normalText
+        ts.wrapMode = 'text'
         aligns = ['left', 0.25, 'center', 0.75, 'right']
         colors = ['red', 'green', 'blue', 'orange', 'black']
         for idx, line in enumerate(ipsum.split('\n')):
-            ts.write(line+'\n', wrapMode='text', color=colors[(idx>>1)%len(colors)], align=aligns[(idx>>1)%len(aligns)])
+            ts.write(line+'\n', color=colors[(idx>>1)%len(colors)], align=aligns[(idx>>1)%len(aligns)])
 
     elif 1:
+        ts.wrapMode = 'text'
         ts.write('A font ', face=normal, color='black')
         ts.write('test ', face=bold, color='red')
         ts.write('of fun ', face=italic, color='blue')
-        ts.write('proportions\n\n', face=normal, color='green')
+        ts.write('proportions\n', face=normal, color='green')
         ts.align = 'right'
         ts.write('Now, wasn\'t that ', face=funFont, color='black')
-        ts.write('fun?\n\n')
+        ts.write('fun?\n')
 
         ts.align = 'center'
         ts.write(u'\u03a8\u03c8\u03b2\n', face=liSung)

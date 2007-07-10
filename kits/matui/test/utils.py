@@ -128,9 +128,10 @@ class Text(MatuiActor):
 
     textBlock = None
     def update(self, typeset):
-        self.textBlock = typeset.flush()
+        self.typeset = typeset
+        self.textBlock = typeset.block
         self.textBlock.box = self.box
-        self.textBlock.compile()
+        self.textBlock.update(typeset)
 
         self.dirty = True
 
@@ -142,7 +143,8 @@ class Text(MatuiActor):
 
     @kvobserve('box.*')
     def onBoxUpdate(self, box):
-        self.textBlock.layout()
+        self.typeset.setWrapSize(box.size, True)
+        self.typeset.update()
 
     res = None
     def sg_load(self, srm):
@@ -187,6 +189,8 @@ class Text(MatuiActor):
         if self.dirty:
             self.bind()
 
+        self.textBlock.apply()
+
         res['avColor'].enable()
         res['avColor'].send()
         res['avTexture'].enable()
@@ -223,8 +227,8 @@ class Text(MatuiActor):
                 ('target', 'rect'), ('format', 'a'), 
                 #('genMipmaps', True),
                 ('wrap', gl.GL_CLAMP),
-                #('magFilter', gl.GL_NEAREST), ('minFilter', gl.GL_NEAREST),
-                ('magFilter', gl.GL_LINEAR), ('minFilter', gl.GL_NEAREST),
+                ##('magFilter', gl.GL_NEAREST), ('minFilter', gl.GL_NEAREST),
+                ('magFilter', gl.GL_LINEAR), ('minFilter', gl.GL_LINEAR),
                 ]
     
         if page.entryCount > tex.entryCount:
