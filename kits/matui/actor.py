@@ -159,10 +159,14 @@ class MatuiActor(HelixActor, KVObject):
             opBind = self._fm_.sgOpPrefix + opKey
 
         if isinstance(opBind, str):
-            node.onPass(opKey, getattr(self, opBind))
-
+            opBind = getattr(self, opBind, None)
+            if opBind is None:
+                return False
+            node.onPass(opKey, opBind)
+            return True
         else:
             opBind(self, node, opKey)
+            return True
 
     def sgClearOp(self, opKey):
         self.node.clearPass(opKey)

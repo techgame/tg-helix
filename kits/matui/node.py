@@ -38,11 +38,15 @@ class MatuiNode(HelixNode):
     def sgPassBind(self, ct):
         self._bindPass.call_n2(ct.passKey, self, ct)
 
-    def addPass(self, passKey, passBindFn):
+    def addPass(self, passKey, passBindFn, idx=None):
         if passKey in self._passMask:
             return None
 
-        self._bindPass.add(passKey, passBindFn)
+        passAtKey = self._bindPass[passKey]
+        if idx is None:
+            passAtKey.append(passBindFn)
+        else: passAtKey.insert(idx, passBindFn)
+
         self.sg_clearPassKey(passKey, False)
         return passBindFn
 
@@ -57,7 +61,7 @@ class MatuiNode(HelixNode):
             self._passMask = mask
             self.clearPass(passKey)
 
-    def onPass(self, passKey, fn=None):
+    def getPassBindFnFor(self, passKey, fn=None):
         if fn is None:
             fn = passKey
             passKey = fn.__name__
@@ -69,14 +73,20 @@ class MatuiNode(HelixNode):
             unwind = True
         else: unwind = False
 
-        fn = asWeakMethod(fn)
+        if fn is None:
+            return passKey, None
 
+        fn = asWeakMethod(fn)
         if unwind: 
             passBindFn = lambda n, ct: ct.addUnwind(fn)
         else: 
             passBindFn = lambda n, ct: ct.add(fn)
+        return passKey, passBindFn
 
-        return self.addPass(passKey, passBindFn)
+    def onPass(self, passKey, fn=None, idx=None):
+        passKey, passBindFn = self.getPassBindFnFor(passKey, fn)
+        if passBindFn is not None:
+            return self.addPass(passKey, passBindFn, idx)
 
     @classmethod
     def itemAsNode(klass, item, create=True):
