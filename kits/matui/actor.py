@@ -42,7 +42,7 @@ class SceneGraphOp(object):
         pass
 
     def bindOp(self, node, opKey):
-        node.addPass(opKey, self._sgBindPass_)
+        node.addPass(opKey, self.sgPassBind)
 
     def _getNodeRes(self, node):
         res = getattr(node, 'res', None)
@@ -51,14 +51,14 @@ class SceneGraphOp(object):
             node.res = {}
         return res
 
-    def _sgBindPass_(self, node, ct): 
+    def sgPassBind(self, node, ct): 
         pass
 
 class SGResizeOp(SceneGraphOp):
     def init(self, node, actor): 
         self.res = self._getNodeRes(node)
 
-    def _sgBindPass_(self, node, ct):
+    def sgPassBind(self, node, ct):
         ct.add(self.resize)
 
     def resize(self, srm):
@@ -68,7 +68,7 @@ class SGRenderOp(SceneGraphOp):
     def init(self, node, actor): 
         self.res = self._getNodeRes(node)
 
-    def _sgBindPass_(self, node, ct):
+    def sgPassBind(self, node, ct):
         ct.add(self.render)
 
     def render(self, srm):
@@ -83,7 +83,7 @@ class SGLoadOp(SceneGraphOp):
         self.actor = actor.asWeakProxy()
         return None
 
-    def _sgBindPass_(self, node, ct):
+    def sgPassBind(self, node, ct):
         if not self.loaded:
             ct.add(self.loadOp)
 
