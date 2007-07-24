@@ -31,9 +31,9 @@ if __name__=='__main__':
         #'/Library/Fonts/Arial Rounded Bold',
         #'/Library/Fonts/Brush Script',
         #'/Library/Fonts/Impact',
-        #'/Library/Fonts/MarkerFelt.dfont',
+        '/Library/Fonts/MarkerFelt.dfont',
         #'/Library/Fonts/PlantagenetCherokee.ttf',
-        '/Library/Fonts/Snell Roundhand',
+        #'/Library/Fonts/Snell Roundhand',
         #'/Library/Fonts/Times New Roman',
         #'/Library/Fonts/Trebuchet MS',
         #'/Library/Fonts/Verdana'
@@ -43,14 +43,20 @@ if __name__=='__main__':
 
     mosaicSize = (1<<10, 1<<10)
 
-    ts = TypeSetter(color = 'black', kern=True)
-    ts1 = TypeSetter(color = 'black', kern=False)
+    ts = TypeSetter(kern=True, face=kernedFont)
+    ts1 = TypeSetter(kern=False, face=kernedFont)
     
-    ts.face = kernedFont
-    print >> ts, 'War of Aviation (kerned)',
+    ts.write('(', color='black')
+    ts.write('nominal', color='blue')
+    ts.write(' | ', color='black')
+    ts.write('kerned', color='red')
+    ts.write(')', color='black')
 
-    ts1.face = kernedFont
-    print >> ts1, 'War of Aviation (not kerned)',
+    ts.color = 'red'
+    print >> ts, '\nAviation\nWar',
+
+    ts1.color = 'blue'
+    print >> ts1, '\nAviation\nWar',
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -73,12 +79,12 @@ if __name__=='__main__':
     text.arena = MosaicPageArena(mosaicSize)
     text.update(ts)
 
-    layout.add(text).align(0, (0, 1), (10, -10 - size))
+    layout.add(text).align(0, (0, 1), (10, -10))
 
     text1 = Text()
     text1.arena = text.arena
     text1.update(ts1)
-    layout.add(text1).align(0, (0, 1), (10, -10 - 2*size))
+    layout.add(text1).align(0, (0, 1), (10, -10))
 
     host = HelixHost(scene)
     host.show()
