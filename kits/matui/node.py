@@ -20,6 +20,7 @@ from TG.helix.actors import HelixNode
 
 class MatuiNode(HelixNode):
     actor_ref = None
+    _passMask = set()
 
     def __init__(self, **kw):
         for n,v in kw.items():
@@ -38,6 +39,9 @@ class MatuiNode(HelixNode):
         self._bindPass.call_n2(ct.passKey, self, ct)
 
     def addPass(self, passKey, passBindFn):
+        if passKey in self._passMask:
+            return None
+
         self._bindPass.add(passKey, passBindFn)
         self.sg_clearPassKey(passKey, False)
         return passBindFn
@@ -45,6 +49,13 @@ class MatuiNode(HelixNode):
     def clearPass(self, passKey):
         self._bindPass.clear(passKey)
         self.sg_clearPassKey(passKey, False)
+
+    def maskPass(self, passKey):
+        mask = self._passMask or set()
+        if passKey not in mask:
+            mask.add(passKey)
+            self._passMask = mask
+            self.clearPass(passKey)
 
     def onPass(self, passKey, fn=None):
         if fn is None:
