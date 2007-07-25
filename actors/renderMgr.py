@@ -20,10 +20,11 @@ class SceneRenderManager(object):
     result = None
     vpsize = (0,0)
     swapKeys = set(['render'])
+    debugCallTrees = set([])
 
     def __init__(self, renderContext):
         self.renderContext = renderContext
-        self.debugCallTrees = set()
+        self.debugCallTrees = self.debugCallTrees.copy()
 
     def startPass(self, sgpass, info):
         rctx = self.renderContext

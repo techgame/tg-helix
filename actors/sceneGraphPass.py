@@ -74,7 +74,8 @@ class SceneGraphNodePass(CompiledGraphPass):
         if cache is None or cnode is ct.root:
             return cnode.sgPassBind(ct)
 
-        ct.addFn(self.sg_pass, ct.passKey, cnode)
+        if cache.get(ct.passKey, True):
+            ct.addFn(self.sg_pass, ct.passKey, cnode)
         ct.cull()
 
     def sg_pass(self, passKey, root, srm):
