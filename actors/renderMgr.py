@@ -19,6 +19,7 @@ from TG.geomath.data import DataHostObject, OBFactoryMap
 class SceneRenderManager(DataHostObject):
     _fm_ = OBFactoryMap()
     invalidated = False
+    passKey = None
     info = None
     result = None
     vpsize = (0,0)
@@ -34,6 +35,9 @@ class SceneRenderManager(DataHostObject):
         self.debugCallTrees = self.debugCallTrees.copy()
 
     def startPass(self, sgpass, info):
+        if self.passKey is not None:
+            raise RuntimeError("Already in pass '%s', cannot start pass '%s'" % (self.passKey, sgpass.passKey))
+        self.passKey = sgpass.passKey
         rctx = self.renderContext
         rctx.select()
 
@@ -49,6 +53,7 @@ class SceneRenderManager(DataHostObject):
 
         del self.result
         del self.info
+        del self.passKey
         return result
 
     def invalidate(self):
