@@ -23,7 +23,7 @@ from .sceneGraphPass import SceneGraphPass, SingleSceneGraphPass
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneRenderContext(object):
+class TheaterRenderContext(object):
     def getSize(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
     def select(self):
@@ -33,8 +33,8 @@ class SceneRenderContext(object):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixScene(base.HelixObject):
-    """A Helix Scene is a mediator, tieing viewport, events, and managers together in an extensible way.
+class HelixTheater(base.HelixObject):
+    """A Helix Theater is a mediator, tieing viewport, events, and managers together in an extensible way.
     
     The sgPass are called on by the events to handle rendering, resizing, and
     picking operations over the scene's nodes."""
@@ -49,7 +49,7 @@ class HelixScene(base.HelixObject):
     _sgPassTypes_ = []
     _sgPassTriggers_ = []
 
-    def isScene(self): return True
+    def isTheater(self): return True
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

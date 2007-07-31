@@ -17,7 +17,7 @@ import weakref
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class HelixObject(object):
-    def isScene(self): return False
+    def isTheater(self): return False
     def isActor(self): return False
     def isNode(self, nodeKlass=None): return False
 

@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.helix.actors.scene import SceneRenderContext
+from TG.helix.actors.theater import TheaterRenderContext
 from .viewportEvents import wxViewportEventSource
 from .keyboardEvents import wxKeyboardEventSource
 from .mouseEvents import wxMouseEventSource
@@ -20,7 +20,7 @@ from .timerEvents import wxTimerEventSource, wxIdleEventSource
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxSceneRenderContext(SceneRenderContext):
+class wxTheaterRenderContext(TheaterRenderContext):
     def __init__(self, glCanvas):
         self.glCanvas = glCanvas
     def getSize(self):
@@ -32,10 +32,10 @@ class wxSceneRenderContext(SceneRenderContext):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class wxHelixSceneHostViewLoader(object):
+class wxHelixTheaterHostViewLoader(object):
     @classmethod
     def load(klass, glCanvas, options, scene, **kwsetup):
-        renderContext = wxSceneRenderContext(glCanvas)
+        renderContext = wxTheaterRenderContext(glCanvas)
         renderContext.select()
 
         scene.setup(renderContext)
@@ -53,5 +53,5 @@ class wxHelixSceneHostViewLoader(object):
             wxIdleEventSource(glCanvas, options, scene),
             ]
 
-SceneHostViewLoader = wxHelixSceneHostViewLoader
+TheaterHostViewLoader = wxHelixTheaterHostViewLoader
 

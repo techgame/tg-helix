@@ -87,7 +87,7 @@ class HelixHost(wxSkinModel):
         wxSkinModel.__init__(self)
         self.skinModel()
 
-    SceneHostViewLoader = viewLoader.SceneHostViewLoader
+    TheaterHostViewLoader = viewLoader.TheaterHostViewLoader
     def setupCanvas(self, canvasElem, canvasObj):
         self.setGLContext(canvasObj.GetContext())
         canvasObj.SetCurrent()
@@ -95,7 +95,7 @@ class HelixHost(wxSkinModel):
         TG.openGL.raw.apiReload()
 
         if self.scene is not None:
-            self.SceneHostViewLoader.load(canvasObj, self.options, self.scene)
+            self.TheaterHostViewLoader.load(canvasObj, self.options, self.scene)
 
     _glcontext = None
     @classmethod

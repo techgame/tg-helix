@@ -23,7 +23,7 @@ from TG.openGL.data.drawArrayViews import DrawElementArrayView
 from TG.openGL.data.texture import Texture
 
 from TG.helix.bridges.wx.host import HelixHost
-from TG.helix.kits.matui.scene import MatuiScene
+from TG.helix.kits.matui.theater import MatuiTheater
 from TG.helix.kits.matui.actor import MatuiActor
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -10,5 +10,5 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from . import scene, node, actor
+from . import theater, node, actor
 
