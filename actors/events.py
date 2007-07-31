@@ -35,6 +35,18 @@ class EventInfo(object):
     def update(self, *args, **kw):
         return self.__dict__.update(*args, **kw)
 
+    def __iter__(self): return iter(self.__dict__)
+    def keys(self): return self.__dict__.keys()
+    def values(self): return self.__dict__.values()
+    def items(self): return self.__dict__.items()
+    def iterkeys(self): return self.__dict__.iterkeys()
+    def itervalues(self): return self.__dict__.itervalues()
+    def iteritems(self): return self.__dict__.iteritems()
+
+    def __len__(self, key):
+        return len(self.__dict__)
+    def __contains__(self, key):
+        return key in self.__dict__
     def get(self, key, default=None):
         return self.__dict__.get(key, default)
     def __getitem__(self, key):
@@ -57,9 +69,6 @@ class EventInfo(object):
     def getSceneRenderManager(self):
         return self.scene.srm
     srm = property(getSceneRenderManager)
-
-    def invalidate(self):
-        return self.srm.invalidate()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
