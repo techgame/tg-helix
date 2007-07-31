@@ -44,12 +44,11 @@ class MatuiNode(HelixNode):
         return sep.join(sorted(self._bindPass.keys()))
 
     def sgPassBind(self, ct):
-        self._bindPass.call_n2(ct.passKey, self, ct)
+        passKey = ct.passKey
+        if passKey not in self._passMask:
+            self._bindPass.call_n2(passKey, self, ct)
 
     def addPass(self, passKey, passBindFn, idx=None):
-        if passKey in self._passMask:
-            return None
-
         passAtKey = self._bindPass[passKey]
         if idx is None:
             passAtKey.append(passBindFn)
@@ -67,7 +66,6 @@ class MatuiNode(HelixNode):
         if passKey not in mask:
             mask.add(passKey)
             self._passMask = mask
-            self.clearPass(passKey)
 
     def getPassBindFnFor(self, passKey, fn=None):
         if fn is None:
