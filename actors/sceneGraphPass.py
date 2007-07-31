@@ -49,7 +49,7 @@ class DebugSceneGraphCallTree(SceneGraphCallTree):
         r = self._compile_next(itree, compileNodeTo)
 
         ov = ''.join(self.ov)
-        nl = getattr(self.root, 'scene', None) is not None
+        nl = getattr(self.root, 'theater', None) is not None
         if nl: print
         print '%30s:%8s %2d/%2d | %s' % (self.root._getSubjectRepr(), self.passKey, len(r), len(ov), ov)
         return r
@@ -101,16 +101,6 @@ class SceneGraphPass(SceneGraphNodePass):
             return self._fm_.SGDebugCallTree(root, passKey)
         return self._fm_.SGCallTree(root, passKey)
 
-    def performSubpass(self, info, passKey=None):
-        if passKey is None: 
-            passKey = self.passKey
-
-        srm = self.root.srm
-
-        passList = self.compile(passKey)
-        for fn in passList:
-            fn(srm)
-
     def performPass(self, info, passKey=None):
         if passKey is None:
             passKey = self.passKey
@@ -119,12 +109,22 @@ class SceneGraphPass(SceneGraphNodePass):
         srm.startPass(self, info)
 
         passList = self.compile(passKey)
-        for fn in passList:
-            fn(srm)
+        self.performPassOnList(passList, srm)
 
         return srm.finishPass(self, info)
     __call__ = performPass
 
+    def performPassOnList(self, passList, srm):
+        for fn in passList:
+            fn(srm)
+
 class SingleSceneGraphPass(SceneGraphPass):
     singlePass = True
+
+class EventSceneGraphPass(SceneGraphPass):
+    def performPassOnList(self, passList, srm):
+        for fn in passList:
+            r = fn(srm)
+            if r:
+                return r
 

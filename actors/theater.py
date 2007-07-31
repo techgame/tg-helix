@@ -37,7 +37,7 @@ class HelixTheater(base.HelixObject):
     """A Helix Theater is a mediator, tieing viewport, events, and managers together in an extensible way.
     
     The sgPass are called on by the events to handle rendering, resizing, and
-    picking operations over the scene's nodes."""
+    picking operations over the theater's nodes."""
 
     _fm_ = OBFactoryMap(
             Node = HelixNode,
@@ -58,7 +58,7 @@ class HelixTheater(base.HelixObject):
 
     def init(self):
         self._sg_passes = {}
-        self.root = self._fm_.Node(scene=self, info='SceneRoot')
+        self.root = self._fm_.Node(theater=self, info='SceneRoot')
         self.evtRoot = self._fm_.EventRoot(self.asWeakProxy())
         self.timestamp = self.evtRoot.newTimestamp
 
@@ -85,12 +85,12 @@ class HelixTheater(base.HelixObject):
             for dk in preKeys:
                 dp = sg_passes.get(dk) 
                 if dp is not None:
-                    sgPassEvents.add(passKey+'-pre', dp.performSubpass)
+                    sgPassEvents.add(passKey+'-pre', dp)
 
             for dk in postKeys:
                 dp = sg_passes.get(dk) 
                 if dp is not None:
-                    sgPassEvents.add(passKey+'-post', dp.performSubpass)
+                    sgPassEvents.add(passKey+'-post', dp)
 
     def sg_pass(self, key, info=None):
         if info is None: 

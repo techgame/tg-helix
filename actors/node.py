@@ -54,16 +54,16 @@ class HelixNode(GraphNode, HelixObject):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    scene = None
-    def findScene(self):
+    theater = None
+    def findTheater(self):
         for p in self.iterParents():
-            if p.scene is not None:
-                yield p.scene
+            if p.theater is not None:
+                yield p.theater
                 return
 
     def getSceneRenderManager(self):
-        for scene in self.findScene():
-            return scene.srm
+        for theater in self.findTheater():
+            return theater.srm
     srm = property(getSceneRenderManager)
 
     def sg_invalidate(self):

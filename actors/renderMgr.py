@@ -19,31 +19,45 @@ from TG.geomath.data import DataHostObject, OBFactoryMap
 class SceneRenderManager(DataHostObject):
     _fm_ = OBFactoryMap()
     invalidated = False
+
     passKey = None
     info = None
     result = None
+
     vpsize = (0,0)
     swapKeys = set(['render'])
     debugCallTrees = set([])
+
+    _passStackNames = ['passKey', 'result', 'info']
 
     def __init__(self, renderContext):
         self.renderContext = renderContext
         self.init()
 
     def init(self):
+        self._passStack = []
         self.swapKeys = self.swapKeys.copy()
         self.debugCallTrees = self.debugCallTrees.copy()
 
+    def _pushStackPass(self):
+        items = dict((n, getattr(self, n)) for n in self._passStackNames)
+        self._passStack.append(items)
+    def _popStackPass(self):
+        items = self._passStack.pop()
+        for n, v in items.items():
+            setattr(self, n, v)
+
     def startPass(self, sgpass, info):
-        if self.passKey is not None:
-            raise RuntimeError("Already in pass '%s', cannot start pass '%s'" % (self.passKey, sgpass.passKey))
+        self._pushStackPass()
+
         self.passKey = sgpass.passKey
+        self.info = info
+        self.result = None
+
         rctx = self.renderContext
         rctx.select()
 
-        self.info = info
         self.vpsize = rctx.getSize()
-        self.result = None
 
     def finishPass(self, sgpass, info):
         result = self.result
@@ -51,9 +65,7 @@ class SceneRenderManager(DataHostObject):
             self.renderContext.swap()
             self.invalidated = False
 
-        del self.result
-        del self.info
-        del self.passKey
+        self._popStackPass()
         return result
 
     def invalidate(self):
