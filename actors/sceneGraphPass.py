@@ -11,6 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from functools import partial
+from TG.geomath.data import DataHostObject, OBFactoryMap
 from TG.geomath.alg.compiledGraphPass import CompiledGraphPass, CompileStack
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,12 +56,15 @@ class DebugSceneGraphCallTree(SceneGraphCallTree):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneGraphNodePass(CompiledGraphPass):
+class SceneGraphNodePass(CompiledGraphPass, DataHostObject):
     singlePass = False
-    SGCallTree = SceneGraphCallTree
+    _fm_ = OBFactoryMap(
+        SGCallTree = SceneGraphCallTree,
+        SGDebugCallTree = DebugSceneGraphCallTree,
+        )
 
     def newCompileStack(self, passKey, root):
-        return self.SGCallTree(root, passKey)
+        return self._fm_.SGCallTree(root, passKey)
 
     def _getCached(self, key, root):
         return root.sg_passCache.get(key, None)
@@ -96,8 +100,8 @@ class SceneGraphPass(SceneGraphNodePass):
 
     def newCompileStack(self, passKey, root):
         if passKey in self.debugCallTrees:
-            return DebugSceneGraphCallTree(root, passKey)
-        return self.SGCallTree(root, passKey)
+            return self._fm_.SGDebugCallTree(root, passKey)
+        return self._fm_.SGCallTree(root, passKey)
 
     def performSubpass(self, info, passKey=None):
         if passKey is None: 
