@@ -90,11 +90,9 @@ class SceneGraphNodePass(CompiledGraphPass, DataHostObject):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SceneGraphPass(SceneGraphNodePass):
-    def __init__(self, root, passKey, singlePass):
+    def __init__(self, root, passKey):
         self.passKey = passKey
 
-        if singlePass:
-            self.singlePass = singlePass
         SceneGraphNodePass.__init__(self, root)
         self.debugCallTrees = self.root.scene.srm.debugCallTrees
 
@@ -126,4 +124,7 @@ class SceneGraphPass(SceneGraphNodePass):
 
         return srm.finishPass(self, info)
     __call__ = performPass
+
+class SingleSceneGraphPass(SceneGraphPass):
+    singlePass = True
 

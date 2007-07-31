@@ -12,6 +12,7 @@
 
 from TG.kvObserving import KVObject
 from TG.helix.actors.scene import HelixScene, SceneRenderManager
+from TG.helix.actors.sceneGraphPass import SceneGraphPass, SingleSceneGraphPass
 from .node import MatuiNode
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,17 +32,17 @@ class MatuiScene(HelixScene, KVObject):
             )
 
     _sgPassTypes_ = [
-        ('load', True),
+        ('load', SingleSceneGraphPass),
 
-        ('pre-render', False),
-        ('render', False),
+        ('pre-render', SceneGraphPass),
+        ('render', SceneGraphPass),
 
-        ('resize', False),
+        ('resize', SceneGraphPass),
 
-        ('pre-pick', False),
-        ('pick', False),
+        ('pre-pick', SceneGraphPass),
+        ('pick', SceneGraphPass),
 
-        ('animate', False),
+        ('animate', SceneGraphPass),
         ]
 
     _sgPassTriggers_ = [

@@ -44,7 +44,6 @@ class HelixScene(base.HelixObject):
             EventRoot = EventRoot,
             SceneRenderManager = SceneRenderManager,
 
-            SGPass = SceneGraphPass,
             SGPassEvents = OBKeyedList,
             )
     _sgPassTypes_ = []
@@ -74,10 +73,10 @@ class HelixScene(base.HelixObject):
     def sgAddPasses(self, sgPassTypes):
         self.sgPassEvents = self._fm_.SGPassEvents()
 
-        SGPass = self._fm_.SGPass
         root = self.root.asSGPassNode()
-        for key, singlePass in sgPassTypes:
-            self._sg_passes[key] = SGPass(self.root, key, singlePass)
+        for passKey, SGPassFactory in sgPassTypes:
+            sgPass = SGPassFactory(self.root, passKey)
+            self._sg_passes[passKey] = sgPass
 
     def sgPassConfig(self, sgPassTriggers):
         sg_passes = self._sg_passes
