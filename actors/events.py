@@ -119,3 +119,6 @@ class EventRoot(OBChannelSet):
         evtkw.update(timestamp=self.newTimestamp(), evtRoot=self._wpself)
         return evtkw
 
+    def send(self, channelKey, info):
+        return self.call_n1(channelKey, info)
+

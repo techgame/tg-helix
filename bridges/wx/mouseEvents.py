@@ -37,7 +37,7 @@ class wxMouseEventSource(wxEventSourceMixin):
 
         self.addKeyMouseInfo(info, (evt.GetX(), evt.GetY()), evt)
 
-        self.evtRoot.call_n1(self.channelKey, info)
+        self.evtRoot.send(self.channelKey, info)
         if info.get('skip', False):
             evt.Skip()
 
