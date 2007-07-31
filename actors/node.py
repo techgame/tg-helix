@@ -39,9 +39,6 @@ class HelixNode(GraphNode, HelixObject):
     def _getPassRepr(self, sep=' '):
         return None
 
-    def sgPassBind(self, ct):
-        pass
-
     def extendAt(self, idx, iterable):
         if isinstance(iterable, HelixObject):
             return self.insert(idx, iterable)
@@ -49,11 +46,13 @@ class HelixNode(GraphNode, HelixObject):
         return GraphNode.extendAt(self, idx, iterable)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Scene graph management: passes and invalidation
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getSceneRenderManager(self):
-        for scene in self.findScene():
-            return scene.srm
-    srm = property(getSceneRenderManager)
+    def sgPassBind(self, ct):
+        pass
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     scene = None
     def findScene(self):
@@ -62,9 +61,17 @@ class HelixNode(GraphNode, HelixObject):
                 yield p.scene
                 return
 
-    def sg_invalidate(self):
+    def getSceneRenderManager(self):
         for scene in self.findScene():
-            scene.sg_invalidate()
+            return scene.srm
+    srm = property(getSceneRenderManager)
+
+    def sg_invalidate(self):
+        srm = self.srm
+        if srm is not None:
+            srm.invalidate()
+            return True
+        else: return False
 
     sg_passCache = None
     def asSGPassNode(self):

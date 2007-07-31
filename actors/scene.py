@@ -37,7 +37,7 @@ class HelixScene(base.HelixObject):
     """A Helix Scene is a mediator, tieing viewport, events, and managers together in an extensible way.
     
     The sgPass are called on by the events to handle rendering, resizing, and
-    selection operations over the scene's nodes."""
+    picking operations over the scene's nodes."""
 
     _fm_ = OBFactoryMap(
             Node = HelixNode,

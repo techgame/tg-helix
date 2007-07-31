@@ -32,6 +32,14 @@ class MatuiNode(HelixNode):
 
     def isLayout(self): return False
 
+    @classmethod
+    def itemAsNode(klass, item, create=True):
+        if item.isNode():
+            return item
+        return item._sgGetNode_(create)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     def _getPassRepr(self, sep=' '):
         return sep.join(sorted(self._bindPass.keys()))
 
@@ -88,11 +96,10 @@ class MatuiNode(HelixNode):
         if passBindFn is not None:
             return self.addPass(passKey, passBindFn, idx)
 
-    @classmethod
-    def itemAsNode(klass, item, create=True):
-        if item.isNode():
-            return item
-        return item._sgGetNode_(create)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Using onAdd/onRemove from parent events, Manage references
+    # so that nodes and actors cleanup when they are no longer
+    # referenced and no longer in the node tree 
 
     def onAddToParent(self, parent):
         r = HelixNode.onAddToParent(self, parent)

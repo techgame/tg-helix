@@ -38,8 +38,8 @@ class MatuiScene(HelixScene, KVObject):
 
         ('resize', False),
 
-        ('pre-select', False),
-        ('select', False),
+        ('pre-pick', False),
+        ('pick', False),
 
         ('animate', False),
         ]
@@ -47,7 +47,7 @@ class MatuiScene(HelixScene, KVObject):
     _sgPassTriggers_ = [
         ('render', ['load', 'pre-render'], []),
         ('resize', ['load'], []),
-        ('select', ['load', 'pre-select'], []),
+        ('pick', ['load', 'pre-pick'], []),
         ('animate', ['load'], []),
         ]
 
@@ -64,8 +64,8 @@ class MatuiScene(HelixScene, KVObject):
         return self.sg_pass('resize', info)
     def sg_render(self, info=None):
         return self.sg_pass('render', info)
-    def sg_select(self, info=None):
-        return self.sg_pass('select', info)
+    def sg_pick(self, info=None):
+        return self.sg_pass('pick', info)
     def sg_load(self):
         return self.sg_pass('load')
 
