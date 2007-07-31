@@ -94,7 +94,7 @@ class SceneGraphPass(SceneGraphNodePass):
         self.passKey = passKey
 
         SceneGraphNodePass.__init__(self, root)
-        self.debugCallTrees = self.root.scene.srm.debugCallTrees
+        self.debugCallTrees = self.root.srm.debugCallTrees
 
     def newCompileStack(self, passKey, root):
         if passKey in self.debugCallTrees:
@@ -105,7 +105,7 @@ class SceneGraphPass(SceneGraphNodePass):
         if passKey is None: 
             passKey = self.passKey
 
-        srm = self.root.scene.srm
+        srm = self.root.srm
 
         passList = self.compile(passKey)
         for fn in passList:
@@ -115,7 +115,7 @@ class SceneGraphPass(SceneGraphNodePass):
         if passKey is None:
             passKey = self.passKey
 
-        srm = self.root.scene.srm
+        srm = self.root.srm
         srm.startPass(self, info)
 
         passList = self.compile(passKey)

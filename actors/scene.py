@@ -17,7 +17,7 @@ from . import base
 from .node import HelixNode
 from .events import EventRoot
 from .renderMgr import SceneRenderManager
-from .sceneGraphPass import SceneGraphPass
+from .sceneGraphPass import SceneGraphPass, SingleSceneGraphPass
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
