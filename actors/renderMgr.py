@@ -10,11 +10,14 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.geomath.data import DataHostObject, OBFactoryMap
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneRenderManager(object):
+class SceneRenderManager(DataHostObject):
+    _fm_ = OBFactoryMap()
     invalidated = False
     info = None
     result = None
@@ -24,6 +27,10 @@ class SceneRenderManager(object):
 
     def __init__(self, renderContext):
         self.renderContext = renderContext
+        self.init()
+
+    def init(self):
+        self.swapKeys = self.swapKeys.copy()
         self.debugCallTrees = self.debugCallTrees.copy()
 
     def startPass(self, sgpass, info):
