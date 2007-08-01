@@ -44,8 +44,7 @@ class MatuiTheater(HelixTheater, KVObject):
 
         ('animate', SceneGraphPass),
 
-        ('key', EventSceneGraphPass),
-        ('mouse', EventSceneGraphPass),
+        ('event', EventSceneGraphPass),
         ]
 
     _sgPassTriggers_ = [
@@ -63,8 +62,9 @@ class MatuiTheater(HelixTheater, KVObject):
         evtRoot.add('viewport-paint', self.sg_render)
         evtRoot.add('timer', self.sg_animate)
 
-        evtRoot.add('mouse', self.sg_mouse)
-        evtRoot.add('key', self.sg_key)
+        evtRoot.add('system', self.sg_event)
+        evtRoot.add('mouse', self.sg_event)
+        evtRoot.add('key', self.sg_event)
 
     def sg_load(self):
         return self.sg_pass('load')
@@ -75,10 +75,8 @@ class MatuiTheater(HelixTheater, KVObject):
         return self.sg_pass('render', info)
     def sg_pick(self, info=None):
         return self.sg_pass('pick', info)
-    def sg_mouse(self, info=None):
-        return self.sg_pass('mouse', info)
-    def sg_key(self, info=None):
-        return self.sg_pass('key', info)
+    def sg_event(self, info=None):
+        return self.sg_pass('event', info)
 
     animate = False
     def sg_animate(self, info=None):

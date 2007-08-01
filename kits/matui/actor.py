@@ -21,46 +21,19 @@ from .cell import MatuiCell
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class SGMultiOp(KVObject):
-    _fm_ = OBFactoryMap(
-            sgOpPrefix='sg_',
-            )
+    _fm_ = OBFactoryMap()
 
     _sgOps_ = []
+    _sgOpMasks_ = []
 
     def sgBindNode(self, node):
         self.node = node
-        self.sgAddOpList(self._sgOps_, node)
 
-    def sgAddOpList(self, opsList, node=None):
-        if node is None: 
-            node = self.node
+        for mask in self._sgOpMasks_:
+            node.maskPass(mask)
 
-        for op in opsList:
-            self.sgAddOp(op, None, node)
-
-    def sgAddOp(self, opKey, opBind=None, node=None):
-        if node is None: 
-            node = self.node
-
-        if opBind is None:
-            if isinstance(opKey, str):
-                opBind = self._fm_.sgOpPrefix + opKey
-            else: 
-                opKey, opBind = opKey
-
-        if isinstance(opBind, str):
-            opBind = getattr(self, opBind, None)
-
-        if opBind is not None:
-            idx = getattr(opBind, 'idx', None)
-            node.onPass(opKey, opBind, idx=idx)
-            return True
-        else:
-            return False
-
-    def sgClearOp(self, opKey):
-        self.node.clearPass(opKey)
-
+        for op in self._sgOps_:
+            node.addPassFrom(self, op)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Actor

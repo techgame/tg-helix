@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.metaObserving import OBKeyedList, asWeakMethod
+from TG.metaObserving import OBKeyedList, asWeakMethod, OBFactoryMap
 from TG.kvObserving import KVList
 from TG.helix.actors import HelixNode
 
@@ -19,6 +19,7 @@ from TG.helix.actors import HelixNode
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class MatuiNode(HelixNode):
+    _fm_ = OBFactoryMap(sgOpPrefix='sg_')
     actor_ref = None
     sgPassMask = set()
 
@@ -26,7 +27,8 @@ class MatuiNode(HelixNode):
         for n,v in kw.items():
             setattr(self, n, v)
 
-        self._bindPass = OBKeyedList()
+        self.sgPassMask = self.sgPassMask.copy()
+        self.sgPassChannels = OBKeyedList()
         self._parents = KVList()
         self._children = KVList()
 
@@ -39,21 +41,23 @@ class MatuiNode(HelixNode):
         return item._sgGetNode_(create)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Pass Management                                   
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _getPassRepr(self, sep=' '):
-        return sep.join(sorted(self._bindPass.keys()))
+        return sep.join(sorted(self.sgPassChannels.keys()))
 
     def sgIsPassBound(self, passKey):
         return ((passKey not in self.sgPassMask)
-            and (self._bindPass.get(passKey)))
+            and (self.sgPassChannels.get(passKey)))
 
     def sgPassBind(self, ct):
         passKey = ct.passKey
         if passKey not in self.sgPassMask:
-            self._bindPass.call_n2(passKey, self, ct)
+            self.sgPassChannels.call_n2(passKey, self, ct)
 
-    def addPass(self, passKey, passBindFn, idx=None):
-        passAtKey = self._bindPass[passKey]
+    def addPassRaw(self, passKey, passBindFn, idx=None):
+        passAtKey = self.sgPassChannels[passKey]
         if idx is None:
             passAtKey.append(passBindFn)
         else: passAtKey.insert(idx, passBindFn)
@@ -62,24 +66,44 @@ class MatuiNode(HelixNode):
         return passBindFn
 
     def clearPass(self, passKey):
-        self._bindPass.clear(passKey)
+        self.sgPassChannels.clear(passKey)
         self.sg_rebuildPass(passKey, False)
 
     def maskPass(self, passKey, masked=True):
-        mask = self.sgPassMask or set()
+        sgPassMask = self.sgPassMask
         if masked:
-            if passKey not in mask:
-                mask.add(passKey)
-        elif passKey in mask:
-            mask.discard(passKey)
+            if passKey not in sgPassMask:
+                sgPassMask.add(passKey)
+        elif passKey in sgPassMask:
+            sgPassMask.discard(passKey)
 
-        self.sgPassMask = mask
+    def addPass(self, passKey, fn=None, idx=None):
+        passKey, passBindFn = self._getPassBindFnFor(passKey, fn)
+        if passBindFn is not None:
+            return self.addPassRaw(passKey, passBindFn, idx)
+    onPass = addPass
 
-    def getPassBindFnFor(self, passKey, fn=None):
+    def addPassFrom(self, host, opKey, opBind=None):
+        if opBind is None:
+            if isinstance(opKey, str):
+                opBind = self._fm_.sgOpPrefix + opKey
+            else: opKey, opBind = opKey
+
+        if isinstance(opBind, str):
+            opBind = getattr(host, opBind, None)
+
+        if opBind is not None:
+            idx = getattr(opBind, 'idx', None)
+            self.onPass(opKey, opBind, idx=idx)
+            return True
+        else:
+            return False
+
+    def _getPassBindFnFor(self, passKey, fn=None):
         if fn is None:
             fn = passKey
             passKey = fn.__name__
-            if passKey.startswith('sg_'):
+            if passKey.startswith(self._fm_.sgOpPrefix):
                 passKey = passKey[3:]
 
         if passKey.endswith('_unwind'):
@@ -96,11 +120,6 @@ class MatuiNode(HelixNode):
         else: 
             passBindFn = lambda n, ct: ct.add(fn)
         return passKey, passBindFn
-
-    def onPass(self, passKey, fn=None, idx=None):
-        passKey, passBindFn = self.getPassBindFnFor(passKey, fn)
-        if passBindFn is not None:
-            return self.addPass(passKey, passBindFn, idx)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Using onAdd/onRemove from parent events, Manage references
