@@ -33,7 +33,7 @@ class wxSystemEventSource(wxEventSourceMixin):
         self.addKeyMouseInfo(info)
 
         self.evtRoot.send(self.channelKey, info)
-        if info.get('skip', False):
+        if info.get('skip', True):
             evt.Skip()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
