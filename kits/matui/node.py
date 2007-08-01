@@ -20,7 +20,7 @@ from TG.helix.actors import HelixNode
 
 class MatuiNode(HelixNode):
     actor_ref = None
-    _passMask = set()
+    sgPassMask = set()
 
     def __init__(self, **kw):
         for n,v in kw.items():
@@ -43,9 +43,13 @@ class MatuiNode(HelixNode):
     def _getPassRepr(self, sep=' '):
         return sep.join(sorted(self._bindPass.keys()))
 
+    def sgIsPassBound(self, passKey):
+        return ((passKey not in self.sgPassMask)
+            and (self._bindPass.get(passKey)))
+
     def sgPassBind(self, ct):
         passKey = ct.passKey
-        if passKey not in self._passMask:
+        if passKey not in self.sgPassMask:
             self._bindPass.call_n2(passKey, self, ct)
 
     def addPass(self, passKey, passBindFn, idx=None):
@@ -54,18 +58,22 @@ class MatuiNode(HelixNode):
             passAtKey.append(passBindFn)
         else: passAtKey.insert(idx, passBindFn)
 
-        self.sg_clearPassKey(passKey, False)
+        self.sg_rebuildPass(passKey, False)
         return passBindFn
 
     def clearPass(self, passKey):
         self._bindPass.clear(passKey)
-        self.sg_clearPassKey(passKey, False)
+        self.sg_rebuildPass(passKey, False)
 
-    def maskPass(self, passKey):
-        mask = self._passMask or set()
-        if passKey not in mask:
-            mask.add(passKey)
-            self._passMask = mask
+    def maskPass(self, passKey, masked=True):
+        mask = self.sgPassMask or set()
+        if masked:
+            if passKey not in mask:
+                mask.add(passKey)
+        elif passKey in mask:
+            mask.discard(passKey)
+
+        self.sgPassMask = mask
 
     def getPassBindFnFor(self, passKey, fn=None):
         if fn is None:
@@ -109,7 +117,7 @@ class MatuiNode(HelixNode):
             else: 
                 del self.actor_ref
 
-        self.sg_clearPassKey('load', True)
+        self.sg_rebuildPass('load', True)
         return r
     def onRemoveFromParent(self, parent):
         r = HelixNode.onRemoveFromParent(self, parent)
