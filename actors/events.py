@@ -120,5 +120,6 @@ class EventRoot(OBChannelSet):
         return evtkw
 
     def send(self, channelKey, info):
+        info.channel = channelKey
         return self.call_n1(channelKey, info)
 
