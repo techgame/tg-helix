@@ -35,34 +35,28 @@ class SGMultiOp(KVObject):
         if node is None: 
             node = self.node
 
-        if isinstance(opsList, dict):
-            opsList = sorted(opsList.items())
-
         for op in opsList:
-            if isinstance(op, str):
-                opKey = op
-                opBind = None
-            else: opKey, opBind = op
-            self.sgAddOp(opKey, opBind, node)
-
+            self.sgAddOp(op, None, node)
 
     def sgAddOp(self, opKey, opBind=None, node=None):
         if node is None: 
             node = self.node
 
         if opBind is None:
-            opBind = self._fm_.sgOpPrefix + opKey
+            if isinstance(opKey, str):
+                opBind = self._fm_.sgOpPrefix + opKey
+            else: 
+                opKey, opBind = opKey
 
         if isinstance(opBind, str):
             opBind = getattr(self, opBind, None)
-            if opBind is None:
-                return False
+
+        if opBind is not None:
             idx = getattr(opBind, 'idx', None)
             node.onPass(opKey, opBind, idx=idx)
             return True
         else:
-            opBind(self, node, opKey)
-            return True
+            return False
 
     def sgClearOp(self, opKey):
         self.node.clearPass(opKey)
