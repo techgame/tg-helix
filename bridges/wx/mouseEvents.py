@@ -44,8 +44,8 @@ class wxMouseEventSource(wxEventSourceMixin):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     wxEtypeMap = {
-        wx.wxEVT_ENTER_WINDOW: ('hover', 'enter', None),
-        wx.wxEVT_LEAVE_WINDOW: ('hover', 'leave', None),
+        wx.wxEVT_ENTER_WINDOW: ('window', 'enter', None),
+        wx.wxEVT_LEAVE_WINDOW: ('window', 'leave', None),
 
         wx.wxEVT_MOTION: ('motion', 'pos', None),
         wx.wxEVT_MOUSEWHEEL: ('motion', 'wheel', None),

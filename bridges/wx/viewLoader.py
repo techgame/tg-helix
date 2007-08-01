@@ -13,6 +13,7 @@
 from TG.helix.actors.theater import TheaterRenderContext
 from .viewportEvents import wxViewportEventSource
 from .keyboardEvents import wxKeyboardEventSource
+from .systemEvents import wxSystemEventSource
 from .mouseEvents import wxMouseEventSource
 from .timerEvents import wxTimerEventSource, wxIdleEventSource
 
@@ -49,6 +50,7 @@ class wxHelixTheaterHostViewLoader(object):
             wxViewportEventSource(glCanvas, options, scene),
             wxMouseEventSource(glCanvas, options, scene),
             wxKeyboardEventSource(glCanvas, options, scene),
+            wxSystemEventSource(glCanvas, options, scene),
             wxTimerEventSource(glCanvas, options, scene),
             wxIdleEventSource(glCanvas, options, scene),
             ]
