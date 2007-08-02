@@ -21,6 +21,11 @@ class wxMouseEventSource(wxEventSourceMixin):
 
     def bindHost(self, glCanvas, options):
         glCanvas.Bind(wx.EVT_MOUSE_EVENTS, self.onEvtMouse)
+        glCanvas.Bind(wx.EVT_MOUSE_CAPTURE_CHANGED, self.onEvtMouseCapture)
+        glCanvas.Bind(wx.EVT_MOUSE_CAPTURE_LOST, self.onEvtMouseCapture)
+
+        self._winCaptureMouse = glCanvas.CaptureMouse
+        self._winReleaseMouse = glCanvas.ReleaseMouse
 
     def onEvtMouse(self, evt):
         etype, ekind, btn = self.wxEtypeMap[evt.GetEventType()]
@@ -38,10 +43,47 @@ class wxMouseEventSource(wxEventSourceMixin):
         self.addKeyMouseInfo(info, (evt.GetX(), evt.GetY()), evt)
 
         self.evtRoot.send(self.channelKey, info)
+        self.checkCapture(info)
         if info.get('skip', False):
             evt.Skip()
 
+    def onEvtMouseCapture(self, evt=None):
+        if evt is None:
+            key = ('acquire' if self._captureState else 'release')
+        else: key = evt.GetEventType()
+
+        etype, ekind, captured = self.wxCaptureEtypeMap[key]
+        info = self.newInfo(etype=etype, ekind=ekind, captured=captured)
+
+        self.addKeyMouseInfo(info)
+        self.evtRoot.send(self.channelKey, info)
+
+        if evt is not None:
+            if info.get('skip', True):
+                evt.Skip()
+
+    _captureState = False
+    def checkCapture(self, info):
+        capture = info.get('capture', bool(info.buttons))
+
+        if capture != self._captureState:
+            if capture:
+                self._winCaptureMouse()
+            else: 
+                self._winReleaseMouse()
+            self._captureState = capture
+            self.onEvtMouseCapture()
+
+        return capture
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    wxCaptureEtypeMap = {
+        'acquire': ('capture', 'acquire', True),
+        'release': ('capture', 'release', False),
+        wx.wxEVT_MOUSE_CAPTURE_LOST: ('capture', 'lost', False),
+        wx.wxEVT_MOUSE_CAPTURE_CHANGED: ('capture', 'changed', False),
+    }
 
     wxEtypeMap = {
         wx.wxEVT_ENTER_WINDOW: ('window', 'enter', None),
