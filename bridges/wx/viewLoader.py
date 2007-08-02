@@ -35,24 +35,24 @@ class wxTheaterRenderContext(TheaterRenderContext):
 
 class wxHelixTheaterHostViewLoader(object):
     @classmethod
-    def load(klass, glCanvas, options, scene, **kwsetup):
+    def load(klass, glCanvas, options, theater, **kwsetup):
         renderContext = wxTheaterRenderContext(glCanvas)
         renderContext.select()
 
-        scene.setup(renderContext)
+        theater.setup(renderContext)
 
-        klass.loadEvtSources(glCanvas, options, scene)
-        return scene
+        sources = klass.loadEvtSources(glCanvas, options, theater)
+        return sources
 
     @classmethod
-    def loadEvtSources(self, glCanvas, options, scene):
+    def loadEvtSources(self, glCanvas, options, theater):
         return [
-            wxViewportEventSource(glCanvas, options, scene),
-            wxMouseEventSource(glCanvas, options, scene),
-            wxKeyboardEventSource(glCanvas, options, scene),
-            wxSystemEventSource(glCanvas, options, scene),
-            wxTimerEventSource(glCanvas, options, scene),
-            wxIdleEventSource(glCanvas, options, scene),
+            wxViewportEventSource(glCanvas, options, theater),
+            wxMouseEventSource(glCanvas, options, theater),
+            wxKeyboardEventSource(glCanvas, options, theater),
+            wxSystemEventSource(glCanvas, options, theater),
+            wxTimerEventSource(glCanvas, options, theater),
+            wxIdleEventSource(glCanvas, options, theater),
             ]
 
 TheaterHostViewLoader = wxHelixTheaterHostViewLoader

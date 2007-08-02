@@ -22,9 +22,9 @@ from TG.helix.actors.events import EventSource
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class wxEventSourceMixin(EventSource):
-    def __init__(self, glCanvas, options, scene):
+    def __init__(self, glCanvas, options, theater):
         self.glCanvas = glCanvas
-        self.evtRootSetup(scene.evtRoot)
+        self.evtRootSetup(theater.evtRoot)
         self.bindHost(glCanvas, options)
 
     def __nonzero__(self):

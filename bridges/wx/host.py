@@ -76,8 +76,8 @@ class HelixHost(wxSkinModel):
     xmlSkin = xmlSkin
     runSkin = False
 
-    def __init__(self, scene, options=None):
-        self.scene = scene
+    def __init__(self, theater, options=None):
+        self.theater = theater
 
         r = {}
         if options is not None:
@@ -94,8 +94,8 @@ class HelixHost(wxSkinModel):
         # Reload the opengl raw api to support windows
         TG.openGL.raw.apiReload()
 
-        if self.scene is not None:
-            self.TheaterHostViewLoader.load(canvasObj, self.options, self.scene)
+        if self.theater is not None:
+            self.TheaterHostViewLoader.load(canvasObj, self.options, self.theater)
 
     _glcontext = None
     @classmethod
