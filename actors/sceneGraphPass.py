@@ -84,6 +84,9 @@ class SceneGraphNodePass(CompiledGraphPass, DataHostObject):
 
     def sg_pass(self, passKey, root, srm):
         passList = self.compile(passKey, root)
+        self.performPassOnList(passList, srm)
+
+    def performPassOnList(self, passList, srm):
         for fn in passList:
             fn(srm)
 
@@ -113,10 +116,6 @@ class SceneGraphPass(SceneGraphNodePass):
 
         return srm.finishPass(self, info)
     __call__ = performPass
-
-    def performPassOnList(self, passList, srm):
-        for fn in passList:
-            fn(srm)
 
 class SingleSceneGraphPass(SceneGraphPass):
     singlePass = True

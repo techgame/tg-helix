@@ -30,7 +30,8 @@ class SceneRenderManager(DataHostObject):
 
     _passStackNames = ['passKey', 'result', 'info']
 
-    def __init__(self, renderContext):
+    def __init__(self, theater, renderContext):
+        self.theater = theater.asWeakProxy()
         self.renderContext = renderContext
         self.init()
 

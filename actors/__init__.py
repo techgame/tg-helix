@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from .base import HelixObject
 from .theater import HelixTheater
 from .actor import HelixActor
 from .node import HelixNode

@@ -63,7 +63,7 @@ class HelixTheater(base.HelixObject):
         self.timestamp = self.evtRoot.newTimestamp
 
     def setup(self, renderContext):
-        self.srm = self._fm_.SceneRenderManager(renderContext)
+        self.srm = self._fm_.SceneRenderManager(self, renderContext)
 
         self.sgAddPasses(self._sgPassTypes_)
         self.sgPassConfig(self._sgPassTriggers_)

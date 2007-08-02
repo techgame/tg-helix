@@ -12,7 +12,7 @@
 
 from TG.kvObserving import KVObject, KVProperty, OBFactoryMap
 
-from TG.helix.actors import HelixActor
+from TG.helix.actors import HelixActor, HelixObject
 from .node import MatuiNode
 from .cell import MatuiCell
 
@@ -20,7 +20,7 @@ from .cell import MatuiCell
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SGMultiOp(KVObject):
+class SGMultiOp(KVObject, HelixObject):
     _fm_ = OBFactoryMap()
 
     _sgOps_ = []
