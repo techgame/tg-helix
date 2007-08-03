@@ -53,6 +53,7 @@ class wxMouseEventSource(wxEventSourceMixin):
         else: key = evt.GetEventType()
 
         etype, ekind, captured = self.wxCaptureEtypeMap[key]
+        self._captureState = captured
         info = self.newInfo(etype=etype, ekind=ekind, captured=captured)
 
         self.addKeyMouseInfo(info)
@@ -64,15 +65,19 @@ class wxMouseEventSource(wxEventSourceMixin):
 
     _captureState = False
     def checkCapture(self, info):
-        capture = info.get('capture', bool(info.buttons))
+        capture = bool(info.get('capture', info.buttons))
 
         if capture != self._captureState:
-            if capture:
-                self._winCaptureMouse()
-            else: 
-                self._winReleaseMouse()
             self._captureState = capture
-            self.onEvtMouseCapture()
+            try:
+                if capture:
+                    self._winCaptureMouse()
+                else: 
+                    self._winReleaseMouse()
+            except wx.PyAssertionError:
+                pass
+            else:
+                self.onEvtMouseCapture()
 
         return capture
 
