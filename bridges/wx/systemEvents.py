@@ -30,7 +30,9 @@ class wxSystemEventSource(wxEventSourceMixin):
         etype, ekind, active = self.wxEtypeMap[evt.GetEventType(), bool(evt.GetActive())]
         info = self.newInfo(etype=etype, ekind=ekind, active=active)
 
-        self.addKeyMouseInfo(info)
+        if not self.addKeyMouseInfo(info):
+            evt.Skip()
+            return
 
         self.evtRoot.send(self.channelKey, info)
         if info.get('skip', True):

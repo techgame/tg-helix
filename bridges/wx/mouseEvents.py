@@ -24,9 +24,6 @@ class wxMouseEventSource(wxEventSourceMixin):
         glCanvas.Bind(wx.EVT_MOUSE_CAPTURE_CHANGED, self.onEvtMouseCapture)
         glCanvas.Bind(wx.EVT_MOUSE_CAPTURE_LOST, self.onEvtMouseCapture)
 
-        self._winCaptureMouse = glCanvas.CaptureMouse
-        self._winReleaseMouse = glCanvas.ReleaseMouse
-
     def onEvtMouse(self, evt):
         etype, ekind, btn = self.wxEtypeMap[evt.GetEventType()]
         info = self.newInfo(etype=etype, ekind=ekind)
@@ -40,7 +37,9 @@ class wxMouseEventSource(wxEventSourceMixin):
                 wheelLinesPer=evt.GetLinesPerAction(),
                 wheelIsPage=evt.IsPageScroll())
 
-        self.addKeyMouseInfo(info, (evt.GetX(), evt.GetY()), evt)
+        if not self.addKeyMouseInfo(info, (evt.GetX(), evt.GetY()), evt):
+            evt.Skip()
+            return
 
         self.evtRoot.send(self.channelKey, info)
         self.checkCapture(info)
@@ -56,7 +55,10 @@ class wxMouseEventSource(wxEventSourceMixin):
         self._captureState = captured
         info = self.newInfo(etype=etype, ekind=ekind, captured=captured)
 
-        self.addKeyMouseInfo(info)
+        if not self.addKeyMouseInfo(info):
+            evt.Skip()
+            return
+
         self.evtRoot.send(self.channelKey, info)
 
         if evt is not None:
@@ -71,9 +73,9 @@ class wxMouseEventSource(wxEventSourceMixin):
             self._captureState = capture
             try:
                 if capture:
-                    self._winCaptureMouse()
+                    self.glCanvas.CaptureMouse()
                 else: 
-                    self._winReleaseMouse()
+                    self.glCanvas.ReleaseMouse()
             except wx.PyAssertionError:
                 pass
             else:

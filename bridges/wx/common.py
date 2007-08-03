@@ -35,6 +35,9 @@ class wxEventSourceMixin(EventSource):
 
     def addKeyMouseInfo(self, info, pos=None, evt=None):
         wxhost = self.glCanvas
+        if not wxhost:
+            return None
+
         eoHeight = wxhost.GetClientSize()[1]
 
         if pos is None:

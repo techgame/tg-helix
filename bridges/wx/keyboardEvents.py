@@ -34,7 +34,9 @@ class wxKeyboardEventSource(wxEventSourceMixin):
 
         info = self.newInfo(etype=etype, ekind=ekind)
         info.update(ukey=unikey, uchar=uchar, token=token)
-        self.addKeyMouseInfo(info, None, evt)
+        if not self.addKeyMouseInfo(info, None, evt):
+            evt.Skip()
+            return
 
         self.evtRoot.send(self.channelKey, info)
         if info.get('skip', True):
