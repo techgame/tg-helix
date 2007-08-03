@@ -43,7 +43,7 @@ class EventInfo(object):
     def itervalues(self): return self.__dict__.itervalues()
     def iteritems(self): return self.__dict__.iteritems()
 
-    def __len__(self, key):
+    def __len__(self):
         return len(self.__dict__)
     def __contains__(self, key):
         return key in self.__dict__
