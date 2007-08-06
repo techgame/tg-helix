@@ -26,6 +26,12 @@ class SGMultiOp(KVObject, HelixObject):
     _sgOps_ = []
     _sgOpMasks_ = []
 
+    @classmethod
+    def fromNode(klass, node, *args, **kw):
+        self = klass(*args, **kw)
+        self.sgBindNode(node)
+        return self
+
     def sgBindNode(self, node):
         self.node = node
 
