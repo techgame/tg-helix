@@ -44,7 +44,7 @@ class wxTimerEventSource(wxEventSourceMixin):
             del self._timer
             return
 
-        info = self.newInfo()
+        info = self.newInfo(etype='animate', ekind='timer')
         if not self.addKeyMouseInfo(info):
             evt.Skip()
             return
@@ -72,7 +72,7 @@ class wxIdleEventSource(wxEventSourceMixin):
         else: glCanvas.Bind(wx.EVT_IDLE, self.onEvtIdle)
 
     def onEvtIdle(self, evt):
-        info = self.newInfo()
+        info = self.newInfo(etype='idle', ekind='idle')
         if not self.addKeyMouseInfo(info):
             evt.Skip()
             return
