@@ -53,6 +53,9 @@ class Package(module):
         path = os.path.abspath(path)
         self.__path__.append(path)
 
+    def siteImport(self, name, fromList=['__name__'], level=1):
+        return __import__(name, self.__dict__, {}, fromList, level)
+
 registerAs = Package._registerAs_
 registerAlias = Package._registerAlias_
 
