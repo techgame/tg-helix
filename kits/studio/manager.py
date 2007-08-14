@@ -91,6 +91,9 @@ class StudioManager(BaseManager):
 
     def loadProductionFor(self, key):
         prodModule = self.package.siteImport(key)
+        return self.loadProduction(prodModule)
+
+    def loadProduction(self, prodModule):
         return prodModule.loadProduction(self)
 
     def addProduction(self, key, production):
