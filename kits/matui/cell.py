@@ -11,6 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from __future__ import with_statement
+from numpy import asarray
 from TG.metaObserving import OBSet, OBFactoryMap
 
 from TG.geomath.data.vector import Vector
@@ -65,6 +66,20 @@ class MatuiCell(HelixObject, LayoutCell):
 
     def offset(self, offset=0):
         return self.align(0, 0, offset)
+
+    def dock(self, sw, at0=None, at1=None, offset=0):
+        sw = asarray(sw)
+        if at0 is None:
+            at0 = 1-sw
+        if at1 is None: 
+            at1 = at0
+        @self.on
+        def placeDocked(host, lbox):
+            hbox = host.box
+            with hbox.kvpub:
+                hbox.size = (sw)*lbox.size + (1-sw)*hbox.size
+                hbox.at[at0] = lbox.at[at1] + offset
+        return self
 
     def align(self, at0=0, at1=None, offset=0):
         if at1 is None: 

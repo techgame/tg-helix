@@ -113,10 +113,13 @@ class MatuiLayout(HelixObject, KVObject):
         self.remove(other)
         return self
 
-    def add(self, item):
+    def add(self, item, **kw):
         if not item.isLayout() and self._node is not None:
             self._node.add(item)
         itemCell = item.cell
+        if kw:
+            for k,v in kw.iteritems():
+                setattr(itemCell, k, v)
         self.collection.append(itemCell)
         return itemCell
 
