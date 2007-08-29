@@ -77,6 +77,8 @@ class StudioManager(BaseManager):
 
     def run(self):
         self.host.run()
+    def exit(self):
+        self.host.exit()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

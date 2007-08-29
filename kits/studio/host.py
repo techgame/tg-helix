@@ -38,3 +38,7 @@ class StudioHost(wxSkinModel, KVObject):
         if bSkinModel:
             self.skinModel()
 
+    def exit(self):
+        wxapp = wx.GetApp()
+        wxapp.Exit()
+
