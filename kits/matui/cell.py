@@ -130,6 +130,12 @@ class MatuiCell(HelixObject, LayoutCell):
     def removeLayout(self, layout):
         layout.watchCell(self, False)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def getNode(self):
+        return self.host.node
+    node = property(getNode)
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MatuiLayout._fm_.update(Cell = MatuiCell)

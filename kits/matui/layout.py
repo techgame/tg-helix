@@ -97,12 +97,23 @@ class MatuiLayout(HelixObject, KVObject):
         if lbox is not None:
             box.pv = lbox.pv[..., :box.shape[-1]]
 
-        self.alg(self.collection, box)
+        self.alg(self.viewCollection, box)
 
     def fit(self):
-        box = self.alg.fit(self.collection, self.box)
+        box = self.alg.fit(self.viewCollection, self.box)
         self.box.size = box.size
         return box
+
+    _viewCollection = None
+    def getViewCollection(self):
+        if self._viewCollection is None:
+            return self.collection
+        return self._viewCollection
+    def setViewCollection(self, viewCollection):
+        self._viewCollection = viewCollection
+    def delViewCollection(self):
+        del self._viewCollection
+    viewCollection = property(getViewCollection, setViewCollection, delViewCollection)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -120,6 +131,10 @@ class MatuiLayout(HelixObject, KVObject):
         if kw:
             for k,v in kw.iteritems():
                 setattr(itemCell, k, v)
+        self.collection.append(itemCell)
+        return itemCell
+    def addOnly(self, item, **kw):
+        itemCell = item.cell
         self.collection.append(itemCell)
         return itemCell
 
