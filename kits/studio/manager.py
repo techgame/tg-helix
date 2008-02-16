@@ -57,6 +57,10 @@ class StudioManager(BaseManager):
             StudioDirector = StudioDirector,
             StudioHost = StudioHost,
             StudioPackage = Package,
+
+            hostAppInfo = {
+                'vendor': 'TechGame Networks',
+                'appName': 'Helix Studio Application'}
             )
 
     host = KVProperty(None)
@@ -72,7 +76,7 @@ class StudioManager(BaseManager):
         if self.host is not None:
             return
 
-        self.host = self._fm_.StudioHost(self)
+        self.host = self._fm_.StudioHost(self, self._fm_.hostAppInfo)
         self.director.init()
 
     def run(self):
