@@ -43,15 +43,29 @@ class MatuiCell(HelixObject, LayoutCell):
     def layout(self):
         self.layoutInBox(self.host.box)
     def layoutInBox(self, lbox):
+        if lbox is None:
+            self.hide()
+            return
         lbox = lbox.copy(dim=2)
         host = self.host
         self._placeFn(host, lbox)
         self.oset.call_n2(self, getattr(host, 'box', lbox))
+        self.show()
 
     def watchBox(self, box):
         box.kvo('*', lambda lbox, k: self.layoutInBox(lbox))
     def watchHostBox(self, host):
         host.kvo('box.*', lambda host, lbox: self.layoutInBox(lbox))
+
+    _hidden = False
+    def hide(self):
+        self._hidden = True
+        self.node.enable(False)
+
+    def show(self):
+        if self._hidden:
+            self._hidden = False
+            self.node.enable(True)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Placement methods
