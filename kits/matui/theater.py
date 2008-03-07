@@ -34,12 +34,12 @@ class MatuiTheater(HelixTheater, KVObject):
     _sgPassTypes_ = [
         ('load', SingleSceneGraphPass),
 
-        ('pre-render', SceneGraphPass),
+        #('pre-render', SceneGraphPass),
         ('render', SceneGraphPass),
 
         ('resize', SceneGraphPass),
 
-        ('pre-pick', SceneGraphPass),
+        #('pre-pick', SceneGraphPass),
         ('pick', SceneGraphPass),
 
         ('animate', SceneGraphPass),

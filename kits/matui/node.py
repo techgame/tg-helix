@@ -62,8 +62,18 @@ class MatuiNode(HelixNode):
             passAtKey.append(passBindFn)
         else: passAtKey.insert(idx, passBindFn)
 
-        self.sg_rebuildPass(passKey, False)
+        self.sg_rebuildPass(passKey, passKey=='load')
         return passBindFn
+
+    def discardPassRaw(self, passKey, passBindFn):
+        passAtKey = self.sgPassChannels[passKey]
+        try:
+            passAtKey.remove(passBindFn)
+        except ValueError:
+            return None
+        else:
+            self.sg_rebuildPass(passKey, False)
+            return passBindFn
 
     def clearPass(self, passKey):
         self.sgPassChannels.clear(passKey)
