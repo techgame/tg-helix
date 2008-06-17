@@ -151,4 +151,5 @@ class MatuiLayout(HelixObject, KVObject):
         if self._node is not None:
             self._node.clear()
         self.collection[:] = []
+        self.viewCollection = None
 
