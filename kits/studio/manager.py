@@ -23,18 +23,8 @@ from .package import Package
 #~ Studio Manager
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class BaseDirector(KVObject):
-    _fm_ = OBFactoryMap()
-    mgr = KVProperty(None)
-
-    def asWeakRef(self, cb=None):
-        return weakref.ref(self, cb)
-    def asWeakProxy(self, cb=None):
-        return weakref.proxy(self, cb)
-
 class BaseManager(KVObject):
     _fm_ = OBFactoryMap()
-    director = KVProperty(None)
 
     def asWeakRef(self, cb=None):
         return weakref.ref(self, cb)
@@ -45,16 +35,8 @@ class BaseManager(KVObject):
 #~ Studio 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class StudioDirector(BaseDirector):
-    def __init__(self, mgr):
-        self.mgr = mgr
-
-    def init(self):
-        pass
-
 class StudioManager(BaseManager):
     _fm_ = BaseManager._fm_.branch(
-            StudioDirector = StudioDirector,
             StudioHost = StudioHost,
             StudioPackage = Package,
 
@@ -70,14 +52,12 @@ class StudioManager(BaseManager):
 
     def __init__(self, rootPkgName):
         self.package = self._fm_.StudioPackage(rootPkgName)
-        self.director = self._fm_.StudioDirector(self)
 
     def init(self):
         if self.host is not None:
             return
 
         self.host = self._fm_.StudioHost(self, self._fm_.hostAppInfo)
-        self.director.init()
 
     def run(self):
         self.host.run()
