@@ -26,11 +26,11 @@ class SceneGraphCallTree(CompileStack):
     def addFn(self, fn, *args):
         if args:
             fn = partial(fn, *args)
-        self._result.append(fn)
+        self.add(fn)
     def addUnwindFn(self, fn, *args):
         if args:
             fn = partial(fn, *args)
-        self._unwind.append(fn)
+        self.addUnwind(fn)
 
 class DebugSceneGraphCallTree(SceneGraphCallTree):
     _pop_next = SceneGraphCallTree._pop_
@@ -76,8 +76,10 @@ class SceneGraphNodePass(CompiledGraphPass, DataHostObject):
     def compileNodeTo(self, cnode, ct):
         cache = cnode.sg_passCache
         if cache is None or cnode is ct.root:
+            # compile the node to this pass
             return cnode.sgPassBind(ct)
 
+        # add a method to call the pre-cached subpass
         if cache.get(ct.passKey, True):
             ct.addFn(self.sg_pass, ct.passKey, cnode)
         ct.cull()
