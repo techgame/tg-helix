@@ -23,6 +23,7 @@ class wxKeyboardEventSource(wxEventSourceMixin):
         glCanvas.Bind(wx.EVT_KEY_DOWN, self.onEvtKey)
         glCanvas.Bind(wx.EVT_KEY_UP, self.onEvtKey)
         glCanvas.Bind(wx.EVT_CHAR, self.onEvtKey)
+        glCanvas.SetFocus()
 
     def onEvtKey(self, evt):
         etype, ekind = self.wxEtypeMap[evt.GetEventType()]

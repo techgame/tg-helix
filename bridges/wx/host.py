@@ -58,7 +58,7 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
         <layout>
             <panel>
                 <layout>
-                    <opengl-canvas gl-context='ctx.model.getGLContext()'>
+                    <opengl-canvas gl-context='ctx.model.getGLContext()' style='WANTS_CHARS'>
                         ctx.model.setupCanvas(elem, obj)
                     </opengl-canvas>
                 </layout>
