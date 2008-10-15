@@ -47,12 +47,12 @@ class MatuiTheater(HelixTheater, KVObject):
         ('event', EventSceneGraphPass),
         ]
 
-    _sgPassTriggers_ = [
-        ('render', ['pre_render', 'load'], []),
-        ('resize', ['load'], []),
-        ('pick', ['pre_pick', 'load'], []),
-        ('animate', ['load'], []),
-        ]
+    _sgPassTriggers_ = dict(
+        render = (['pre_render', 'load'], []),
+        resize = (['load'], []),
+        pick = (['pre_pick', 'load'], []),
+        animate = (['load'], []),
+        )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

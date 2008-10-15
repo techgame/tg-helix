@@ -106,17 +106,19 @@ class SceneGraphPass(SceneGraphNodePass):
             return self._fm_.SGDebugCallTree(root, passKey)
         return self._fm_.SGCallTree(root, passKey)
 
-    def performPass(self, info, passKey=None):
+    def performPass(self, sgPassInfo, passKey=None):
         if passKey is None:
             passKey = self.passKey
 
+        sgPassInfo['passKey'] = passKey
+
         srm = self.root.srm
-        srm.startPass(self, info)
+        srm.startPass(self, sgPassInfo)
 
         passList = self.compile(passKey)
         self.performPassOnList(passList, srm)
 
-        return srm.finishPass(self, info)
+        return srm.finishPass(self, sgPassInfo)
     __call__ = performPass
 
 class SingleSceneGraphPass(SceneGraphPass):

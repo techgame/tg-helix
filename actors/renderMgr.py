@@ -48,11 +48,13 @@ class SceneRenderManager(DataHostObject):
         for n, v in items.items():
             setattr(self, n, v)
 
-    def startPass(self, sgpass, info):
+    def startPass(self, sgPass, sgPassInfo):
         self._pushStackPass()
 
-        self.passKey = sgpass.passKey
-        self.info = info
+        self.sgPassInfo = sgPassInfo
+        self.info = sgPassInfo.get('info')
+        self.passKey = sgPassInfo.get('passKey')
+        self.outerPassKey = sgPassInfo.get('outerPassKey')
         self.result = None
 
         rctx = self.renderContext
@@ -60,9 +62,9 @@ class SceneRenderManager(DataHostObject):
 
         self.vpsize = rctx.getSize()
 
-    def finishPass(self, sgpass, info):
+    def finishPass(self, sgPass, sgPassInfo):
         result = self.result
-        if sgpass.passKey in self.swapKeys:
+        if sgPass.passKey in self.swapKeys:
             self.renderContext.swap()
             self.invalidated = False
 

@@ -79,28 +79,38 @@ class HelixTheater(base.HelixObject):
             self._sg_passes[passKey] = sgPass
 
     def sgPassConfig(self, sgPassTriggers):
-        sg_passes = self._sg_passes
-        sgPassEvents = self.sgPassEvents
-        for passKey, preKeys, postKeys in sgPassTriggers:
-            for dk in preKeys:
-                dp = sg_passes.get(dk) 
-                if dp is not None:
-                    sgPassEvents.add(passKey+'-pre', dp)
+        if not isinstance(sgPassTriggers, dict):
+            sgPassTriggers = dict((key, (pre, post)) for key, pre, post in sgPassTriggers)
+        self._sgPassTriggers_ = sgPassTriggers
 
-            for dk in postKeys:
-                dp = sg_passes.get(dk) 
-                if dp is not None:
-                    sgPassEvents.add(passKey+'-post', dp)
-
-    def sg_pass(self, key, info=None):
+    def sg_pass(self, key, info=None, sgPassInfo={}):
         if info is None: 
             info = {}
-        sgp = self._sg_passes[key]
 
-        self.sgPassEvents.call_n1(key+'-pre', info)
-        result = sgp(info, key)
-        self.sgPassEvents.call_n1(key+'-post', info)
+        sgPassInfo = dict(sgPassInfo)
+        sgPassInfo.update(info=info, outerPassKey=key)
+
+        result = None
+        for sgKey, sgPass in self.iterSceneGraphPasses(key):
+            spr = sgPass(sgPassInfo)
+            if sgKey == key:
+                result = spr
         return result
+
+    def iterSceneGraphPasses(self, passListList=None):
+        if passListList is None or isinstance(passListList, str):
+            key = passListList
+            passListList = list(self._sgPassTriggers_.get(key, []))
+            passListList.insert(1, [key])
+
+        sg_passes = self._sg_passes
+        for passList in passListList:
+            if isinstance(passList, str):
+                passList = [passList]
+            for passKey in passList:
+                sgPass = sg_passes.get(passKey)
+                if sgPass is not None:
+                    yield passKey, sgPass
 
     def sg_invalidate(self):
         self.srm.invalidate()
