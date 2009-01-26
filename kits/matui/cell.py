@@ -28,33 +28,36 @@ from .layout import MatuiLayout
 class MatuiCell(HelixObject, LayoutCell):
     _fm_ = OBFactoryMap(Layout = None)
     oset = OBSet.property()
-    host = None
+    hostRef = None
 
     weight = Vector.property([0,0], 'f')
     minSize = Vector.property([0,0], 'f')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def __init__(self, host):
-        self.host = host
+    def __init__(self, hostRef):
+        hostRef()
+        self.hostRef = hostRef
 
     def isLayout(self): return True
 
     def layout(self):
-        self.layoutInBox(self.host.box)
+        self.layoutInBox(self.hostRef().box)
 
     def layoutInBox(self, lbox):
         if lbox is None:
             self.hide()
             return
         lbox = lbox.copy(dim=2)
-        host = self.host
-        self._placeFn(host, lbox)
-        self.oset.call_n2(self, getattr(host, 'box', lbox))
-        self.show()
+        host = self.hostRef()
+        if host is not None:
+            self._placeFn(host, lbox)
+            self.oset.call_n2(self, getattr(host, 'box', lbox))
+            self.show()
 
     def _onBoxChanged(self, host, lbox):
         self.layoutInBox(lbox)
+
     def watchBox(self, box):
         box.kvo('*', self._onBoxChanged)
     def watchHostBox(self, host):
@@ -155,7 +158,9 @@ class MatuiCell(HelixObject, LayoutCell):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def getNode(self):
-        return self.host.node
+        host = self.hostRef()
+        if host is not None:
+            return host.node
     node = property(getNode)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -69,7 +69,7 @@ class MatuiActor(HelixActor, SGMultiOp):
 
         Cell = self._fm_.Cell
         if Cell is not None:
-            self.cell = Cell(self.asWeakProxy())
+            self.cell = Cell(self.asWeakRef())
 
         self.sgBindNode(node)
 

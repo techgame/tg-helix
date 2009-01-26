@@ -81,7 +81,7 @@ class MatuiLayout(HelixObject, KVObject):
         return self._cell
     def setCell(self, cell):
         if cell is True:
-            cell = self._fm_.Cell(self)
+            cell = self._fm_.Cell(self.asWeakRef())
 
         self._cell = cell
         self.watchCell(cell)
