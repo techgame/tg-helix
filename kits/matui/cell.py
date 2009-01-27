@@ -119,12 +119,14 @@ class MatuiCell(HelixObject, LayoutCell):
             host.box.atAspect[aspect,at] = lbox
         return self
 
-    def aspectFill(self, at=.5, grow=True):
+    def aspectFill(self, at=.5, grow=True, aspect=None):
         @self.on
-        def placeFill(host, lbox):
+        def placeFill(host, lbox, aspect=aspect):
+            if aspect is None:
+                aspect = host.box.size
             with host.box.kvpub:
                 host.box.at[at] = lbox.at[at]
-                host.box.setAspectWith((host.box.size, grow), lbox.size)
+                host.box.setAspectWith((aspect, grow), lbox.size)
         return self
 
     def fill(self, inset=0, offset=0):
