@@ -113,6 +113,12 @@ class MatuiCell(HelixObject, LayoutCell):
             host.box.at[at0] = lbox.at[at1] + offset
         return self
 
+    def alignCorners(self, at0=0, at1=1, offset0=0, offset1=0):
+        @self.on
+        def placeAligned(host, lbox):
+            host.box.pv = lbox.at[at0]+offset0, lbox.at[at1]+offset1
+        return self
+
     def aspect(self, aspect, at=.5):
         @self.on
         def placeAspect(host, lbox):
@@ -127,6 +133,26 @@ class MatuiCell(HelixObject, LayoutCell):
             with host.box.kvpub:
                 host.box.at[at] = lbox.at[at]
                 host.box.setAspectWith((aspect, grow), lbox.size)
+        return self
+
+    def fillHeight(self, at0=.5, at1=None, offset=0):
+        if at1 is None: 
+            at1 = at0
+        @self.on
+        def placeFillHeight(host, lbox):
+            with host.box.kvpub:
+                host.box.height = lbox.height
+                host.box.at[at0] = lbox.at[at1] + offset
+        return self
+
+    def fillWidth(self, at0=.5, at1=None, offset=0):
+        if at1 is None: 
+            at1 = at0
+        @self.on
+        def placeFillWidth(host, lbox):
+            with host.box.kvpub:
+                host.box.width = lbox.width
+                host.box.at[at0] = lbox.at[at1] + offset
         return self
 
     def fill(self, inset=0, offset=0):
