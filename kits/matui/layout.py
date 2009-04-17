@@ -99,9 +99,9 @@ class MatuiLayout(HelixObject, KVObject):
 
         self.alg(self.viewCollection, box)
 
-    def fit(self):
+    def fit(self, at=None):
         box = self.alg.fit(self.viewCollection)
-        self.box.size = box.size
+        self.box.setSize(box.size, at=at)
         return box
 
     _viewCollection = None
