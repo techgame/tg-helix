@@ -43,7 +43,6 @@ class MatuiLayout(HelixObject, KVObject):
             )
 
     alg = KVProperty(None)
-    cell = KVProperty(None)
     collection = KVProperty(KVList)
     box = KVBox.property()
 
@@ -131,6 +130,8 @@ class MatuiLayout(HelixObject, KVObject):
         if not item.isLayout() and self._node is not None:
             self._node.add(item)
         itemCell = item.cell
+        if itemCell is None:
+            raise ValueError("Item.cell is None!")
         if kw:
             for k,v in kw.iteritems():
                 setattr(itemCell, k, v)
