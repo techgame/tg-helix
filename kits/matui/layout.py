@@ -157,3 +157,19 @@ class MatuiLayout(HelixObject, KVObject):
         self.collection[:] = []
         self.viewCollection = None
 
+    def axisSizes(self, collection=None, incBox=False):
+        if collection is None:
+            collection = self.collection
+        sizes, box = self.alg.axisSizesFor(collection)
+        if incBox:
+            return sizes, box
+        else: return sizes
+
+    def primaryAxisSize(self, collection=None, incAxisIdx=True):
+        sizes = self.axisSizes(collection)
+        axisIdx = self.alg.axis.argmax()
+        if incAxisIdx:
+            return axisIdx, sizes[:,axisIdx]
+        else:
+            return sizes[:,axisIdx]
+
