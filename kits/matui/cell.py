@@ -73,6 +73,13 @@ class MatuiCell(HelixObject, LayoutCell):
             self._hidden = False
             self.node.enable(True)
 
+    def debug(self, fn=None, **kw):
+        if fn is None:
+            def dbgPrintLayout(cell, box):
+                print sorted(kw.items()), box
+            fn = dbgPrintLayout
+        return self.oset.on(fn)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Placement methods
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,10 +145,12 @@ class MatuiCell(HelixObject, LayoutCell):
     def fillHeight(self, at0=.5, at1=None, offset=0):
         if at1 is None: 
             at1 = at0
+        if isinstance(offset, (int, float, long)):
+            offset = (offset, offset)
         @self.on
         def placeFillHeight(host, lbox):
             with host.box.kvpub:
-                host.box.height = lbox.height
+                host.box.height = lbox.height - 2*offset[1]
                 host.box.at[at0] = lbox.at[at1] + offset
         return self
 
