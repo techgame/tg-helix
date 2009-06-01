@@ -151,6 +151,10 @@ class MatuiLayout(HelixObject, KVObject):
             return itemCell
         return None
 
+    def assign(self, item, **kw):
+        self.clear()
+        return self.add(item, **kw)
+
     def clear(self):
         if self._node is not None:
             self._node.clear()
