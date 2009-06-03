@@ -127,8 +127,10 @@ class MatuiLayout(HelixObject, KVObject):
         if item is None:
             self.collection.append(None)
             return
-        if not item.isLayout() and self._node is not None:
-            self._node.add(item)
+        node = kw.pop('node', self._node)
+        if not item.isLayout():
+            if node is not None:
+                node.add(item)
         itemCell = item.cell
         if itemCell is None:
             raise ValueError("Item.cell is None!")
@@ -142,9 +144,11 @@ class MatuiLayout(HelixObject, KVObject):
         self.collection.append(itemCell)
         return itemCell
 
-    def remove(self, item):
-        if not item.isLayout() and self._node is not None:
-            self._node.remove(item)
+    def remove(self, item, **kw):
+        node = kw.pop('node', self._node)
+        if not item.isLayout():
+            if node is not None:
+                node.remove(item)
         itemCell = item.cell
         if itemCell in self.collection:
             self.collection.remove(itemCell)
