@@ -10,24 +10,30 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import wx
+from .host import StudioHostBase
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class StudioHostBase(object):
-    def __init__(self, mgr, appInfo, bSkinModel=True):
-        self.createApp(mgr)
-        self.setAppInfo(mgr, appInfo)
-
+class wxStudioHost(StudioHostBase):
     def createApp(self, mgr):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        self._app = wx.GetApp() or wx.PySimpleApp()
+        return self._app
 
     def setAppInfo(self, mgr, appInfo):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        app = wx.GetApp()
+        if 'vendor' in appInfo:
+            app.SetVendorName(appInfo['vendor'])
+        if 'appName' in appInfo:
+            app.SetAppName(appInfo['appName'])
 
     def run(self):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        app = wx.GetApp()
+        return app.MainLoop()
 
     def exit(self):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        app = wx.GetApp()
+        app.Exit()
 

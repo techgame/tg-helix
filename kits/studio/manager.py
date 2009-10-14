@@ -16,7 +16,7 @@ import weakref
 from TG.metaObserving import OBFactoryMap
 from TG.kvObserving import KVObject, KVProperty, KVDict
 
-from .host import StudioHost
+from .host import StudioHostBase
 from .package import Package
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,7 +37,7 @@ class BaseManager(KVObject):
 
 class StudioManager(BaseManager):
     _fm_ = BaseManager._fm_.branch(
-            StudioHost = StudioHost,
+            StudioHost = StudioHostBase,
             StudioPackage = Package,
 
             hostAppInfo = {
@@ -45,7 +45,7 @@ class StudioManager(BaseManager):
                 'appName': 'Helix Studio Application'}
             )
 
-    host = KVProperty(None)
+    host = None
     productions = KVProperty(KVDict)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +57,14 @@ class StudioManager(BaseManager):
         if self.host is not None:
             return
 
-        self.host = self._fm_.StudioHost(self, self._fm_.hostAppInfo)
+        self._createHost()
+
+    def _createHost(self):
+        Factory = self._fm_.StudioHost
+        if Factory is not None:
+            host = Factory(self, self._fm_.hostAppInfo)
+        else: host = None
+        self.host = host
 
     def run(self):
         self.host.run()

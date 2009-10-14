@@ -10,24 +10,33 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from PyQt4 import QtCore
+from PyQt4 import QtGui
+from .host import StudioHostBase
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class StudioHostBase(object):
-    def __init__(self, mgr, appInfo, bSkinModel=True):
-        self.createApp(mgr)
-        self.setAppInfo(mgr, appInfo)
-
+class qtStudioHost(StudioHostBase):
     def createApp(self, mgr):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        self._app = QtGui.qApp or QtGui.QApplication(sys.argv)
+        return self._app
 
     def setAppInfo(self, mgr, appInfo):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        app = QtGui.qApp
+        if 'vendor' in appInfo:
+            app.setOrganizationName(appInfo['vendor'])
+        if 'vendorDomain' in appInfo:
+            app.setOrganizationDomain(appInfo['vendorDomain'])
+        if 'appName' in appInfo:
+            app.setApplicationName(appInfo['appName'])
+        if 'appVersion' in appInfo:
+            app.setApplicationVersion(appInfo['appVersion'])
 
     def run(self):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        QtGui.qApp.exec_()
 
     def exit(self):
-        raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+        QtGui.qApp.exit()
 
