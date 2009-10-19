@@ -57,3 +57,45 @@ class qtHelixTheaterHostViewLoader(object):
 
 TheaterHostViewLoader = qtHelixTheaterHostViewLoader
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class qtHostMixin(object):
+    # viewport delegate
+    dgViewport = None
+    def initializeGL(self):
+        return self.dgViewport.initializeGL()
+    def resizeGL(self, w, h):
+        return self.dgViewport.resizeGL(w, h)
+    def paintGL(self):
+        return self.dgViewport.paintGL()
+
+    _eventRegistry = None
+    def getEventRegistry(self):
+        reg = self._eventRegistry
+        if reg is None:
+            reg = {}
+            self._eventRegistry = reg
+        return reg
+    eventRegistry = property(getEventRegistry)
+
+    def bindEvent(self, key, fn):
+        self.eventRegistry[key] = fn
+
+    def event(self, evt):
+        et = evt.type(); ek = evt.__class__
+        reg = self.eventRegistry
+        fns = []
+        for key in [(et, ek), et, ek]:
+            fn = reg.get(key)
+            if fn is not None:
+                fns.append(fn)
+
+        if fns:
+            self.makeCurrent()
+            for fn in fns:
+                r = fn(evt)
+                if r: 
+                    return r
+
+        return super(qtHostMixin, self).event(evt)
+
