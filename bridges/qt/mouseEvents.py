@@ -40,7 +40,9 @@ class qtMouseEventSource(qtEventSourceMixin):
         self.evtRoot.send(self.channelKey, info)
         self.checkCapture(info)
 
-        return not info.get('skip', False)
+        if not info.get('skip', False):
+            evt.accept()
+            return True
 
     def onEvtMouseWheel(self, evt):
         etype, ekind = self.qtEtypeMap[evt.type()]
@@ -56,7 +58,9 @@ class qtMouseEventSource(qtEventSourceMixin):
 
         self.evtRoot.send(self.channelKey, info)
         self.checkCapture(info)
-        return not info.get('skip', False)
+        if not info.get('skip', False):
+            evt.accept()
+            return True
 
     def onEvtHover(self, evt):
         try:
@@ -71,7 +75,9 @@ class qtMouseEventSource(qtEventSourceMixin):
 
         self.evtRoot.send(self.channelKey, info)
         self.checkCapture(info)
-        return not info.get('skip', False)
+        if not info.get('skip', False):
+            evt.accept()
+            return True
 
 
     _captureState = False

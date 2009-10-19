@@ -50,11 +50,12 @@ class qtTimerEventSource(qtEventSourceMixin):
 
     def onEvtTimer(self, evt):
         if evt.timerId() != self._timerId:
-            print 'tokc?'
             return False
 
         info = self.newInfo(etype='animate', ekind='timer')
         if self.addKeyMouseInfo(info):
             self.evtRoot.send(self.channelKey, info)
+
+        evt.accept()
         return True
 
