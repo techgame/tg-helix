@@ -64,10 +64,10 @@ class qtEventSourceMixin(EventSource):
         else: buttons = evt.buttons()
 
         if pos is None:
-            pos = QCursor.pos()
-            pos = (pos.x(), qthost.height() - pos.y())
-        else:
-            pos = (pos[0], qthost.height() - pos[1])
+            pos = qthost.mapFromGlobal(QCursor.pos())
+            pos = (pos.x(), pos.y())
+
+        pos = (pos[0], qthost.height() - pos[1])
 
         modifiers = [v for k, v in self.qtModifierMask if k & modifiers]
         buttons = [v for k, v in self.qtButtonMask if k & buttons]
