@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import TG.openGL.raw
+import TG.ext.openGL.raw
 from TG.skinning.toolkits.wx import wx, wxSkinModel, XMLSkin
 
 from . import viewLoader
@@ -92,7 +92,7 @@ class HelixHost(wxSkinModel):
         self.setGLContext(canvasObj.GetContext())
         canvasObj.SetCurrent()
         # Reload the opengl raw api to support windows
-        TG.openGL.raw.apiReload()
+        TG.ext.openGL.raw.apiReload()
 
         if self.theater is not None:
             self.TheaterHostViewLoader.load(canvasObj, self.options, self.theater)

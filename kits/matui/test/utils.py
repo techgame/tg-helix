@@ -17,10 +17,10 @@ from TG.kvObserving import KVProperty, kvobserve
 from TG.geomath.data.kvBox import KVBox
 from TG.geomath.data.color import Color
 
-from TG.openGL.raw import gl
-from TG.openGL.data.arrayViews import arrayView
-from TG.openGL.data.drawArrayViews import DrawElementArrayView
-from TG.openGL.data.texture import Texture
+from TG.ext.openGL.raw import gl
+from TG.ext.openGL.data.arrayViews import arrayView
+from TG.ext.openGL.data.drawArrayViews import DrawElementArrayView
+from TG.ext.openGL.data.texture import Texture
 
 from TG.helix.bridges.wx.host import HelixHost
 from TG.helix.kits.matui.theater import MatuiTheater
