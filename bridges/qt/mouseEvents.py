@@ -53,8 +53,7 @@ class qtMouseEventSource(qtEventSourceMixin):
 
         info.update(
             wheel=evt.delta(),
-            wheelLinesPer=evt.GetLinesPerAction(),
-            wheelIsPage=evt.IsPageScroll())
+            wheelLinesPer=QtGui.qApp.wheelScrollLines())
 
         self.evtRoot.send(self.channelKey, info)
         self.checkCapture(info)
