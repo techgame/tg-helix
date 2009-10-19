@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import sys
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from .host import StudioHostBase
@@ -20,7 +21,7 @@ from .host import StudioHostBase
 
 class qtStudioHost(StudioHostBase):
     def createApp(self, mgr):
-        self._app = QtGui.qApp or QtGui.QApplication(sys.argv)
+        self._app = QtGui.QApplication(sys.argv)
         return self._app
 
     def setAppInfo(self, mgr, appInfo):

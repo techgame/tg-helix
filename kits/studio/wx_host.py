@@ -19,7 +19,7 @@ from .host import StudioHostBase
 
 class wxStudioHost(StudioHostBase):
     def createApp(self, mgr):
-        self._app = wx.GetApp() or wx.PySimpleApp()
+        self._app = wx.PySimpleApp()
         return self._app
 
     def setAppInfo(self, mgr, appInfo):
