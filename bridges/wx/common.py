@@ -10,9 +10,6 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import sys
-import time
-
 import wx
 
 from TG.helix.actors.events import EventSource
