@@ -69,8 +69,8 @@ class qtEventSourceMixin(EventSource):
 
         pos = (pos[0], qthost.height() - pos[1])
 
-        modifiers = [v for k, v in self.qtModifierMask if k & modifiers]
-        buttons = [v for k, v in self.qtButtonMask if k & buttons]
+        modifiers = set(v for k, v in self.qtModifierMask if k & modifiers)
+        buttons = set(v for k, v in self.qtButtonMask if k & buttons)
 
         info.update(pos=pos, buttons=buttons, modifiers=modifiers)
 

@@ -12,7 +12,7 @@
 
 from TG.helix.actors.theater import TheaterRenderContext
 from .viewportEvents import qtViewportEventSource
-#from .keyboardEvents import qtKeyboardEventSource
+from .keyboardEvents import qtKeyboardEventSource
 from .systemEvents import qtSystemEventSource
 from .mouseEvents import qtMouseEventSource
 from .timerEvents import qtTimerEventSource
@@ -50,7 +50,7 @@ class qtHelixTheaterHostViewLoader(object):
         return [
             qtViewportEventSource(glCanvas, options, theater),
             qtMouseEventSource(glCanvas, options, theater),
-            #qtKeyboardEventSource(glCanvas, options, theater),
+            qtKeyboardEventSource(glCanvas, options, theater),
             qtSystemEventSource(glCanvas, options, theater),
             qtTimerEventSource(glCanvas, options, theater),
             ]
