@@ -10,9 +10,27 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+QtCore = QtGui = None
+
+if None in [QtCore, QtGui]:
+    try:
+        from PySide import QtCore, QtGui
+        from PySide.QtCore import SIGNAL, SLOT
+    except ImportError:
+        pass
+
+if None in [QtCore, QtGui]:
+    try:
+        from PyQt4 import QtCore, QtGui
+        from PyQt4.QtCore import SIGNAL, SLOT
+    except ImportError:
+        pass
+
+if None in [QtCore, QtGui]:
+    raise ImportError("Unable to import PySide or PyQt4 for Qt GUI support")
+
+
 import sys
-from PyQt4 import QtCore
-from PyQt4 import QtGui
 from .host import StudioHostBase
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

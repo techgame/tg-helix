@@ -26,6 +26,9 @@ if None in [QtCore, QtGui]:
     except ImportError:
         pass
 
+if None in [QtCore, QtGui]:
+    raise ImportError("Unable to import PySide or PyQt4 for Qt GUI support")
+
 from TG.helix.actors.events import EventSource
 
 Qt = QtCore.Qt
