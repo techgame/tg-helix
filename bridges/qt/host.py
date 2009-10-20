@@ -18,7 +18,7 @@ from . import viewLoader
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class qtHelixHost(QtOpenGL.QGLWidget, viewLoader.qtHostMixin):
+class qtHelixHost(viewLoader.qtHostMixin, QtOpenGL.QGLWidget):
     TheaterHostViewLoader = viewLoader.TheaterHostViewLoader
 
     def __init__(self, scene, parent=None):
