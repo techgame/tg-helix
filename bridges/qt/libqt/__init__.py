@@ -12,17 +12,20 @@
 
 qt_host_impl = None
 if qt_host_impl is None:
+    # try for PySide implementation
     try: import PySide
     except ImportError: pass
     else: qt_host_impl = PySide
 
 if qt_host_impl is None:
+    # try for PyQt4 implementation
     try: import PyQt4
     except ImportError: pass
-    else: qt_host_impl = PySide
+    else: qt_host_impl = PyQt4
 
 if qt_host is None:
     raise ImportError("Unable to import PySide or PyQt4 for Qt GUI support")
 
+# add qt_host's package path to ours, allowing our package to standin for theirs
 __path__.extend(qt_host.__path__)
 
