@@ -15,15 +15,19 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class StudioHostBase(object):
-    def __init__(self, mgr, appInfo, bSkinModel=True):
-        self.createApp(mgr)
+    def __init__(self, mgr, appInfo):
+        app = self.createApp(mgr)
         self.setAppInfo(mgr, appInfo)
+        self.initHostForApp(app)
 
     def createApp(self, mgr):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
 
     def setAppInfo(self, mgr, appInfo):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+
+    def initHostForApp(self, app):
+        pass
 
     def run(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))

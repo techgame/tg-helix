@@ -37,7 +37,11 @@ from .host import StudioHostBase
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class qtStudioHost(StudioHostBase):
+class qtStudioHost(StudioHostBase, QtCore.QObject):
+    def __init__(self, mgr, appInfo):
+        QtCore.QObject.__init__(self)
+        StudioHostBase.__init__(self, mgr, appInfo)
+
     def createApp(self, mgr):
         self._app = QtGui.QApplication(sys.argv)
         return self._app
