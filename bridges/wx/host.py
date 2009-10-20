@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import TG.ext.openGL.raw
+import sys, os
 from TG.skinning.toolkits.wx import wx, wxSkinModel, XMLSkin
 
 from . import viewLoader
@@ -72,7 +72,7 @@ xmlSkin = XMLSkin("""<?xml version='1.0'?>
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class HelixHost(wxSkinModel):
+class wxHelixHost(wxSkinModel):
     xmlSkin = xmlSkin
     runSkin = False
 
@@ -91,11 +91,21 @@ class HelixHost(wxSkinModel):
     def setupCanvas(self, canvasElem, canvasObj):
         self.setGLContext(canvasObj.GetContext())
         canvasObj.SetCurrent()
-        # Reload the opengl raw api to support windows
-        TG.ext.openGL.raw.apiReload()
+
+        self._glApiReload()
+        self.printGLInfo()
 
         if self.theater is not None:
             self.TheaterHostViewLoader.load(canvasObj, self.options, self.theater)
+
+    def _glApiReload(self):
+        # Reload the opengl raw api to support windows
+        if sys.platform.startswith('win'):
+            import TG.ext.openGL.raw
+            TG.ext.openGL.raw.apiReload()
+    def printGLInfo(self):
+        import TG.ext.openGL.raw
+        TG.ext.openGL.printGLInfo()
 
     _glcontext = None
     @classmethod
@@ -113,4 +123,6 @@ class HelixHost(wxSkinModel):
     def adjPosition(self):
         self.frame.SetClientSize(self.options.get('size', (1024, 768)))
         self.frame.Center()
+
+HelixHost = wxHelixHost
 
