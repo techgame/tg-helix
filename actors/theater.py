@@ -24,6 +24,8 @@ from .sceneGraphPass import SceneGraphPass, SingleSceneGraphPass
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class TheaterRenderContext(object):
+    def isRenderContext(self):
+        return True
     def getSize(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
     def select(self):
@@ -63,6 +65,8 @@ class HelixTheater(base.HelixObject):
         self.timestamp = self.evtRoot.newTimestamp
 
     def setup(self, renderContext):
+        if not renderContext.isRenderContext():
+            raise ValueError("renderContext must support TheaterRenderContext protocol")
         self.srm = self._fm_.SceneRenderManager(self, renderContext)
 
         self.sgAddPasses(self._sgPassTypes_)
