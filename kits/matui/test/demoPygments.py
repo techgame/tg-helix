@@ -15,6 +15,7 @@ from TG.geomath.typeset.mosaic import MosaicPageArena
 from TG.geomath.typeset.typesetter import TypeSetter
 from TG.geomath.typeset.typeface import FTFixedTypeface
 
+from TG.helix.bridges.wx.host import HelixHost
 from utils import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -79,9 +80,9 @@ class TSFormatter(Formatter):
 
 if __name__=='__main__':
     size = 12
-    fn = '/Library/Fonts/Andale Mono'
+    #fn = '/Library/Fonts/Andale Mono'
     #fn = '/Library/Fonts/Courier New'
-    #fn = '/System/Library/Fonts/Courier.dfont'
+    fn = '/System/Library/Fonts/Courier.dfont'
     #fn = '/System/Library/Fonts/Monaco.dfont'
 
     faceSet = {
@@ -97,7 +98,7 @@ if __name__=='__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    scene = MatuiScene()
+    scene = MatuiTheater()
 
     node = scene.root
     node += Viewport()

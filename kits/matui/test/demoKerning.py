@@ -15,6 +15,7 @@ from TG.geomath.typeset.mosaic import MosaicPageArena
 from TG.geomath.typeset.typesetter import TypeSetter
 from TG.geomath.typeset.typeface import FTTypeface
 
+from TG.helix.bridges.wx.host import HelixHost
 from utils import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,18 +26,18 @@ if __name__=='__main__':
     size = 64
 
     allKernedFonts = [
-        #'/Library/Fonts/Arial',
-        #'/Library/Fonts/Arial Black',
-        #'/Library/Fonts/Arial Narrow',
-        #'/Library/Fonts/Arial Rounded Bold',
-        #'/Library/Fonts/Brush Script',
-        #'/Library/Fonts/Impact',
-        '/Library/Fonts/MarkerFelt.dfont',
+        #'/Library/Fonts/Arial.ttf',
+        #'/Library/Fonts/Arial Black.ttf',
+        #'/Library/Fonts/Arial Narrow.ttf',
+        #'/Library/Fonts/Arial Rounded Bold.ttf',
+        #'/Library/Fonts/Brush Script.ttf',
+        #'/Library/Fonts/Impact.ttf',
+        #'/Library/Fonts/MarkerFelt.dfont',
         #'/Library/Fonts/PlantagenetCherokee.ttf',
         #'/Library/Fonts/Snell Roundhand',
-        #'/Library/Fonts/Times New Roman',
-        #'/Library/Fonts/Trebuchet MS',
-        #'/Library/Fonts/Verdana'
+        '/Library/Fonts/Times New Roman.ttf',
+        #'/Library/Fonts/Trebuchet MS.ttf',
+        #'/Library/Fonts/Verdana.ttf'
         ]
 
     kernedFont = FTTypeface(allKernedFonts[-1], size)
@@ -60,7 +61,7 @@ if __name__=='__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    scene = MatuiScene()
+    scene = MatuiTheater()
 
     node = scene.root
     node += Viewport()

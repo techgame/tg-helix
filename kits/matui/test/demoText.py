@@ -16,6 +16,7 @@ from TG.geomath.typeset.typesetter import TypeSetter
 from TG.geomath.typeset.textblock import TextBlock
 from TG.geomath.typeset.typeface import FTTypeface
 
+from TG.helix.bridges.wx.host import HelixHost
 from utils import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,18 +43,18 @@ if __name__=='__main__':
         # test the rendering from multiple mosaic pages
         ts.block = TextBlock(False, (2*size,2*size))
 
-    liSung = FTTypeface('/Library/Fonts/Apple LiSung Light.dfont', size)
+    liSung = FTTypeface('/Library/Fonts/Apple LiSung Light.ttf', size)
 
-    liSungVert = FTTypeface('/Library/Fonts/Apple LiSung Light.dfont', size)
+    liSungVert = FTTypeface('/Library/Fonts/Apple LiSung Light.ttf', size)
     #liSungVert._ftFace.allowVerticalLayout()
 
     helvetical = FTTypeface('/System/Library/Fonts/Helvetica.dfont', size)
-    zapfino = FTTypeface('/Library/Fonts/Zapfino.dfont', size*3/4)
-    normal = FTTypeface('/Library/Fonts/Times New Roman', size)
-    normalText = FTTypeface('/Library/Fonts/Times New Roman', 16)
-    italic = FTTypeface('/Library/Fonts/Times New Roman#italic', size)
-    bold = FTTypeface('/Library/Fonts/Times New Roman#bold', size)
-    funFont = FTTypeface('/Library/Fonts/MarkerFelt.dfont', size)
+    zapfino = FTTypeface('/Library/Fonts/Zapfino.ttf', size*3/4)
+    normal = FTTypeface('/Library/Fonts/Times New Roman.ttf', size)
+    normalText = FTTypeface('/Library/Fonts/Times New Roman.ttf', 16)
+    italic = FTTypeface('/Library/Fonts/Times New Roman Italic.ttf', size)
+    bold = FTTypeface('/Library/Fonts/Times New Roman Bold.ttf', size)
+    funFont = FTTypeface('/Library/Fonts/MarkerFelt.ttc', size)
 
     ts.face = normal
 
@@ -123,7 +124,7 @@ if __name__=='__main__':
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    scene = MatuiScene()
+    scene = MatuiTheater()
 
     node = scene.root
     node += Viewport()

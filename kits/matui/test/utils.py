@@ -22,7 +22,6 @@ from TG.ext.openGL.data.arrayViews import arrayView
 from TG.ext.openGL.data.drawArrayViews import DrawElementArrayView
 from TG.ext.openGL.data.texture import Texture
 
-from TG.helix.bridges.wx.host import HelixHost
 from TG.helix.kits.matui.theater import MatuiTheater
 from TG.helix.kits.matui.actor import MatuiActor
 
@@ -78,9 +77,9 @@ class Panel(MatuiActor):
 
     res = None
     def sg_load(self, srm):
+        self.node.maskPass('load')
         if self.res is not None:
             return
-        self.sgClearOp('load')
 
         res = {}
         self.res = res
@@ -141,16 +140,18 @@ class Text(MatuiActor):
     def lines(self):
         return self.textBlock.lines
 
+    typeset = None
     @kvobserve('box.*')
     def onBoxUpdate(self, box):
+        if self.typeset is None: return
         self.typeset.setWrapSize(box.size, True)
-        self.typeset.update()
+        self.textBlock.update(self.typeset)
 
     res = None
     def sg_load(self, srm):
+        self.node.maskPass('load')
         if self.res is not None:
             return
-        self.sgClearOp('load')
 
         res = {}
         res['avColor'] = arrayView('color')
