@@ -81,7 +81,7 @@ class qtHostMixin(object):
     def bindEvent(self, key, fn):
         self.eventRegistry[key] = fn
 
-    def event(self, evt):
+    def _dispatchRegisteredEvent(self, evt):
         et = evt.type(); ek = evt.__class__
         reg = self.eventRegistry
         fns = []
@@ -97,5 +97,9 @@ class qtHostMixin(object):
                 if r: 
                     return r
 
-        return super(qtHostMixin, self).event(evt)
+    def event(self, evt):
+        r = self._dispatchRegisteredEvent(evt)
+        if not r:
+            r = super(qtHostMixin, self).event(evt)
+        return r
 
