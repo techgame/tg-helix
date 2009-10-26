@@ -23,7 +23,7 @@ class qtViewportEventSource(qtEventSourceMixin):
     channelKey = 'viewport'
 
     def bindHost(self, glCanvas, options):
-        glCanvas.dgViewport = self
+        glCanvas.setHelixViewportDelegate(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

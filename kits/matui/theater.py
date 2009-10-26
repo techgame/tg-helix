@@ -84,5 +84,6 @@ class MatuiTheater(HelixTheater, KVObject):
             self.sg_pass('animate', info)
 
         if self.srm.invalidated:
-            return self.sg_render(info)
+            if self.srm.renderContext.animateRender():
+                return self.sg_render(info)
 

@@ -24,12 +24,14 @@ from .timerEvents import wxTimerEventSource, wxIdleEventSource
 class wxTheaterRenderContext(TheaterRenderContext):
     def __init__(self, glCanvas):
         self.glCanvas = glCanvas
-    def getSize(self):
+    def getViewportSize(self):
         return tuple(self.glCanvas.GetClientSize())
     def select(self):
         self.glCanvas.SetCurrent()
-    def swap(self):
+    def renderComplete(self, passKey):
         self.glCanvas.SwapBuffers()
+    def animateRender(self):
+        return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

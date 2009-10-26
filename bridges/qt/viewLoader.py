@@ -22,37 +22,43 @@ from .timerEvents import qtTimerEventSource
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class qtTheaterRenderContext(TheaterRenderContext):
-    def __init__(self, glCanvas):
-        self.glCanvas = glCanvas
-    def getSize(self):
-        s = self.glCanvas.size()
+    def __init__(self, glWidget):
+        self.glWidget = glWidget
+    def getViewportSize(self):
+        s = self.glWidget.size()
         return (s.width(), s.height())
     def select(self):
-        self.glCanvas.makeCurrent()
-    def swap(self):
-        self.glCanvas.swapBuffers()
+        self.glWidget.makeCurrent()
+    def renderComplete(self, passKey):
+        # we don't swap buffers, because QGLWidget will do it for us
+        pass
+    def animateRender(self):
+        # mark the glWidget for redrawing, and return False
+        self.glWidget.update()
+        return False
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class qtHelixTheaterHostViewLoader(object):
     @classmethod
-    def load(klass, glCanvas, options, theater, **kwsetup):
-        renderContext = qtTheaterRenderContext(glCanvas)
+    def load(klass, glHost, options, theater, **kwsetup):
+        glWidget = glHost.getGLWidget()
+        renderContext = qtTheaterRenderContext(glWidget)
         renderContext.select()
 
         theater.setup(renderContext)
 
-        sources = klass.loadEvtSources(glCanvas, options, theater)
+        sources = klass.loadEvtSources(glHost, options, theater)
         return sources
 
     @classmethod
-    def loadEvtSources(self, glCanvas, options, theater):
+    def loadEvtSources(self, glHost, options, theater):
         return [
-            qtViewportEventSource(glCanvas, options, theater),
-            qtMouseEventSource(glCanvas, options, theater),
-            qtKeyboardEventSource(glCanvas, options, theater),
-            qtSystemEventSource(glCanvas, options, theater),
-            qtTimerEventSource(glCanvas, options, theater),
+            qtViewportEventSource(glHost, options, theater),
+            qtMouseEventSource(glHost, options, theater),
+            qtKeyboardEventSource(glHost, options, theater),
+            qtSystemEventSource(glHost, options, theater),
+            qtTimerEventSource(glHost, options, theater),
             ]
 
 TheaterHostViewLoader = qtHelixTheaterHostViewLoader
@@ -62,6 +68,9 @@ TheaterHostViewLoader = qtHelixTheaterHostViewLoader
 class qtHostMixin(object):
     # viewport delegate
     dgViewport = None
+
+    def setHelixViewportDelegate(self, dgViewport):
+        self.dgViewport = dgViewport
     def initializeGL(self):
         return self.dgViewport.initializeGL()
     def resizeGL(self, w, h):

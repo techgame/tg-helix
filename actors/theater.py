@@ -26,12 +26,17 @@ from .sceneGraphPass import SceneGraphPass, SingleSceneGraphPass
 class TheaterRenderContext(object):
     def isRenderContext(self):
         return True
-    def getSize(self):
+    def getViewportSize(self):
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
     def select(self):
+        """Makes gl context current"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
-    def swap(self):
+    def renderComplete(self, passKey):
+        """Called when the render pass is complete.  Handle by swapping buffers in opengl window"""
         raise NotImplementedError('Subclass Responsibility: %r' % (self,))
+    def animateRender(self):
+        """Called when the render manager is marked as invalidated during an animation pass.  Return true to re-render inplace, false to acknowledge"""
+        return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -60,13 +60,13 @@ class SceneRenderManager(DataHostObject):
         rctx = self.renderContext
         rctx.select()
 
-        self.vpsize = rctx.getSize()
+        self.vpsize = rctx.getViewportSize()
 
     def finishPass(self, sgPass, sgPassInfo):
         result = self.result
         if sgPass.passKey in self.swapKeys:
-            self.renderContext.swap()
             self.invalidated = False
+            self.renderContext.renderComplete(sgPass.passKey)
 
         self._popStackPass()
         return result
