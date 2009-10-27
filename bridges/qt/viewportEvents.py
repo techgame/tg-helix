@@ -22,8 +22,8 @@ from .common import QtGui, qtEventSourceMixin
 class qtViewportEventSource(qtEventSourceMixin):
     channelKey = 'viewport'
 
-    def bindHost(self, glCanvas, options):
-        glCanvas.setHelixViewportDelegate(self)
+    def bindHost(self, glHost, options):
+        glHost.setHelixViewportDelegate(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

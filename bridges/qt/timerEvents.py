@@ -22,8 +22,8 @@ from .common import QtCore, qtEventSourceMixin
 class qtTimerEventSource(qtEventSourceMixin):
     channelKey = 'timer'
 
-    def bindHost(self, glCanvas, options):
-        glCanvas.bindEvent(QtCore.QTimerEvent, self.onEvtTimer)
+    def bindHost(self, glHost, options):
+        glHost.bindEvent(QtCore.QTimerEvent, self.onEvtTimer)
         self.frequency = options.get('timerFrequency', 60.)
 
     _frequency = 60
@@ -37,7 +37,7 @@ class qtTimerEventSource(qtEventSourceMixin):
     _timerId = None
     def _stopTimer(self):
         if self._timerId is not None:
-            self.glCanvas.killTimer(self._timerId)
+            self.glHost.killTimer(self._timerId)
             self._timerId = None
             return True
         else:
@@ -45,7 +45,7 @@ class qtTimerEventSource(qtEventSourceMixin):
     def _startTimer(self):
         self._stopTimer()
         msec = int(1000/self.frequency)
-        self._timerId = self.glCanvas.startTimer(msec)
+        self._timerId = self.glHost.startTimer(msec)
         return True
 
     def onEvtTimer(self, evt):

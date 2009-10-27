@@ -26,11 +26,11 @@ class qtKeyboardEventSource(qtEventSourceMixin):
     channelKey = 'key'
     _focusPolicy = QtCore.Qt.ClickFocus
 
-    def bindHost(self, glCanvas, options):
+    def bindHost(self, glHost, options):
         if self._focusPolicy is not None:
-            glCanvas.setFocusPolicy(self._focusPolicy)
+            glHost.setFocusPolicy(self._focusPolicy)
 
-        glCanvas.bindEvent(QtGui.QKeyEvent, self.onEvtKey)
+        glHost.bindEvent(QtGui.QKeyEvent, self.onEvtKey)
 
     def onEvtKey(self, evt):
         etype, ekind = self.qtEtypeMap[evt.type()]

@@ -22,19 +22,19 @@ QCursor = QtGui.QCursor
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class qtEventSourceMixin(EventSource):
-    def __init__(self, glCanvas, options, theater):
-        self.glCanvas = glCanvas
+    def __init__(self, glHost, options, theater):
+        self.glHost = glHost
         self.evtRootSetup(theater.evtRoot)
-        self.bindHost(glCanvas, options)
+        self.bindHost(glHost, options)
 
     def __nonzero__(self):
-        return bool(self.glCanvas)
+        return bool(self.glHost)
 
-    def bindHost(self, glCanvas, options):
+    def bindHost(self, glHost, options):
         pass
 
     def addKeyMouseInfo(self, info, pos=None, evt=None):
-        qthost = self.glCanvas
+        qthost = self.glHost
         if not qthost:
             return None
 

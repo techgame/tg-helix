@@ -10,29 +10,28 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from .common import QtCore, QtGui, QE, qtEventSourceMixin
+from ..qt.common import QtCore, QtGui, QE, qtEventSourceMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class qtMouseEventSource(qtEventSourceMixin):
+class qtGraphicsViewMouseEventSource(qtEventSourceMixin):
     channelKey = 'mouse'
 
-    _mouseTracking = True
     def bindHost(self, glHost, options):
-        if self._mouseTracking is not None:
-            glHost.setMouseTracking(self._mouseTracking)
-        glHost.bindEvent(QtGui.QMouseEvent, self.onEvtMouse)
-        glHost.bindEvent(QtGui.QHoverEvent, self.onEvtHover)
-        glHost.bindEvent(QtGui.QWheelEvent, self.onEvtMouseWheel)
+        scene = glHost.scene()
+        scene.bindEvent(QtGui.QGraphicsSceneMouseEvent, self.onEvtMouse)
+        scene.bindEvent(QtGui.QGraphicsSceneHoverEvent, self.onEvtHover)
+        scene.bindEvent(QtGui.QGraphicsSceneWheelEvent, self.onEvtMouseWheel)
 
     def onEvtMouse(self, evt):
         etype, ekind = self.qtEtypeMap[evt.type()]
 
         info = self.newInfo(etype=etype, ekind=ekind)
 
-        if not self.addKeyMouseInfo(info, (evt.x(), evt.y()), evt):
+        pos = evt.scenePos()
+        if not self.addKeyMouseInfo(info, (pos.x(), pos.y()), evt):
             return False
 
         btn = self.qtButtonMap[evt.button()]
@@ -50,7 +49,8 @@ class qtMouseEventSource(qtEventSourceMixin):
         etype, ekind = self.qtEtypeMap[evt.type()]
         info = self.newInfo(etype=etype, ekind=ekind)
 
-        if not self.addKeyMouseInfo(info, (evt.x(), evt.y()), evt):
+        pos = evt.scenePos()
+        if not self.addKeyMouseInfo(info, (pos.x(), pos.y()), evt):
             return False
 
         info.update(
@@ -71,7 +71,8 @@ class qtMouseEventSource(qtEventSourceMixin):
 
         info = self.newInfo(etype=etype, ekind=ekind)
 
-        if not self.addKeyMouseInfo(info, (evt.pos.x(), evt.pos.y()), evt):
+        pos = evt.scenePos()
+        if not self.addKeyMouseInfo(info, (pos.x(), pos.y()), evt):
             return False
 
         self.evtRoot.send(self.channelKey, info)
@@ -87,12 +88,13 @@ class qtMouseEventSource(qtEventSourceMixin):
 
         if capture != self._captureState:
             self._captureState = capture
-            if capture:
-                self.glHost.grabMouse()
-                self.glHost.grabKeyboard()
-            else: 
-                self.glHost.releaseMouse()
-                self.glHost.releaseKeyboard()
+            if 0: # TODO- Fix this
+                if capture:
+                    self.glHost.grabMouse()
+                    self.glHost.grabKeyboard()
+                else: 
+                    self.glHost.releaseMouse()
+                    self.glHost.releaseKeyboard()
 
             self.onMouseCaptured(capture)
 
@@ -111,15 +113,14 @@ class qtMouseEventSource(qtEventSourceMixin):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     qtEtypeMap = {
-        QE.MouseButtonDblClick: ('button', 'dclick'),
-        QE.MouseButtonPress: ('button', 'down'),
-        QE.MouseButtonRelease: ('button', 'up'),
+        QE.GraphicsSceneMouseDoubleClick: ('button', 'dclick'),
+        QE.GraphicsSceneMousePress: ('button', 'down'),
+        QE.GraphicsSceneMouseRelease: ('button', 'up'),
 
-        QE.MouseMove: ('motion', 'pos'),
-        QE.Wheel: ('motion', 'wheel'),
-        QE.MouseTrackingChange: ('motion', 'tracking'),
+        QE.GraphicsSceneMouseMove: ('motion', 'pos'),
+        QE.GraphicsSceneWheel: ('motion', 'wheel'),
         
-        QE.HoverEnter: ('window', 'enter'),
-        QE.HoverLeave: ('window', 'leave'),
+        QE.GraphicsSceneHoverEnter: ('window', 'enter'),
+        QE.GraphicsSceneHoverLeave: ('window', 'leave'),
     }
 

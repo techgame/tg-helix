@@ -19,9 +19,9 @@ from .common import QtCore, QtGui, QE, qtEventSourceMixin
 class qtSystemEventSource(qtEventSourceMixin):
     channelKey = 'system'
 
-    def bindHost(self, glCanvas, options):
+    def bindHost(self, glHost, options):
         for qtype in self.qtEtypeMap.iterkeys():
-            glCanvas.bindEvent(qtype, self.onEvtActivate)
+            glHost.bindEvent(qtype, self.onEvtActivate)
 
     def onEvtActivate(self, evt):
         etype, ekind, active = self.qtEtypeMap[evt.type()]

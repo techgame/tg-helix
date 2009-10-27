@@ -18,8 +18,62 @@ from . import viewLoader
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class qtHelixMixin(viewLoader.qtHostMixin):
-    TheaterHostViewLoader = viewLoader.TheaterHostViewLoader
+class qtGLDelegateMixin(object):
+    # viewport delegate
+    dgViewport = None
+
+    def setHelixViewportDelegate(self, dgViewport):
+        self.dgViewport = dgViewport
+    def initializeGL(self):
+        return self.dgViewport.initializeGL()
+    def resizeGL(self, w, h):
+        return self.dgViewport.resizeGL(w, h)
+    def paintGL(self):
+        return self.dgViewport.paintGL()
+
+class qtEventDispatchMixin(object):
+    _eventRegistry = None
+    def getEventRegistry(self):
+        reg = self._eventRegistry
+        if reg is None:
+            reg = {}
+            self._eventRegistry = reg
+        return reg
+    eventRegistry = property(getEventRegistry)
+
+    def bindEvent(self, key, fn):
+        self.eventRegistry[key] = fn
+
+    def _dispatchRegisteredEvent(self, evt):
+        et = evt.type(); ek = evt.__class__
+        reg = self.eventRegistry
+        fns = []
+        for key in [(et, ek), et, ek]:
+            fn = reg.get(key)
+            if fn is not None:
+                fns.append(fn)
+
+        if fns:
+            for fn in fns:
+                r = fn(evt)
+                if r: 
+                    return r
+        return False
+
+    def event(self, evt):
+        r0 = self._dispatchRegisteredEvent(evt)
+        r1 = super(qtEventDispatchMixin, self).event(evt)
+        if evt.isAccepted(): 
+            return r1
+        return r0 or False
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Qt Helix Mixin Class
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class qtHelixMixin(qtEventDispatchMixin):
+    TheaterHostViewLoader = None
 
     def __init__(self, helixScene, parent=None):
         app = self.findApp()
@@ -40,7 +94,7 @@ class qtHelixMixin(viewLoader.qtHostMixin):
         return self.findApp().exec_()
 
     def bindScene(self):
-        self.makeCurrent()
+        self.getGLWidget().makeCurrent()
 
         self._glApiReload()
         self.printGLInfo()
@@ -88,15 +142,19 @@ class qtHelixMixin(viewLoader.qtHostMixin):
         fmt.setRgba(True)
         fmt.setStencil(True)
 
-        #fmt.setSwapInterval(0) # vsync disabled
+        fmt.setSwapInterval(0) # vsync disabled
 
         fmt.setAccum(False)
         fmt.setStereo(False)
         return fmt
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Here's the actual combination of QtOpenGL and QGLWidget
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class qtHelixGLWidgetHost(qtHelixMixin, QtOpenGL.QGLWidget):
+class qtHelixGLWidgetHost(qtGLDelegateMixin, qtHelixMixin, QtOpenGL.QGLWidget):
+    TheaterHostViewLoader = viewLoader.TheaterHostViewLoader
+
     def getGLWidget(self):
         return self
 
@@ -104,70 +162,7 @@ class qtHelixGLWidgetHost(qtHelixMixin, QtOpenGL.QGLWidget):
         QtOpenGL.QGLWidget.__init__(self, parent)
         self._createQGLContext(True)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class qtHelixQGraphicsScene(QtGui.QGraphicsScene):
-    def drawBackground(self, painter, rect):
-        pe = painter.paintEngine()
-        assert pe.type() == pe.OpenGL, "Must use an OpenGL paint engine"
-
-        if 1:
-            from TG.ext.openGL.raw import gl
-            gl.glMatrixMode(gl.GL_MODELVIEW)
-            gl.glPushMatrix()
-            gl.glMatrixMode(gl.GL_PROJECTION)
-            gl.glPushMatrix()
-            gl.glPushAttrib(gl.GL_ALL_ATTRIB_BITS)
-
-        self.paintGL()
-
-        if 1:
-            gl.glPopAttrib()
-            gl.glMatrixMode(gl.GL_PROJECTION)
-            gl.glPopMatrix()
-            gl.glMatrixMode(gl.GL_MODELVIEW)
-            gl.glPopMatrix()
-
-    def setHelixViewportDelegate(self, dgViewport):
-        self.dgViewport = dgViewport
-    def initializeGL(self):
-        return self.dgViewport.initializeGL()
-    def resizeGL(self, w, h):
-        return self.dgViewport.resizeGL(w, h)
-    def paintGL(self):
-        return self.dgViewport.paintGL()
-
-class qtHelixQGraphicsViewHost(qtHelixMixin, QtGui.QGraphicsView):
-    QGraphicsSceneFactory = qtHelixQGraphicsScene
-
-    def getGLWidget(self):
-        return self._glWidget
-    def makeCurrent(self):
-        return self._glWidget.makeCurrent()
-
-    def _initQTWidget(self, parent=None):
-        QtGui.QGraphicsView.__init__(self, parent)
-        self._glWidget = QtOpenGL.QGLWidget()
-        self._createQGLContext(True, self._glWidget)
-        self.setViewport(self._glWidget)
-        self.setViewportUpdateMode(self.FullViewportUpdate)
-        self.setScene(self.QGraphicsSceneFactory())
-
-    def setHelixViewportDelegate(self, dgViewport):
-        self.scene().setHelixViewportDelegate(dgViewport)
-
-    def resizeEvent(self, evt):
-        if self.scene():
-            r = QtCore.QRect(QtCore.QPoint(0, 0), evt.size())
-            r = QtCore.QRectF(r)
-            self.scene().setSceneRect(r)
-
-            self.makeCurrent()
-            self.scene().resizeGL(r.width(), r.height())
-
-        return QtGui.QGraphicsView.resizeEvent(self, evt)
-
-qtHelixHost = qtHelixQGraphicsViewHost
-#qtHelixHost = qtHelixGLWidgetHost
+qtHelixHost = qtHelixGLWidgetHost
 HelixHost = qtHelixHost
 

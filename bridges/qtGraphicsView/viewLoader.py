@@ -12,17 +12,17 @@
 
 from TG.helix.actors.theater import TheaterRenderContext
 
-from .viewportEvents import qtViewportEventSource
-from .keyboardEvents import qtKeyboardEventSource
-from .mouseEvents import qtMouseEventSource
-from .systemEvents import qtSystemEventSource
-from .timerEvents import qtTimerEventSource
+from ..qt.viewportEvents import qtViewportEventSource
+from ..qt.keyboardEvents import qtKeyboardEventSource
+from ..qt.systemEvents import qtSystemEventSource
+from ..qt.timerEvents import qtTimerEventSource
+from .mouseEvents import qtGraphicsViewMouseEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class qtGLWidgetRenderContext(TheaterRenderContext):
+class qtGLGraphicsViewRenderContext(TheaterRenderContext):
     def __init__(self, glHost):
         glWidget = glHost.getGLWidget()
         self.glWidget = glWidget
@@ -33,22 +33,21 @@ class qtGLWidgetRenderContext(TheaterRenderContext):
         self.glWidget.makeCurrent()
     def renderComplete(self, passKey):
         # we don't swap buffers, because QGLWidget will do it for us
-        self.glWidget.swapBuffers()
+        pass
     def animateRender(self):
         # mark the glWidget for redrawing, and return False
-        return True
+        self.glWidget.update()
+        return False
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Qt QGLWidget Helix Loader
+#~ Qt GraphicsView Helix Loader
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class qtHelixTheaterQGLWidgetLoader(object):
-    RenderContext = qtGLWidgetRenderContext
+    RenderContext = qtGLGraphicsViewRenderContext
 
     @classmethod
     def load(klass, glHost, options, theater, **kwsetup):
-        glHost.setAutoBufferSwap(False)
-
         renderContext = klass.RenderContext(glHost)
         renderContext.select()
 
@@ -63,7 +62,7 @@ class qtHelixTheaterQGLWidgetLoader(object):
             qtViewportEventSource(glHost, options, theater),
             qtSystemEventSource(glHost, options, theater),
             qtTimerEventSource(glHost, options, theater), 
-            qtMouseEventSource(glHost, options, theater),
+            qtGraphicsViewMouseEventSource(glHost, options, theater),
             qtKeyboardEventSource(glHost, options, theater), ]
 
 TheaterHostViewLoader = qtHelixTheaterQGLWidgetLoader
