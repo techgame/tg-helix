@@ -25,6 +25,7 @@ from .mouseEvents import qtGraphicsViewMouseEventSource
 class qtGLGraphicsViewRenderContext(TheaterRenderContext):
     def __init__(self, glHost):
         glWidget = glHost.getGLWidget()
+        self.qtScene = glHost.scene()
         self.glWidget = glWidget
     def getViewportSize(self):
         s = self.glWidget.size()
