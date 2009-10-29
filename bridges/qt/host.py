@@ -11,6 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import sys, os
+import warnings
 from .libqt import QtCore, QtGui, QtOpenGL
 from . import viewLoader
 
@@ -126,7 +127,8 @@ class qtHelixMixin(qtEventDispatchMixin):
         fmt = self._describeQTFormat()
         ctx = QtOpenGL.QGLContext(fmt, glWidget)
         if not ctx.create():
-            raise RuntimeError("Could not create a valid Qt OpenGL Context")
+            warnings.warn("Unable to create requested OpenGL context.  Proceeding with default")
+            return None
 
         if setDefault:
             # get the closest matching format
