@@ -19,7 +19,11 @@ from ..qt.common import QtCore, QtGui, QE, qtEventSourceMixin
 class qtGraphicsViewMouseEventSource(qtEventSourceMixin):
     channelKey = 'mouse'
 
+    _mouseTracking = True
     def bindHost(self, glHost, options):
+        if self._mouseTracking is not None:
+            glHost.setMouseTracking(self._mouseTracking)
+
         scene = glHost.scene()
         scene.bindEvent(QtGui.QGraphicsSceneMouseEvent, self.onEvtMouse)
         scene.bindEvent(QtGui.QGraphicsSceneHoverEvent, self.onEvtHover)

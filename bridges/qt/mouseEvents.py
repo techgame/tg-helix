@@ -23,6 +23,7 @@ class qtMouseEventSource(qtEventSourceMixin):
     def bindHost(self, glHost, options):
         if self._mouseTracking is not None:
             glHost.setMouseTracking(self._mouseTracking)
+
         glHost.bindEvent(QtGui.QMouseEvent, self.onEvtMouse)
         glHost.bindEvent(QtGui.QHoverEvent, self.onEvtHover)
         glHost.bindEvent(QtGui.QWheelEvent, self.onEvtMouseWheel)
