@@ -76,7 +76,7 @@ class MatuiCell(HelixObject, LayoutCell):
     def debug(self, fn=None, **kw):
         if fn is None:
             def dbgPrintLayout(cell, box):
-                print sorted(kw.items()), box
+                print '%r box:%r size: %r' % (sorted(kw.items()), box.tolist(), box.size)
             fn = dbgPrintLayout
         return self.oset.on(fn)
 
@@ -199,6 +199,12 @@ class MatuiCell(HelixObject, LayoutCell):
         if host is not None:
             return host.node
     node = property(getNode)
+
+    def getBox(self):
+        host = self.hostRef()
+        if host is not None:
+            return host.box
+    box = property(getBox)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
