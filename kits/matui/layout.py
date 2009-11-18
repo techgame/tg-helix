@@ -45,6 +45,7 @@ class MatuiLayout(HelixObject, KVObject):
     alg = KVProperty(None)
     collection = KVProperty(KVList)
     box = KVBox.property()
+    oset = OBSet.property()
 
     def __init__(self, kind='abs', node=None, cell=None):
         self.setKind(kind)
@@ -97,11 +98,20 @@ class MatuiLayout(HelixObject, KVObject):
             box.pv = lbox.pv[..., :box.shape[-1]]
 
         self.alg(self.viewCollection, box)
+        self.oset.call_n3(self, 'layout', box)
 
     def fit(self, at=None):
         box = self.alg.fit(self.viewCollection)
+        self.oset.call_n3(self, 'fit', box)
         self.box.setSize(box.size, at=at)
         return box
+
+    def debug(self, fn=None, **kw):
+        if fn is None:
+            def dbgPrintLayout(layout, op, box):
+                print '%r op: %r box:%r size: %r' % (sorted(kw.items()), op, box.tolist(), box.size)
+            fn = dbgPrintLayout
+        return self.oset.on(fn)
 
     _viewCollection = None
     def getViewCollection(self):
