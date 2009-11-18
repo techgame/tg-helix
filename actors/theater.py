@@ -77,7 +77,11 @@ class HelixTheater(base.HelixObject):
         self.sgAddPasses(self._sgPassTypes_)
         self.sgPassConfig(self._sgPassTriggers_)
         self.setupEvtSources()
+        self.setupTheater(renderContext)
         return True
+
+    def setupTheater(self, renderContext):
+        pass
 
     def sgAddPasses(self, sgPassTypes):
         self.sgPassEvents = self._fm_.SGPassEvents()

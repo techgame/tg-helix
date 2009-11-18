@@ -100,6 +100,11 @@ class qtHelixMixin(qtEventDispatchMixin):
         self._glApiReload()
         self.printGLInfo()
 
+        self.setHelixScene(self.helixScene)
+
+    def setHelixScene(self, helixScene):
+        self.getGLWidget().makeCurrent()
+        self.helixScene = helixScene
         if self.helixScene is not None:
             self.TheaterHostViewLoader.load(self, {}, self.helixScene)
 
