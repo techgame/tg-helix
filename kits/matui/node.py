@@ -52,6 +52,8 @@ class MatuiNode(HelixNode):
             and (self.sgPassChannels.get(passKey)))
 
     def sgPassBind(self, ct):
+        if not self.isEnabled():
+            return
         passKey = ct.passKey
         if passKey not in self.sgPassMask:
             self.sgPassChannels.call_n2(passKey, self, ct)
