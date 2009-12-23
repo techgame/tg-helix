@@ -58,9 +58,13 @@ class qtKeyboardEventSource(qtEventSourceMixin):
             if not (info.modifiers & self.qtCharSetFilter):
                 self.evtRoot.send(self.channelKey, info)
 
+        if info.get('handled', False):
+            evt.accept()
+
         if not info.get('skip', False):
             evt.accept()
-            return True
+
+        return evt.isAccepted()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

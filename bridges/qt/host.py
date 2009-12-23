@@ -57,16 +57,24 @@ class qtEventDispatchMixin(object):
         if fns:
             for fn in fns:
                 r = fn(evt)
-                if r: 
+                if r or evt.isAccepted(): 
                     return r
         return False
 
     def event(self, evt):
-        r0 = self._dispatchRegisteredEvent(evt)
+        wasAccepted = evt.isAccepted()
+
+        evt.ignore()
         r1 = super(qtEventDispatchMixin, self).event(evt)
         if evt.isAccepted(): 
             return r1
-        return r0 or False
+
+        r0 = self._dispatchRegisteredEvent(evt)
+        if evt.isAccepted(): 
+            return r0
+
+        evt.setAccepted(wasAccepted)
+        return r1
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
