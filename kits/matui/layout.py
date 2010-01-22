@@ -18,6 +18,7 @@ from TG.geomath import layouts
 
 from TG.helix.actors.base import HelixObject
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Layout Object
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -153,6 +154,12 @@ class MatuiLayout(HelixObject, KVObject):
         itemCell = item.cell
         self.collection.append(itemCell)
         return itemCell
+
+    def addSpacer(self, size=None, weight=None):
+        cell = self._fm_.SpacerCell(size, weight)
+        self.collection.append(cell)
+        return cell
+
 
     def remove(self, item, **kw):
         node = kw.pop('node', self._node)

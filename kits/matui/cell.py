@@ -14,6 +14,7 @@ from __future__ import with_statement
 from numpy import asarray
 from TG.metaObserving import OBSet, OBFactoryMap
 
+from TG.geomath.data.box import Box
 from TG.geomath.data.vector import Vector
 from TG.geomath.layouts import LayoutCell
 
@@ -207,7 +208,44 @@ class MatuiCell(HelixObject, LayoutCell):
     box = property(getBox)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Spacer Cell 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
 
-MatuiLayout._fm_.update(Cell = MatuiCell)
+class SpacerCell(HelixObject, LayoutCell):
+    weight = Vector.property([0,0], 'f')
+    minSize = Vector.property([0,0], 'f')
+
+    box = Box.property(dtype='i')
+
+    def __init__(self, size=None, weight=None):
+        if size or weight:
+            self.init(size, weight)
+
+    def init(self, size=None, weight=None):
+        if size is None: 
+            if weight is None:
+                raise ValueError("Must specify weight or size, both are currently None")
+        elif isinstance(size, (int, long, float)):
+            size = (size, size)
+
+        if isinstance(weight, (int, long, float)):
+            weight = (weight, weight)
+        
+        if size is not None:
+            self.minSize[:] = size
+            self.box.size[:] = size
+
+        if weight is not None:
+            self.weight[:] = weight 
+
+        
+    def layoutInBox(self, lbox):
+        """Called with a Box instance or None when the cell has been placed"""
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+MatuiLayout._fm_.update(Cell = MatuiCell, SpacerCell = SpacerCell)
 MatuiCell._fm_.update(Layout = MatuiLayout)
+
+
 
