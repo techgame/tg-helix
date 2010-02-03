@@ -19,14 +19,19 @@ from . import viewLoader
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+paintEngines = [QtGui.QPaintEngine.OpenGL, QtGui.QPaintEngine.OpenGL2]
+
 class qtHelixQGraphicsScene(qtEventDispatchMixin, QtGui.QGraphicsScene):
+    _paintEngines = paintEngines
     def drawBackground(self, painter, rect):
         pe = painter.paintEngine()
-        assert pe.type() == pe.OpenGL, "Must use an OpenGL paint engine"
+        assert pe.type() in self._paintEngines, "Must use an OpenGL paint engine"
 
+        painter.beginNativePainting()
         self._glKeepState(True)
         self.paintGL()
         self._glKeepState(False)
+        painter.endNativePainting()
 
     def _glKeepState(self, push):
         gl = self.gl

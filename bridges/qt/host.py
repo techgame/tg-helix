@@ -149,6 +149,30 @@ class qtHelixMixin(qtEventDispatchMixin):
             QtOpenGL.QGLFormat.setDefaultFormat(fmt)
         return ctx
 
+    def _printQTFormat(self, fmt, label):
+
+        capabilities = ['accum', 'alpha', 'depth','rgba', 'stencil', 'stereo']
+        buffers = ['redBufferSize', 'greenBufferSize', 'blueBufferSize', 'alphaBufferSize', 'accumBufferSize', 'stencilBufferSize', ]
+        misc = ['defaultFormat', 'defaultOverlayFormat', 
+            'depthBufferSize', 'directRendering', 'doubleBuffer',
+            'hasOpenGL', 'hasOpenGLOverlays', 'hasOverlay',
+            'openGLVersionFlags', 'plane', 
+            'sampleBuffers', 'samples', 
+            'swapInterval']
+
+        def dump(attrs):
+            for attr in attrs:
+                fn = getattr(fmt, attr)
+                print "  %s: %r"  % (attr, fn())
+            print
+
+        print label, "capabilities:"
+        dump(capabilities)
+        print label, "buffers:"
+        dump(buffers)
+        print label, "misc:"
+        dump(misc)
+
     def _describeQTFormat(self):
         fmt = QtOpenGL.QGLFormat()
         fmt.setAlpha(True)
