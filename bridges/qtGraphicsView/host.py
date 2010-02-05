@@ -71,6 +71,7 @@ class qtHelixQGraphicsViewHost(qtHelixMixin, QtGui.QGraphicsView):
 
     def _initQTWidget(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
+        self.setFrameStyle(0)
         self._glWidget = QtOpenGL.QGLWidget()
         self._createQGLContext(True, self._glWidget)
         self.setViewport(self._glWidget)
