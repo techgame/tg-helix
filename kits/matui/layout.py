@@ -93,12 +93,14 @@ class MatuiLayout(HelixObject, KVObject):
     def watchHostBox(self, host):
         host.kvo('box.*', lambda host, lbox: self.layout(lbox))
 
+    passCount = 1
     def layout(self, lbox=None):
         box = self.box
         if lbox is not None:
             box.pv = lbox.pv[..., :box.shape[-1]]
 
-        self.alg(self.viewCollection, box)
+        for n in xrange(self.passCount):
+            self.alg(self.viewCollection, box)
         self.oset.call_n3(self, 'layout', box)
 
     def fit(self, at=None):
