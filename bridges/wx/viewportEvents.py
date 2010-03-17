@@ -11,8 +11,6 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import sys
-import traceback
-
 from .common import wx, wxEventSourceMixin
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,7 +73,7 @@ class wxViewportEventSource(wxEventSourceMixin):
             self.exitOnError(err)
 
     def exitOnError(self, err):
-        traceback.print_exc()
+        sys.excepthook(*sys.exc_info())
         wx.GetApp().Exit()
         sys.exit(-1)
 

@@ -11,7 +11,6 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import sys
-import traceback
 
 from .common import QtGui, qtEventSourceMixin
 
