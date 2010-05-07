@@ -76,6 +76,17 @@ class qtEventDispatchMixin(object):
         evt.setAccepted(wasAccepted)
         return r1
 
+def qtQuitExceptHook(etype, evalue, etb, nextHook=sys.excepthook):
+    if  KeyboardInterrupt == etype:
+        print etype, evalue
+        print 'Quitting Qt application'
+        QtGui.qApp.closeAllWindows()
+        QtGui.qApp.exit()
+        return
+    else:
+        return nextHook(etype, evalue, etb)
+
+sys.excepthook = qtQuitExceptHook
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Qt Helix Mixin Class
