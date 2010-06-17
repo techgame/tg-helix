@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import os, sys
+import os, sys, glob
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Packages for Production Loading
@@ -52,6 +52,13 @@ class Package(module):
     def addSite(self, path):
         path = os.path.abspath(path)
         self.__path__.append(path)
+        self.addBundledPackages(self.__path__, path)
+
+    def addBundledPackages(self, pathList, root=None, pattern='*.zip'):
+        """Make subpackages availble through __path__"""
+        if root is None: root = pathList[0]
+        p = os.path.join(root, pattern)
+        pathList.extend(glob.glob(p))
 
     def siteImport(self, name, fromList=['__name__'], level=1):
         return __import__(name, self.__dict__, {}, fromList, level)
