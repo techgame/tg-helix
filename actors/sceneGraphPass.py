@@ -10,27 +10,17 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from functools import partial
 from TG.geomath.data import DataHostObject, OBFactoryMap
-from TG.geomath.alg.compiledGraphPass import CompiledGraphPass, CompileStack
+from TG.geomath.alg.compiledGraphPass import CompiledGraphPass, CompileCallStack
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Scene managers
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class SceneGraphCallTree(CompileStack):
-    def __init__(self, root, passKey):
-        self.root = root
+class SceneGraphCallTree(CompileCallStack):
+    def __init__(self, passKey, root):
         self.passKey = passKey
-
-    def addFn(self, fn, *args):
-        if args:
-            fn = partial(fn, *args)
-        self.add(fn)
-    def addUnwindFn(self, fn, *args):
-        if args:
-            fn = partial(fn, *args)
-        self.addUnwind(fn)
+        self.root = root
 
 class DebugSceneGraphCallTree(SceneGraphCallTree):
     _pop_next = SceneGraphCallTree._pop_
@@ -64,7 +54,7 @@ class SceneGraphNodePass(CompiledGraphPass, DataHostObject):
         )
 
     def newCompileStack(self, passKey, root):
-        return self._fm_.SGCallTree(root, passKey)
+        return self._fm_.SGCallTree(passKey, root)
 
     def _getCached(self, key, root):
         return root.sg_passCache.get(key, None)
@@ -103,8 +93,8 @@ class SceneGraphPass(SceneGraphNodePass):
 
     def newCompileStack(self, passKey, root):
         if passKey in self.debugCallTrees:
-            return self._fm_.SGDebugCallTree(root, passKey)
-        return self._fm_.SGCallTree(root, passKey)
+            return self._fm_.SGDebugCallTree(passKey, root)
+        return self._fm_.SGCallTree(passKey, root)
 
     def performPass(self, sgPassInfo, passKey=None):
         if passKey is None:
