@@ -37,3 +37,6 @@ class wxStudioHost(StudioHostBase):
         app = wx.GetApp()
         app.Exit()
 
+    def closeAll(self):
+        pass
+

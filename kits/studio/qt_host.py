@@ -42,5 +42,11 @@ class qtStudioHost(StudioHostBase, QtCore.QObject):
         QtGui.qApp.exec_()
 
     def exit(self):
+        self.closeAll()
         QtGui.qApp.exit()
+
+    def closeAll(self):
+        qApp = QtGui.qApp
+        qApp.closeAllWindows()
+        qApp.processEvents()
 
