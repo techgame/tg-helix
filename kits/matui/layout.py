@@ -57,6 +57,15 @@ class MatuiLayout(HelixObject, KVObject):
 
     def isLayout(self): return True
 
+    def newLayout(self, kind='abs', node=True, cell=True):
+        if node is True: node = self.node
+        return self.__class__(kind, node, cell)
+    new = newLayout
+    def addNewLayout(self, kind='abs', node=True, cell=True):
+        layout = self.newLayout(kind, node, cell)
+        self.add(layout)
+        return layout
+
     _kind = None
     def getKind(self):
         return self._kind
