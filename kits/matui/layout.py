@@ -77,6 +77,14 @@ class MatuiLayout(HelixObject, KVObject):
         self.alg = factory()
     kind = property(getKind, setKind)
 
+    def getInside(self): return self.alg.inside
+    def setInside(self, inside): self.alg.inside = inside
+    inside = property(getInside, setInside)
+
+    def getOutside(self): return self.alg.outside
+    def setOutside(self, outside): self.alg.outside = outside
+    outside = property(getOutside, setOutside)
+
     _node = None
     def getNode(self):
         return self._node
