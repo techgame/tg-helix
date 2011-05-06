@@ -32,7 +32,17 @@ class MatuiCell(HelixObject, LayoutCell):
     hostRef = None
 
     weight = Vector.property([0,0], 'f')
-    minSize = Vector.property([0,0], 'f')
+
+    useBoxSize = True
+    _minSize = Vector.property([0,0], 'f')
+    def getMinSize(self):
+        if self.useBoxSize and not self.weight.any():
+            return self.box.size
+        else: return self._minSize
+    def setMinSize(self, minSize):
+        self._minSize = minSize
+        self.useBoxSize = False
+    minSize = property(getMinSize, setMinSize)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
