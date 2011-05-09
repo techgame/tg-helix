@@ -11,7 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from __future__ import with_statement
-from numpy import asarray
+from numpy import asarray, maximum
 from TG.metaObserving import OBSet, OBFactoryMap
 
 from TG.geomath.data.box import Box
@@ -33,16 +33,22 @@ class MatuiCell(HelixObject, LayoutCell):
 
     weight = Vector.property([0,0], 'f')
 
-    useBoxSize = True
     _minSize = Vector.property([0,0], 'f')
     def getMinSize(self):
-        if self.useBoxSize and not self.weight.any():
-            return self.box.size
-        else: return self._minSize
+        ab = self.autoBoxSize & (self.weight == 0)
+        if ab.any():
+            size = ab * self.box.size
+        else: size = 0
+        return maximum(self._minSize, size)
     def setMinSize(self, minSize):
         self._minSize = minSize
-        self.useBoxSize = False
+        self.autoBoxSize[:] = False
     minSize = property(getMinSize, setMinSize)
+
+    autoBoxSize = Vector.property([False, False], 'b')
+    def autoMinsize(self, width, height):
+        self.autoBoxSize = bool(width), bool(height)
+        return self
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
