@@ -139,9 +139,11 @@ class MatuiLayout(HelixObject, KVObject):
             return self.collection
         return self._viewCollection
     def setViewCollection(self, viewCollection):
+        if viewCollection is self.collection:
+            viewCollection = None
         self._viewCollection = viewCollection
     def delViewCollection(self):
-        del self._viewCollection
+        self._viewCollection = None
     viewCollection = property(getViewCollection, setViewCollection, delViewCollection)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
