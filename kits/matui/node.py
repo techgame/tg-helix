@@ -161,8 +161,6 @@ class MatuiNode(HelixNode):
                 else:
                     del self.actor_ref
                     self.clear()
-            else:
-                self.clear()
 
         return r
 
