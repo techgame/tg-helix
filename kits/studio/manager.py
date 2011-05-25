@@ -73,6 +73,17 @@ class StudioManager(BaseManager):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def hasProduction(self, key):
+        if key in self.productions:
+            return True
+
+        try:
+            prodModule = self.package.siteImport(key)
+        except ImportError:
+            prodModule = None
+
+        return prodModule is not None
+
     def getProduction(self, key, orLoad=True):
         try:
             production = self.productions[key]
