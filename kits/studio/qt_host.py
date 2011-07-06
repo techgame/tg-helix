@@ -12,13 +12,14 @@
 
 import sys
 from TG.helix.bridges.qt.libqt import QtCore, QtGui
+from TG.helix.bridges.qt.callAfterEvent import QtCallAfterApi
 from .host import StudioHostBase
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class qtStudioHost(StudioHostBase, QtCore.QObject):
+class qtStudioHost(StudioHostBase, QtCallAfterApi, QtCore.QObject):
     def __init__(self, mgr, appInfo):
         QtCore.QObject.__init__(self)
         StudioHostBase.__init__(self, mgr, appInfo)
