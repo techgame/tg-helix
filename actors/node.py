@@ -49,7 +49,7 @@ class HelixNode(GraphNode, HelixObject):
     #~ Scene graph management: passes and invalidation
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def sgPassBind(self, ct):
+    def sgPassBind(self, ctree):
         pass
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

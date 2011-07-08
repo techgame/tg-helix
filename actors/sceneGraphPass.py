@@ -63,16 +63,16 @@ class SceneGraphNodePass(CompiledGraphPass, DataHostObject):
             root.sg_passCache[key] = []
         else: root.sg_passCache[key] = result
 
-    def compileNodeTo(self, cnode, ct):
+    def compileNodeTo(self, op, cnode, ctree):
         cache = cnode.sg_passCache
-        if cache is None or cnode is ct.root:
+        if cache is None or cnode is ctree.root:
             # compile the node to this pass
-            return cnode.sgPassBind(ct)
+            return cnode.sgPassBind(ctree)
 
         # add a method to call the pre-cached subpass
-        if cache.get(ct.passKey, True):
-            ct.addFn(self.sg_pass, ct.passKey, cnode)
-        ct.cull()
+        if cache.get(ctree.passKey, True):
+            ctree.addFn(self.sg_pass, ctree.passKey, cnode)
+        ctree.cull()
 
     def sg_pass(self, passKey, root, srm):
         passList = self.compile(passKey, root)
