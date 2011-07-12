@@ -41,15 +41,24 @@ class qtCallAfterEvent(QtCore.QEvent):
             sys.excepthook(*sys.exc_info())
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class QtCallAfterApi(object):
+class QtCallAfterTarget(QtCore.QObject):
     def customEvent(self, evt):
         evt.perform()
 
+class QtCallAfterApi(object):
     def callAfter(self, fn, *args, **kw):
         self.callAfterEx(fn, args, kw)
     def callAfterEx(self, fn, args=None, kw=None):
         evt = qtCallAfterEvent()
         evt.bindEx(fn, args, kw)
-        QtGui.qApp.postEvent(self, evt)
+        QtGui.qApp.postEvent(self.callAfterTarget, evt)
+
+    _callAfterTarget = None
+    def getCallAfterTarget(self):
+        r = self._callAfterTarget
+        if r is None:
+            r = QtCallAfterTarget()
+            self._callAfterTarget = r
+        return r
+    callAfterTarget = property(getCallAfterTarget)
 
