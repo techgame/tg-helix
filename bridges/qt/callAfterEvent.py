@@ -21,6 +21,9 @@ from .libqt import QtCore, QtGui
 
 class qtCallAfterEvent(QtCore.QEvent):
     typeId = QtCore.QEvent.registerEventType()
+    if hasattr(QtCore.QEvent, 'Type'):
+        typeId = QtCore.QEvent.Type(typeId)
+
     def __init__(self):
         QtCore.QEvent.__init__(self, self.typeId)
     fn = None

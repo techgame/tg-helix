@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+PySide = PyQt4 = None
 qt_host_impl = None
 if qt_host_impl is None:
     # try for PySide implementation

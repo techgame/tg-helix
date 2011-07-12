@@ -12,7 +12,7 @@
 
 import sys, os
 import warnings
-from .libqt import QtCore, QtGui, QtOpenGL
+from .libqt import QtCore, QtGui, QtOpenGL, PySide, PyQt4
 from . import viewLoader
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -149,7 +149,8 @@ class qtHelixMixin(qtEventDispatchMixin):
         if glWidget is None:
             glWidget = self.getGLWidget()
         fmt = self._describeQTFormat()
-        ctx = QtOpenGL.QGLContext(fmt, glWidget)
+        if PySide: ctx = QtOpenGL.QGLContext(fmt)
+        elif PyQt4: ctx = QtOpenGL.QGLContext(fmt, glWidget)
         if not ctx.create():
             warnings.warn("Unable to create requested OpenGL context.  Proceeding with default")
             return None
