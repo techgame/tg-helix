@@ -176,9 +176,15 @@ class MatuiLayout(HelixObject, KVObject):
         self.collection.append(itemCell)
         return itemCell
 
-    def addSpacer(self, size=None, weight=None):
-        cell = self._fm_.SpacerCell(size, weight)
+    def addSpacer(self, size=None, weight=None, spacer=None):
+        if spacer:
+            cell = spacer
+        else: 
+            cell = self.newSpacer(size, weight)
         self.collection.append(cell)
+        return cell
+    def newSpacer(self, size=None, weight=None):
+        cell = self._fm_.SpacerCell(size, weight)
         return cell
 
 

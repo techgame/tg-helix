@@ -240,7 +240,7 @@ class SpacerCell(HelixObject, LayoutCell):
     box = Box.property(dtype='i')
 
     def __init__(self, size=None, weight=None):
-        if size or weight:
+        if size is not None or weight is not None:
             self.init(size, weight)
 
     def init(self, size=None, weight=None):
@@ -260,6 +260,10 @@ class SpacerCell(HelixObject, LayoutCell):
         if weight is not None:
             self.weight[:] = weight 
 
+    def isLayout(self): return False
+    def _sgGetNode_(self, create=False): return None
+
+    cell = property(lambda self: self)
         
     def layoutInBox(self, lbox):
         """Called with a Box instance or None when the cell has been placed"""
