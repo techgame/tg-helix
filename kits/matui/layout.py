@@ -187,6 +187,18 @@ class MatuiLayout(HelixObject, KVObject):
         cell = self._fm_.SpacerCell(size, weight)
         return cell
 
+    def replace(self, idx, item, **kw):
+        if item is None:
+            self.collection[idx] = item
+            return
+        itemCell = item.cell
+        if itemCell is None:
+            raise ValueError("Item.cell is None!")
+        if kw:
+            for k,v in kw.iteritems():
+                setattr(itemCell, k, v)
+        self.collection[idx] = itemCell
+        return itemCell
 
     def remove(self, item, **kw):
         node = kw.pop('node', self._node)
