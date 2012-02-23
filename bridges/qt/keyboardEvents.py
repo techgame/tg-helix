@@ -33,7 +33,6 @@ class qtKeyboardEventSource(qtEventSourceMixin):
         glHost.bindEvent(QtGui.QKeyEvent, self.onEvtKey)
 
     def onEvtKey(self, evt):
-        print "I have a key evt", evt
         etype, ekind = self.qtEtypeMap[evt.type()]
         if ekind is None:
             return
