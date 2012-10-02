@@ -8,8 +8,21 @@
 ##~ found in the LICENSE file included with this distribution.    ##
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
+import sys
 import Cocoa
 from . import viewLoader
+
+class EventEmitter(object):
+    def __init__(self):
+        self._map = {}
+    def bind(self, key, fn):
+        self._map[key] = fn
+    def emit(self, key, *args):
+        fn = self._map.get(key)
+        if fn is not None:
+            try: fn(*args)
+            except Exception:
+                sys.excepthook(*sys.exc_info())
 
 class CocoaHelixGLView(Cocoa.NSOpenGLView):
     pixelFormatAttributes = [
@@ -18,16 +31,62 @@ class CocoaHelixGLView(Cocoa.NSOpenGLView):
         Cocoa.NSOpenGLPFADepthSize, 24, Cocoa.NSOpenGLPFAStencilSize, 8]
 
     def initWithFrame_(self, frameRect):
+        self.events = EventEmitter()
         return Cocoa.NSOpenGLView.initWithFrame_pixelFormat_(self, frameRect,
             Cocoa.NSOpenGLPixelFormat.alloc().initWithAttributes_(self.pixelFormatAttributes))
     
-    if 0:
-        def drawRect_(self, ((x, y), (w, h))):
-            print 'drawRect', [x,y,w,h]
-        def prepareOpenGL(self):
-            print 'prepareOpenGL'
-        def reshape(self):
-            print 'reshape'
+    _drawLocked = False
+    def invalidateGLView(self):
+        if not self._drawLocked:
+            self.setNeedsDisplay_(True)
+        
+    def drawRect_(self, rect):
+        self._drawLocked = True
+        self.events.emit('paint', rect)
+        self._drawLocked = False
+    def prepareOpenGL(self):
+        self.events.emit('prepareOpenGL')
+    def reshape(self):
+        self.events.emit('reshape')
+
+    def acceptsFirstResponder(self): return True
+
+    def mouseEntered_(self, evt):
+        self.events.emit('mouse', evt, 'window', 'enter')
+    def mouseExited_(self, evt):
+        self.events.emit('mouse', evt, 'window', 'leave')
+
+    def mouseMoved_(self, evt):
+        self.events.emit('mouse', evt, 'motion', 'pos')
+    def mouseDragged_(self, evt):
+        self.events.emit('mouse', evt, 'motion', 'pos')
+    def rightMouseDragged_(self, evt):
+        self.events.emit('mouse', evt, 'motion', 'pos')
+    def otherMouseDragged_(self, evt):
+        self.events.emit('mouse', evt, 'motion', 'pos')
+    def scrollWheel_(self, evt):
+        self.events.emit('mouse', evt, 'motion', 'wheel')
+
+    def mouseDown_(self, evt):
+        self.events.emit('mouse', evt, 'button', 'down', 'left')
+    def mouseUp_(self, evt):
+        self.events.emit('mouse', evt, 'button', 'up', 'left')
+
+    def rightMouseDown_(self, evt):
+        self.events.emit('mouse', evt, 'button', 'down', 'right')
+    def rightMouseUp_(self, evt):
+        self.events.emit('mouse', evt, 'button', 'up', 'right')
+
+    def otherMouseDown_(self, evt):
+        self.events.emit('mouse', evt, 'button', 'down', 'middle')
+    def otherMouseUp_(self, evt):
+        self.events.emit('mouse', evt, 'button', 'up', 'middle')
+
+    def keyDown_(self, evt):
+        self.events.emit('key', evt, 'key', 'down')
+    def keyUp_(self, evt):
+        self.events.emit('key', evt, 'key', 'up')
+
 
 class CocoaHelixGLWindow(Cocoa.NSWindow):
     def initEx_(self, opt={}):
@@ -36,20 +95,18 @@ class CocoaHelixGLWindow(Cocoa.NSWindow):
         self = self.initWithContentRect_styleMask_backing_defer_(
                 frameRect, flags, Cocoa.NSBackingStoreBuffered, False)
         self.setTitle_(opt.pop('title', 'Helix'))
+        self.setReleasedWhenClosed_(True)
 
         glview = opt.pop('GLView', CocoaHelixGLView).alloc()
         self.glview = glview = glview.initWithFrame_(frameRect)
         self.setContentView_(self.glview)
         return self
+    def isRestorable(self):
+        return False
 
 class CocoaHelixHost(object):
     def __init__(self, theater, options=None):
         self.theater = theater
-
-        r = {}
-        if options is not None:
-            r.update(options)
-        self.options = r
 
         self._glwin = CocoaHelixGLWindow.alloc().initEx_()
         self._glview = self._glwin.glview
@@ -58,7 +115,7 @@ class CocoaHelixHost(object):
         self.printGLInfo()
 
         if self.theater is not None:
-            self.TheaterHostViewLoader.load(self._glview, self.options, self.theater)
+            self.TheaterHostViewLoader.load(self._glview, options, self.theater)
 
     TheaterHostViewLoader = viewLoader.TheaterHostViewLoader
 
@@ -72,10 +129,16 @@ class CocoaHelixHost(object):
     def show(self, visible=True):
         if visible:
             self._glwin.makeKeyAndOrderFront_(None)
-        else: self._glwin.orderOut_(None)
+        else: self.hide()
+    def hide(self):
+        self._glwin.orderOut_(None)
 
-    def adjPosition(self):
-        w,h = self.options.get('size', (1024, 768))
+    def centerAndSize(self, width=1024, height=768):
         self._glwin.setContentSize_(Cocoa.NSMakeSize(w,h))
         self._glwin.center()
+
+    def close(self):
+        self._glwin.close()
+        del self._glwin
+        del self._glview
 

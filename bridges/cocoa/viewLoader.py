@@ -8,11 +8,11 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##
 
 from TG.helix.actors.theater import TheaterRenderContext
-#from .viewportEvents import CocoaViewportEventSource
-#from .keyboardEvents import CocoaKeyboardEventSource
-#from .systemEvents import CocoaSystemEventSource
-#from .mouseEvents import CocoaMouseEventSource
-#from .timerEvents import CocoaTimerEventSource, CocoaIdleEventSource
+from .viewportEvents import CocoaViewportEventSource
+from .keyboardEvents import CocoaKeyboardEventSource
+from .systemEvents import CocoaSystemEventSource
+from .mouseEvents import CocoaMouseEventSource
+from .timerEvents import CocoaTimerEventSource
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -22,11 +22,12 @@ class CocoaTheaterRenderContext(TheaterRenderContext):
     def __init__(self, glView):
         self.glView = glView
     def getViewportSize(self):
-        return tuple(self.glView.frame.size)
+        return tuple(self.glView.frame().size)
     def select(self):
         self.glView.openGLContext().makeCurrentContext()
     def renderComplete(self, passKey):
         self.glView.openGLContext().flushBuffer()
+        self.glView.invalidateGLView()
     def animateRender(self):
         return True
 
@@ -34,25 +35,23 @@ class CocoaTheaterRenderContext(TheaterRenderContext):
 
 class CocoaHelixTheaterHostViewLoader(object):
     @classmethod
-    def load(klass, glCanvas, options, theater, **kwsetup):
-        renderContext = CocoaTheaterRenderContext(glCanvas)
+    def load(klass, glView, options, theater, **kwsetup):
+        renderContext = CocoaTheaterRenderContext(glView)
         renderContext.select()
 
         theater.setup(renderContext)
 
-        sources = klass.loadEvtSources(glCanvas, options, theater)
+        sources = klass.loadEvtSources(glView, options, theater)
         return sources
 
     @classmethod
-    def loadEvtSources(self, glCanvas, options, theater):
+    def loadEvtSources(self, glView, options, theater):
         return [
-            CocoaViewportEventSource(glCanvas, options, theater),
-            CocoaMouseEventSource(glCanvas, options, theater),
-            CocoaKeyboardEventSource(glCanvas, options, theater),
-            CocoaSystemEventSource(glCanvas, options, theater),
-            CocoaTimerEventSource(glCanvas, options, theater),
-            CocoaIdleEventSource(glCanvas, options, theater),
-            ]
+            CocoaViewportEventSource(glView, options, theater),
+            CocoaMouseEventSource(glView, options, theater),
+            CocoaKeyboardEventSource(glView, options, theater),
+            CocoaSystemEventSource(glView, options, theater),
+            CocoaTimerEventSource(glView, options, theater), ]
 
 TheaterHostViewLoader = CocoaHelixTheaterHostViewLoader
 
