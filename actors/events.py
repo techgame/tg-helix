@@ -121,5 +121,7 @@ class EventRoot(OBChannelSet):
 
     def send(self, channelKey, info):
         info.channel = channelKey
-        return self.call_n1(channelKey, info)
+        try: return self.call_n1(channelKey, info)
+        except Exception:
+            sys.excepthook(*sys.exc_info())
 
