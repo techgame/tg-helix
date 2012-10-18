@@ -133,8 +133,10 @@ class CocoaHelixHost(object):
     def hide(self):
         self._glwin.orderOut_(None)
 
+    def resize(self, width, height):
+        self._glwin.setContentSize_(Cocoa.NSMakeSize(width, height))
     def centerAndSize(self, width=1024, height=768):
-        self._glwin.setContentSize_(Cocoa.NSMakeSize(w,h))
+        self._glwin.setContentSize_(Cocoa.NSMakeSize(width, height))
         self._glwin.center()
 
     def close(self):
